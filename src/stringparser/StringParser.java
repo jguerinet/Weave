@@ -10,21 +10,17 @@ import org.supercsv.cellprocessor.ift.CellProcessor;
 import org.supercsv.io.CsvBeanReader;
 import org.supercsv.prefs.CsvPreference;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 public class StringParser{
-    public static final String URL = "";
+    public static final String URL = "PUT_URL_HERE";
 
-    public static final String ANDROID_ENGLISH_STRINGS_PATH = "MyMcGill Mobile/res/values/strings.xml";
-    public static final String ANDROID_FRENCH_STRINGS_PATH = "MyMcGill Mobile/res/values-fr/strings.xml";
+    public static final String ANDROID_ENGLISH_STRINGS_PATH = "PUT_ROOT_HERE/res/values/strings.xml";
+    public static final String ANDROID_FRENCH_STRINGS_PATH = "PUT_ROOT_HERE/res/values-fr/strings.xml";
 
     public static final String IOS_ENGLISH_STRINGS_PATH = "english_Localizable.strings";
     public static final String IOS_FRENCH_STRINGS_PATH = "french_Localizable.strings";
