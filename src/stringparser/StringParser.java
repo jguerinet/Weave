@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StringParser{
-    public static final String URL = "https://docs.google.com/spreadsheet/pub?key=0AhHWqylMWqY4dGZFcEZQYThKV1ZjRVhIQ3dHOWNsOFE&single=true&gid=1&output=csv";
+    public static final String URL = "";
 
     public static final String ANDROID_ENGLISH_STRINGS_PATH = "MyMcGill Mobile/res/values/strings.xml";
     public static final String ANDROID_FRENCH_STRINGS_PATH = "MyMcGill Mobile/res/values-fr/strings.xml";
