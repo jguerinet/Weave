@@ -1,10 +1,9 @@
 package stringparser;
 
 /**
- * Project : Immunize Android
  * Author : Julien
  * Date : 04/11/13, 9:02 AM
- * Package : main.java.com.stringsparser
+ * Copyright (c) 2014 Julien Guerinet. All rights reserved.
  */
 public class Strings {
     private String key, en, fr, comments, ontario;

@@ -1,5 +1,11 @@
 package stringparser;
 
+/**
+ * Author : Julien
+ * Date : 04/11/13, 9:02 AM
+ * Copyright (c) 2014 Julien Guerinet. All rights reserved.
+ */
+
 import org.supercsv.cellprocessor.ift.CellProcessor;
 import org.supercsv.io.CsvBeanReader;
 import org.supercsv.prefs.CsvPreference;
