@@ -40,23 +40,8 @@ public class StringParser{
     public static int platform;
 
     public static void main(String[] args) throws IOException {
-        if(args.length != 1){
-            System.out.println("Usage: android/ios/windows");
-            return;
-        }
-        if(args[0].equalsIgnoreCase("Android")){
-            platform = ANDROID;
-        }
-        else if(args[0].equalsIgnoreCase("IOS")){
-            platform = IOS;
-        }
-        else if(args[0].equalsIgnoreCase("Windows")){
-            platform = WINDOWS;
-        }
-        else{
-            System.out.println("Usage: android/ios/windows");
-            return;
-        }
+        //TODO Set the platform here
+        platform = -1;
 
         URL link = new URL(URL);
         HttpURLConnection httpConnection = (HttpURLConnection) link.openConnection();
@@ -81,8 +66,6 @@ public class StringParser{
         finally {
             reader.close();
         }
-
-
     }
 
     public static CellProcessor[] getProcessors(){
