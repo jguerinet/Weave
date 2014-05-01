@@ -1,0 +1,15 @@
+1. Copy this file into the root of your repository. 
+2. Rename it config.txt
+3. Fill out the info below (only the paths for the chosen platform are needed)
+
+URL: CSV_URL_HERE
+Platform: Android/iOS/Windows
+
+Android English Path: PUT_ROOT_HERE/res/values/strings.xml
+Android French Path: PUT_ROOT_HERE/res/values-fr/strings.xml
+
+iOS English Path: PUT_PATH_HERE
+iOS French Path: PUT_PATH_HERE
+
+Windows English Path: PUT_PATH_HERE
+Windows French Path: PUT_PATH_HERE

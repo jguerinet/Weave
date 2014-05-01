@@ -18,36 +18,107 @@ import java.util.List;
 
 public class StringParser{
 
-    public static final String URL = "PUT_URL_HERE";
+    //Config Variables
+    public static String url = null;
+    public static String englishPath = null;
+    public static String frenchPath = null;
 
-    public static final String ANDROID_ENGLISH_STRINGS_PATH = "PUT_ROOT_HERE/res/values/strings.xml";
-    public static final String ANDROID_FRENCH_STRINGS_PATH = "PUT_ROOT_HERE/res/values-fr/strings.xml";
+    //Platforms
+    public static int platform = -1;
+    private static final int ANDROID = 0;
+    private static final int IOS = 1;
+    private static final int WINDOWS = 2;
 
-    public static final String IOS_ENGLISH_STRINGS_PATH = "english_Localizable.strings";
-    public static final String IOS_FRENCH_STRINGS_PATH = "french_Localizable.strings";
-
-    public static final String WINDOWS_ENGLISH_STRINGS_PATH = "";
-    public static final String WINDOWS_FRENCH_STRINGS_PATH = "";
+    //Stuff from the file
+    public static final String URL = "URL:";
+    public static final String PLATFORM = "Platform:";
+    public static final String ANDROID_ENGLISH = "Android English Path:";
+    public static final String ANDROID_FRENCH = "Android French Path:";
+    public static final String IOS_ENGLISH = "iOS English Path:";
+    public static final String IOS_FRENCH = "iOS French Path:";
+    public static final String WINDOWS_ENGLISH = "Windows English Path:";
+    public static final String WINDOWS_FRENCH = "Windows French Path:";
 
     //Stuff for Android Strings
     public static final String XML_OPENER = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
     public static final String RESOURCES_OPENER = "<resources>";
     public static final String RESOURCES_CLOSER = "</resources>";
 
-    private static final int ANDROID = 0;
-    private static final int IOS = 1;
-    private static final int WINDOWS = 2;
-    public static int platform;
-
     public static void main(String[] args) throws IOException {
-        //TODO Set the platform here
-        platform = -1;
+        //Read from the config file
+        BufferedReader configReader = new BufferedReader(new FileReader("config.txt"));
+        String line;
+        while ((line = configReader.readLine()) != null) {
 
-        URL link = new URL(URL);
+            //Get the Docs URL
+            if(line.startsWith(URL)){
+                url = line.replace(URL, "").trim();
+            }
+
+            //Get the platform
+            else if(line.startsWith(PLATFORM)){
+                String platformString = line.replace(PLATFORM, "").trim();
+                if(platformString.equalsIgnoreCase("android")){
+                    platform = ANDROID;
+                }
+                else if(platformString.equalsIgnoreCase("ios")){
+                    platform = IOS;
+                }
+                else if(platformString.equalsIgnoreCase("windows")){
+                    platform = WINDOWS;
+                }
+                else{
+                    System.out.println("Error: Platform must be either Android, iOS, or Windows.");
+                }
+            }
+
+            //Get the path for the file.
+            else if(platform == ANDROID && line.startsWith(ANDROID_ENGLISH)){
+                englishPath = line.replace(ANDROID_ENGLISH, "");
+            }
+            else if(platform == ANDROID && line.startsWith(ANDROID_FRENCH)){
+                frenchPath = line.replace(ANDROID_FRENCH, "");
+            }
+            else if(platform == IOS && line.startsWith(IOS_ENGLISH)){
+                englishPath = line.replace(IOS_ENGLISH, "");
+            }
+            else if(platform == IOS && line.startsWith(IOS_FRENCH)){
+                frenchPath = line.replace(IOS_FRENCH, "");
+            }
+            else if(platform == WINDOWS && line.startsWith(WINDOWS_ENGLISH)){
+                englishPath = line.replace(WINDOWS_ENGLISH, "");
+            }
+            else if(platform == WINDOWS&& line.startsWith(WINDOWS_FRENCH)){
+                frenchPath = line.replace(WINDOWS_FRENCH, "");
+            }
+        }
+        configReader.close();
+
+        //Make sure nothing is null
+        if(url == null){
+            System.out.println("Error: URL Cannot be null");
+            System.exit(0);
+        }
+        else if(platform == -1){
+            System.out.println("Error: You need to input a platform");
+            System.exit(0);
+        }
+        else if(englishPath == null){
+            System.out.println("Error: You need to input a path for the english strings");
+            System.exit(0);
+        }
+        else if(frenchPath == null){
+            System.out.println("Error: You need to input a path for the french strings");
+            System.exit(0);
+        }
+
+        //Connect to the URL
+        URL link = new URL(url);
         HttpURLConnection httpConnection = (HttpURLConnection) link.openConnection();
         httpConnection.setRequestMethod("GET");
         httpConnection.connect();
 
+        //Parse the strings
         List<Strings> strings = new ArrayList<Strings>();
         CsvBeanReader reader = new CsvBeanReader(new InputStreamReader(httpConnection.getInputStream()), CsvPreference.EXCEL_PREFERENCE);
 
@@ -92,9 +163,9 @@ public class StringParser{
     /** ANDROID STRING PARSING **/
     public static void processAndroidStrings(List<Strings> strings)throws FileNotFoundException, UnsupportedEncodingException{
         //Android English Strings
-        PrintWriter androidEnglishWriter = new PrintWriter(ANDROID_ENGLISH_STRINGS_PATH, "UTF-8");
+        PrintWriter androidEnglishWriter = new PrintWriter(englishPath, "UTF-8");
         //Android French Strings
-        PrintWriter androidFrenchWriter = new PrintWriter(ANDROID_FRENCH_STRINGS_PATH, "UTF-8");
+        PrintWriter androidFrenchWriter = new PrintWriter(frenchPath, "UTF-8");
 
         //Add the XML header for Android files
         androidEnglishWriter.println(XML_OPENER);
@@ -193,9 +264,9 @@ public class StringParser{
     /** IOS STRING PARSING **/
     public static void processIOSStrings(List<Strings> strings)throws FileNotFoundException, UnsupportedEncodingException{
         //IOS English Strings
-        PrintWriter iOSEnglishWriter = new PrintWriter(IOS_ENGLISH_STRINGS_PATH,"UTF-8");
+        PrintWriter iOSEnglishWriter = new PrintWriter(englishPath,"UTF-8");
         //IOS French Strings
-        PrintWriter iOSFrenchWriter = new PrintWriter(IOS_FRENCH_STRINGS_PATH,"UTF-8");
+        PrintWriter iOSFrenchWriter = new PrintWriter(frenchPath,"UTF-8");
 
         //Go through the strings
         for(Strings currentStrings : strings){
