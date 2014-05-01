@@ -74,22 +74,22 @@ public class StringParser{
 
             //Get the path for the file.
             else if(platform == ANDROID && line.startsWith(ANDROID_ENGLISH)){
-                englishPath = line.replace(ANDROID_ENGLISH, "");
+                englishPath = line.replace(ANDROID_ENGLISH, "").trim();
             }
             else if(platform == ANDROID && line.startsWith(ANDROID_FRENCH)){
-                frenchPath = line.replace(ANDROID_FRENCH, "");
+                frenchPath = line.replace(ANDROID_FRENCH, "").trim();
             }
             else if(platform == IOS && line.startsWith(IOS_ENGLISH)){
-                englishPath = line.replace(IOS_ENGLISH, "");
+                englishPath = line.replace(IOS_ENGLISH, "").trim();
             }
             else if(platform == IOS && line.startsWith(IOS_FRENCH)){
-                frenchPath = line.replace(IOS_FRENCH, "");
+                frenchPath = line.replace(IOS_FRENCH, "").trim();
             }
             else if(platform == WINDOWS && line.startsWith(WINDOWS_ENGLISH)){
-                englishPath = line.replace(WINDOWS_ENGLISH, "");
+                englishPath = line.replace(WINDOWS_ENGLISH, "").trim();
             }
             else if(platform == WINDOWS&& line.startsWith(WINDOWS_FRENCH)){
-                frenchPath = line.replace(WINDOWS_FRENCH, "");
+                frenchPath = line.replace(WINDOWS_FRENCH, "").trim();
             }
         }
         configReader.close();
