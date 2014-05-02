@@ -46,7 +46,14 @@ public class StringParser{
 
     public static void main(String[] args) throws IOException {
         //Read from the config file
-        BufferedReader configReader = new BufferedReader(new FileReader("../config.txt"));
+        BufferedReader configReader;
+        try{
+            configReader = new BufferedReader(new FileReader("../config.txt"));
+        }
+        catch(FileNotFoundException e){
+            configReader = new BufferedReader(new FileReader("config.txt"));
+        }
+
         String line;
         while ((line = configReader.readLine()) != null) {
 
