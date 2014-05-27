@@ -528,7 +528,7 @@ public class StringParser{
         }
 
         //Add initial indentation
-        String xmlString = "    ";
+        String xmlString = "  ";
 
         //Check if it's a header section
         if(key.trim().equalsIgnoreCase("header")){
@@ -567,7 +567,7 @@ public class StringParser{
             }
 
             //Beginning of object (ID)
-            xmlString += "data name=\"" + key.trim() + "\" xml:space\"preserve\">";
+            xmlString += "<data name=\"" + key.trim() + "\" xml:space\"preserve\">";
             //The value
             xmlString += "\n        <value>" + string + "</value>";
             //Closing Object
