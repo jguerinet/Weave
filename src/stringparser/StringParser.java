@@ -90,11 +90,11 @@ public class StringParser{
             else if(platform == IOS && line.startsWith(IOS_FRENCH)){
                 frenchPath = line.replace(IOS_FRENCH, "").trim();
             }
-            else if(platform == WINDOWS && line.startsWith(WINDOWS_ENGLISH_OPENER)){
-                englishPath = line.replace(WINDOWS_ENGLISH_OPENER, "").trim();
+            else if(platform == WINDOWS && line.startsWith(WINDOWS_ENGLISH)){
+                englishPath = line.replace(WINDOWS_ENGLISH, "").trim();
             }
-            else if(platform == WINDOWS&& line.startsWith(WINDOWS_FRENCH_OPENER)){
-                frenchPath = line.replace(WINDOWS_FRENCH_OPENER, "").trim();
+            else if(platform == WINDOWS&& line.startsWith(WINDOWS_FRENCH)){
+                frenchPath = line.replace(WINDOWS_FRENCH, "").trim();
             }
         }
         configReader.close();
