@@ -1,6 +1,7 @@
 1. Copy this file into the root of your repository. 
 2. Rename it config.txt
 3. Fill out the info below (only the paths for the chosen platform are needed)
+4. Run String Parser.jar
 
 URL: CSV_URL_HERE
 Platform: Android/iOS/Windows
