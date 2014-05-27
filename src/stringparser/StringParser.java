@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StringParser{
-
     //Config Variables
     public static String url = null;
     public static String englishPath = null;
@@ -39,10 +38,9 @@ public class StringParser{
     public static final String WINDOWS_ENGLISH = "Windows English Path:";
     public static final String WINDOWS_FRENCH = "Windows French Path:";
 
-    //Stuff for Android Strings
-    public static final String XML_OPENER = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
-    public static final String RESOURCES_OPENER = "<resources>";
-    public static final String RESOURCES_CLOSER = "</resources>";
+    //Writers
+    static PrintWriter englishWriter;
+    static PrintWriter frenchWriter;
 
     public static void main(String[] args) throws IOException {
         //Read from the config file
@@ -92,11 +90,11 @@ public class StringParser{
             else if(platform == IOS && line.startsWith(IOS_FRENCH)){
                 frenchPath = line.replace(IOS_FRENCH, "").trim();
             }
-            else if(platform == WINDOWS && line.startsWith(WINDOWS_ENGLISH)){
-                englishPath = line.replace(WINDOWS_ENGLISH, "").trim();
+            else if(platform == WINDOWS && line.startsWith(WINDOWS_ENGLISH_OPENER)){
+                englishPath = line.replace(WINDOWS_ENGLISH_OPENER, "").trim();
             }
-            else if(platform == WINDOWS&& line.startsWith(WINDOWS_FRENCH)){
-                frenchPath = line.replace(WINDOWS_FRENCH, "").trim();
+            else if(platform == WINDOWS&& line.startsWith(WINDOWS_FRENCH_OPENER)){
+                frenchPath = line.replace(WINDOWS_FRENCH_OPENER, "").trim();
             }
         }
         configReader.close();
@@ -118,6 +116,10 @@ public class StringParser{
             System.out.println("Error: You need to input a path for the french strings");
             System.exit(0);
         }
+
+        //Set up the writers
+        englishWriter = new PrintWriter(englishPath, "UTF-8");
+        frenchWriter = new PrintWriter(frenchPath, "UTF-8");
 
         //Connect to the URL
         URL link = new URL(url);
@@ -163,24 +165,24 @@ public class StringParser{
             processIOSStrings(strings);
         }
         else{
-            //TODO Windows Code
+            processWindowsStrings(strings);
         }
     }
 
     /** ANDROID STRING PARSING **/
-    public static void processAndroidStrings(List<Strings> strings)throws FileNotFoundException, UnsupportedEncodingException{
-        //Android English Strings
-        PrintWriter androidEnglishWriter = new PrintWriter(englishPath, "UTF-8");
-        //Android French Strings
-        PrintWriter androidFrenchWriter = new PrintWriter(frenchPath, "UTF-8");
+    //Stuff for Android Strings
+    public static final String XML_OPENER = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
+    public static final String RESOURCES_OPENER = "<resources>";
+    public static final String RESOURCES_CLOSER = "</resources>";
 
+    public static void processAndroidStrings(List<Strings> strings)throws FileNotFoundException, UnsupportedEncodingException{
         //Add the XML header for Android files
-        androidEnglishWriter.println(XML_OPENER);
-        androidFrenchWriter.println(XML_OPENER);
+        englishWriter.println(XML_OPENER);
+        frenchWriter.println(XML_OPENER);
 
         //Add the resources opening for Android files
-        androidEnglishWriter.println(RESOURCES_OPENER);
-        androidFrenchWriter.println(RESOURCES_OPENER);
+        englishWriter.println(RESOURCES_OPENER);
+        frenchWriter.println(RESOURCES_OPENER);
 
         //Go through the strings
         for(Strings currentStrings : strings){
@@ -190,20 +192,20 @@ public class StringParser{
 
             //If one is null, there is no value, so do not add it
             if(androidEnglishString != null){
-                androidEnglishWriter.println(androidEnglishString);
+                englishWriter.println(androidEnglishString);
             }
             if(androidFrenchString != null){
-                androidFrenchWriter.println(androidFrenchString);
+                frenchWriter.println(androidFrenchString);
             }
         }
 
         //Add the resources closing to android files
-        androidEnglishWriter.println(RESOURCES_CLOSER);
-        androidFrenchWriter.println(RESOURCES_CLOSER);
+        englishWriter.println(RESOURCES_CLOSER);
+        frenchWriter.println(RESOURCES_CLOSER);
 
         //Close the writers
-        androidEnglishWriter.close();
-        androidFrenchWriter.close();
+        englishWriter.close();
+        frenchWriter.close();
     }
 
     public static String addAndroidEnglishString(Strings strings){
@@ -270,11 +272,6 @@ public class StringParser{
 
     /** IOS STRING PARSING **/
     public static void processIOSStrings(List<Strings> strings)throws FileNotFoundException, UnsupportedEncodingException{
-        //IOS English Strings
-        PrintWriter iOSEnglishWriter = new PrintWriter(englishPath,"UTF-8");
-        //IOS French Strings
-        PrintWriter iOSFrenchWriter = new PrintWriter(frenchPath,"UTF-8");
-
         //Go through the strings
         for(Strings currentStrings : strings){
             //iOS strings
@@ -283,15 +280,15 @@ public class StringParser{
 
             //If one is null, there is no value, so do not add it
             if(iOSEnglishString != null) {
-                iOSEnglishWriter.println(iOSEnglishString);
+                englishWriter.println(iOSEnglishString);
             }
             if(iOSFrenchString != null) {
-                iOSFrenchWriter.println(iOSFrenchString);
+                frenchWriter.println(iOSFrenchString);
             }
         }
 
-        iOSEnglishWriter.close();
-        iOSFrenchWriter.close();
+        englishWriter.close();
+        frenchWriter.close();
     }
 
     public static String addIOSEnglishString(Strings strings){
@@ -338,4 +335,244 @@ public class StringParser{
     }
 
     /**WINDOWS STRING PARSING**/
+    public static final String WINDOWS_FILE_OPENER = "<root>\n" +
+            "  <!-- \n" +
+            "    Microsoft ResX Schema \n" +
+            "    \n" +
+            "    Version 2.0\n" +
+            "    \n" +
+            "    The primary goals of this format is to allow a simple XML format \n" +
+            "    that is mostly human readable. The generation and parsing of the \n" +
+            "    various data types are done through the TypeConverter classes \n" +
+            "    associated with the data types.\n" +
+            "    \n" +
+            "    Example:\n" +
+            "    \n" +
+            "    ... ado.net/XML headers & schema ...\n" +
+            "    <resheader name=\"resmimetype\">text/microsoft-resx</resheader>\n" +
+            "    <resheader name=\"version\">2.0</resheader>\n" +
+            "    <resheader name=\"reader\">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>\n" +
+            "    <resheader name=\"writer\">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>\n" +
+            "    <data name=\"Name1\"><value>this is my long string</value><comment>this is a comment</comment></data>\n" +
+            "    <data name=\"Color1\" type=\"System.Drawing.Color, System.Drawing\">Blue</data>\n" +
+            "    <data name=\"Bitmap1\" mimetype=\"application/x-microsoft.net.object.binary.base64\">\n" +
+            "        <value>[base64 mime encoded serialized .NET Framework object]</value>\n" +
+            "    </data>\n" +
+            "    <data name=\"Icon1\" type=\"System.Drawing.Icon, System.Drawing\" mimetype=\"application/x-microsoft.net.object.bytearray.base64\">\n" +
+            "        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>\n" +
+            "        <comment>This is a comment</comment>\n" +
+            "    </data>\n" +
+            "                \n" +
+            "    There are any number of \"resheader\" rows that contain simple \n" +
+            "    name/value pairs.\n" +
+            "    \n" +
+            "    Each data row contains a name, and value. The row also contains a \n" +
+            "    type or mimetype. Type corresponds to a .NET class that support \n" +
+            "    text/value conversion through the TypeConverter architecture. \n" +
+            "    Classes that don't support this are serialized and stored with the \n" +
+            "    mimetype set.\n" +
+            "    \n" +
+            "    The mimetype is used for serialized objects, and tells the \n" +
+            "    ResXResourceReader how to depersist the object. This is currently not \n" +
+            "    extensible. For a given mimetype the value must be set accordingly:\n" +
+            "    \n" +
+            "    Note - application/x-microsoft.net.object.binary.base64 is the format \n" +
+            "    that the ResXResourceWriter will generate, however the reader can \n" +
+            "    read any of the formats listed below.\n" +
+            "    \n" +
+            "    mimetype: application/x-microsoft.net.object.binary.base64\n" +
+            "    value   : The object must be serialized with \n" +
+            "            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter\n" +
+            "            : and then encoded with base64 encoding.\n" +
+            "    \n" +
+            "    mimetype: application/x-microsoft.net.object.soap.base64\n" +
+            "    value   : The object must be serialized with \n" +
+            "            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter\n" +
+            "            : and then encoded with base64 encoding.\n" +
+            "\n" +
+            "    mimetype: application/x-microsoft.net.object.bytearray.base64\n" +
+            "    value   : The object must be serialized into a byte array \n" +
+            "            : using a System.ComponentModel.TypeConverter\n" +
+            "            : and then encoded with base64 encoding.\n" +
+            "    -->\n" +
+            "  <xsd:schema id=\"root\" xmlns=\"\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:msdata=\"urn:schemas-microsoft-com:xml-msdata\">\n" +
+            "    <xsd:import namespace=\"http://www.w3.org/XML/1998/namespace\" />\n" +
+            "    <xsd:element name=\"root\" msdata:IsDataSet=\"true\">\n" +
+            "      <xsd:complexType>\n" +
+            "        <xsd:choice maxOccurs=\"unbounded\">\n" +
+            "          <xsd:element name=\"metadata\">\n" +
+            "            <xsd:complexType>\n" +
+            "              <xsd:sequence>\n" +
+            "                <xsd:element name=\"value\" type=\"xsd:string\" minOccurs=\"0\" />\n" +
+            "              </xsd:sequence>\n" +
+            "              <xsd:attribute name=\"name\" use=\"required\" type=\"xsd:string\" />\n" +
+            "              <xsd:attribute name=\"type\" type=\"xsd:string\" />\n" +
+            "              <xsd:attribute name=\"mimetype\" type=\"xsd:string\" />\n" +
+            "              <xsd:attribute ref=\"xml:space\" />\n" +
+            "            </xsd:complexType>\n" +
+            "          </xsd:element>\n" +
+            "          <xsd:element name=\"assembly\">\n" +
+            "            <xsd:complexType>\n" +
+            "              <xsd:attribute name=\"alias\" type=\"xsd:string\" />\n" +
+            "              <xsd:attribute name=\"name\" type=\"xsd:string\" />\n" +
+            "            </xsd:complexType>\n" +
+            "          </xsd:element>\n" +
+            "          <xsd:element name=\"data\">\n" +
+            "            <xsd:complexType>\n" +
+            "              <xsd:sequence>\n" +
+            "                <xsd:element name=\"value\" type=\"xsd:string\" minOccurs=\"0\" msdata:Ordinal=\"1\" />\n" +
+            "                <xsd:element name=\"comment\" type=\"xsd:string\" minOccurs=\"0\" msdata:Ordinal=\"2\" />\n" +
+            "              </xsd:sequence>\n" +
+            "              <xsd:attribute name=\"name\" type=\"xsd:string\" use=\"required\" msdata:Ordinal=\"1\" />\n" +
+            "              <xsd:attribute name=\"type\" type=\"xsd:string\" msdata:Ordinal=\"3\" />\n" +
+            "              <xsd:attribute name=\"mimetype\" type=\"xsd:string\" msdata:Ordinal=\"4\" />\n" +
+            "              <xsd:attribute ref=\"xml:space\" />\n" +
+            "            </xsd:complexType>\n" +
+            "          </xsd:element>\n" +
+            "          <xsd:element name=\"resheader\">\n" +
+            "            <xsd:complexType>\n" +
+            "              <xsd:sequence>\n" +
+            "                <xsd:element name=\"value\" type=\"xsd:string\" minOccurs=\"0\" msdata:Ordinal=\"1\" />\n" +
+            "              </xsd:sequence>\n" +
+            "              <xsd:attribute name=\"name\" type=\"xsd:string\" use=\"required\" />\n" +
+            "            </xsd:complexType>\n" +
+            "          </xsd:element>\n" +
+            "        </xsd:choice>\n" +
+            "      </xsd:complexType>\n" +
+            "    </xsd:element>\n" +
+            "  </xsd:schema>\n" +
+            "  <resheader name=\"resmimetype\">\n" +
+            "    <value>text/microsoft-resx</value>\n" +
+            "  </resheader>\n" +
+            "  <resheader name=\"version\">\n" +
+            "    <value>2.0</value>\n" +
+            "  </resheader>\n" +
+            "  <resheader name=\"reader\">\n" +
+            "    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>\n" +
+            "  </resheader>\n" +
+            "  <resheader name=\"writer\">\n" +
+            "    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>\n" +
+            "  </resheader>\n" +
+            "  <data name=\"ResourceFlowDirection\" xml:space=\"preserve\">\n" +
+            "    <value>LeftToRight</value>\n" +
+            "    <comment>Controls the FlowDirection for all elements in the RootFrame. Set to the traditional direction of this resource file's language</comment>\n" +
+            "  </data>";
+
+    public static final String WINDOWS_ENGLISH_OPENER =
+            "<data name=\"ResourceLanguage\" xml:space=\"preserve\">\n" +
+            "    <value>en-US</value>\n" +
+            "    <comment>Controls the Language and ensures that the font for all elements in the RootFrame aligns with the app's language. Set to the language code of this resource file's language.</comment>\n" +
+            "  </data>";
+
+    public static final String WINDOWS_FRENCH_OPENER =
+            "<data name=\"ResourceLanguage\" xml:space=\"preserve\">\n" +
+                    "    <value>fr-CA</value>\n" +
+                    "    <comment>Controls the Language and ensures that the font for all elements in the RootFrame aligns with the app's language. Set to the language code of this resource file's language.</comment>\n" +
+                    "  </data>";
+
+    public static final String WINDOWS_CLOSER = "</root>";
+
+    public static void processWindowsStrings(List<Strings> strings)throws FileNotFoundException, UnsupportedEncodingException{
+        //Add the XML header for Android files
+        englishWriter.println(XML_OPENER);
+        frenchWriter.println(XML_OPENER);
+
+        //Add the Windows opening
+        englishWriter.println(WINDOWS_FILE_OPENER);
+        frenchWriter.println(WINDOWS_FILE_OPENER);
+
+        //Add tge langauage
+        englishWriter.print(WINDOWS_ENGLISH_OPENER);
+        frenchWriter.print(WINDOWS_FRENCH_OPENER);
+
+        //Go through the strings
+        for(Strings currentStrings : strings){
+            //Android strings
+            String englishString = addWindowsEnglishString(currentStrings);
+            String frenchString = addWindowsFrenchString(currentStrings);
+
+            //If one is null, there is no value, so do not add it
+            if(englishString != null){
+                englishWriter.println(englishString);
+            }
+            if(frenchString != null){
+                frenchWriter.println(frenchString);
+            }
+        }
+
+        //Add the resources closing to android files
+        englishWriter.println(WINDOWS_CLOSER);
+        frenchWriter.println(WINDOWS_CLOSER);
+
+        //Close the writers
+        englishWriter.close();
+        frenchWriter.close();
+    }
+
+    public static String addWindowsEnglishString(Strings strings){
+        return addWindowsString(strings.getKey(), strings.getEn());
+    }
+
+    public static String addWindowsFrenchString(Strings strings){
+        //For headers in the french XML
+        if(strings.getKey().equalsIgnoreCase("header")){
+            return addWindowsString(strings.getKey(), strings.getEn());
+        }
+        return addWindowsString(strings.getKey(), strings.getFr());
+    }
+
+    public static String addWindowsString(String key, String string){
+        //First check if string is empty: if it is, return null
+        if(string.isEmpty()){
+            return null;
+        }
+
+        //Add initial indentation
+        String xmlString = "    ";
+
+        //Check if it's a header section
+        if(key.trim().equalsIgnoreCase("header")){
+            xmlString = "\n" + xmlString + "<!-- " + string + " -->";
+        }
+        //If not, treat is as a normal string
+        else{
+            /* Character checks */
+            //Unescaped apostrophes
+            string = string.replace("\'", "\\" + "\'");
+
+            //Unescaped @ signs
+            string = string.replace("@", "\\" + "@");
+
+            if(string.contains("<html>") || string.contains("<HTML>")){
+                //Take care of html tags
+                string = string.replace("<html>", "<![CDATA[");
+                string = string.replace("</html>", "]]>");
+                string = string.replace("<HTML>", "<![CDATA[");
+                string = string.replace("</HTML>", "]]>");
+            }
+            else{
+                //Ampersands
+                if(string.contains("&")){
+                    //If it's an icon, do not do anything
+                    if(!string.contains("&#x")){
+                        string = string.replace("&", "&amp;");
+                    }
+                }
+
+                //Copyright
+                string = string.replace("(c)", "\u00A9");
+
+                //Ellipses
+                string = string.replace("...", "&#8230;");
+            }
+
+            //Beginning of object (ID)
+            xmlString += "data name=\"" + key.trim() + "\" xml:space\"preserve\">";
+            //The value
+            xmlString += "\n        <value>" + string + "</value>";
+            //Closing Object
+            xmlString += "\n  </data>";
+        }
+        return xmlString;
+    }
 }
