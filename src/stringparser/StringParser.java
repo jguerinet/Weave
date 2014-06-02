@@ -190,7 +190,7 @@ public class StringParser{
         //Go through the strings
         for(Strings currentStrings : strings){
             try{
-                lineNumber = strings.indexOf(currentStrings);
+                lineNumber = strings.indexOf(currentStrings) + 2;
 
                 //If there is no ID, we cannot parse it, so show a warning
                 if(currentStrings.getKey() == null){
@@ -292,7 +292,7 @@ public class StringParser{
         //Go through the strings
         for(Strings currentStrings : strings){
             try{
-                lineNumber = strings.indexOf(currentStrings);
+                lineNumber = strings.indexOf(currentStrings) + 2;
 
                 //If there is no ID, we cannot parse it, so show a warning
                 if(currentStrings.getKey() == null){
@@ -519,7 +519,7 @@ public class StringParser{
         //Go through the strings
         for(Strings currentStrings : strings){
             try{
-                lineNumber = strings.indexOf(currentStrings);
+                lineNumber = strings.indexOf(currentStrings) + 2;
 
                 //If there is no ID, we cannot parse it, so show a warning
                 if(currentStrings.getKey() == null){
