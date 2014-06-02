@@ -18,29 +18,32 @@ import java.util.List;
 
 public class StringParser{
     //Config Variables
-    public static String url = null;
-    public static String englishPath = null;
-    public static String frenchPath = null;
+    private static String url = null;
+    private static String englishPath = null;
+    private static String frenchPath = null;
 
     //Platforms
-    public static int platform = -1;
+    private static int platform = -1;
     private static final int ANDROID = 0;
     private static final int IOS = 1;
     private static final int WINDOWS = 2;
 
     //Stuff from the file
-    public static final String URL = "URL:";
-    public static final String PLATFORM = "Platform:";
-    public static final String ANDROID_ENGLISH = "Android English Path:";
-    public static final String ANDROID_FRENCH = "Android French Path:";
-    public static final String IOS_ENGLISH = "iOS English Path:";
-    public static final String IOS_FRENCH = "iOS French Path:";
-    public static final String WINDOWS_ENGLISH = "Windows English Path:";
-    public static final String WINDOWS_FRENCH = "Windows French Path:";
+    private static final String URL = "URL:";
+    private static final String PLATFORM = "Platform:";
+    private static final String ANDROID_ENGLISH = "Android English Path:";
+    private static final String ANDROID_FRENCH = "Android French Path:";
+    private static final String IOS_ENGLISH = "iOS English Path:";
+    private static final String IOS_FRENCH = "iOS French Path:";
+    private static final String WINDOWS_ENGLISH = "Windows English Path:";
+    private static final String WINDOWS_FRENCH = "Windows French Path:";
 
     //Writers
-    static PrintWriter englishWriter;
-    static PrintWriter frenchWriter;
+    private static PrintWriter englishWriter;
+    private static PrintWriter frenchWriter;
+
+    //To keep track of which line number you are at
+    private static int lineNumber;
 
     public static void main(String[] args) throws IOException {
         //Read from the config file
@@ -186,16 +189,24 @@ public class StringParser{
 
         //Go through the strings
         for(Strings currentStrings : strings){
-            //Android strings
-            String androidEnglishString = addAndroidEnglishString(currentStrings);
-            String androidFrenchString = addAndroidFrenchString(currentStrings);
+            try{
+                lineNumber = strings.indexOf(currentStrings);
 
-            //If one is null, there is no value, so do not add it
-            if(androidEnglishString != null){
-                englishWriter.println(androidEnglishString);
+                //Android strings
+                String androidEnglishString = addAndroidEnglishString(currentStrings);
+                String androidFrenchString = addAndroidFrenchString(currentStrings);
+
+                //If one is null, there is no value, so do not add it
+                if(androidEnglishString != null){
+                    englishWriter.println(androidEnglishString);
+                }
+                if(androidFrenchString != null){
+                    frenchWriter.println(androidFrenchString);
+                }
             }
-            if(androidFrenchString != null){
-                frenchWriter.println(androidFrenchString);
+            catch (Exception e){
+                System.out.println("Error on Line " + lineNumber);
+                e.printStackTrace();
             }
         }
 
@@ -274,16 +285,24 @@ public class StringParser{
     public static void processIOSStrings(List<Strings> strings)throws FileNotFoundException, UnsupportedEncodingException{
         //Go through the strings
         for(Strings currentStrings : strings){
-            //iOS strings
-            String iOSEnglishString = addIOSEnglishString(currentStrings);
-            String iOSFrenchString = addIOSFrenchString(currentStrings);
+            try{
+                lineNumber = strings.indexOf(currentStrings);
 
-            //If one is null, there is no value, so do not add it
-            if(iOSEnglishString != null) {
-                englishWriter.println(iOSEnglishString);
+                //iOS strings
+                String iOSEnglishString = addIOSEnglishString(currentStrings);
+                String iOSFrenchString = addIOSFrenchString(currentStrings);
+
+                //If one is null, there is no value, so do not add it
+                if(iOSEnglishString != null) {
+                    englishWriter.println(iOSEnglishString);
+                }
+                if(iOSFrenchString != null) {
+                    frenchWriter.println(iOSFrenchString);
+                }
             }
-            if(iOSFrenchString != null) {
-                frenchWriter.println(iOSFrenchString);
+            catch (Exception e){
+                System.out.println("Error on Line " + lineNumber);
+                e.printStackTrace();
             }
         }
 
@@ -481,22 +500,29 @@ public class StringParser{
         englishWriter.println(WINDOWS_FILE_OPENER);
         frenchWriter.println(WINDOWS_FILE_OPENER);
 
-        //Add tge langauage
+        //Add the language
         englishWriter.print(WINDOWS_ENGLISH_OPENER);
         frenchWriter.print(WINDOWS_FRENCH_OPENER);
 
         //Go through the strings
         for(Strings currentStrings : strings){
-            //Android strings
-            String englishString = addWindowsEnglishString(currentStrings);
-            String frenchString = addWindowsFrenchString(currentStrings);
+            try{
+                lineNumber = strings.indexOf(currentStrings);
 
-            //If one is null, there is no value, so do not add it
-            if(englishString != null){
-                englishWriter.println(englishString);
+                String englishString = addWindowsEnglishString(currentStrings);
+                String frenchString = addWindowsFrenchString(currentStrings);
+
+                //If one is null, there is no value, so do not add it
+                if(englishString != null){
+                    englishWriter.println(englishString);
+                }
+                if(frenchString != null){
+                    frenchWriter.println(frenchString);
+                }
             }
-            if(frenchString != null){
-                frenchWriter.println(frenchString);
+            catch (Exception e){
+                System.out.println("Error on Line " + lineNumber);
+                e.printStackTrace();
             }
         }
 
