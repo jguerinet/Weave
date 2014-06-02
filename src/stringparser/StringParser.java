@@ -192,6 +192,12 @@ public class StringParser{
             try{
                 lineNumber = strings.indexOf(currentStrings);
 
+                //If there is no ID, we cannot parse it, so show a warning
+                if(currentStrings.getKey() == null){
+                    System.out.println("Warning! Line " + lineNumber + " has no ID, and therefore cannot be parsed");
+                    continue;
+                }
+
                 //Android strings
                 String androidEnglishString = addAndroidEnglishString(currentStrings);
                 String androidFrenchString = addAndroidFrenchString(currentStrings);
@@ -287,6 +293,12 @@ public class StringParser{
         for(Strings currentStrings : strings){
             try{
                 lineNumber = strings.indexOf(currentStrings);
+
+                //If there is no ID, we cannot parse it, so show a warning
+                if(currentStrings.getKey() == null){
+                    System.out.println("Warning! Line " + lineNumber + " has no ID, and therefore cannot be parsed");
+                    continue;
+                }
 
                 //iOS strings
                 String iOSEnglishString = addIOSEnglishString(currentStrings);
@@ -508,6 +520,12 @@ public class StringParser{
         for(Strings currentStrings : strings){
             try{
                 lineNumber = strings.indexOf(currentStrings);
+
+                //If there is no ID, we cannot parse it, so show a warning
+                if(currentStrings.getKey() == null){
+                    System.out.println("Warning! Line " + lineNumber + " has no ID, and therefore cannot be parsed");
+                    continue;
+                }
 
                 String englishString = addWindowsEnglishString(currentStrings);
                 String frenchString = addWindowsFrenchString(currentStrings);
