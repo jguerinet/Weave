@@ -179,7 +179,7 @@ public class StringParser{
      */
     private static String processString(String string){
         //Unescaped quotations
-        string = string.replace("\"", "\\" + "\"");
+        string = string.replace(" \"", " \\" + "\"");
 
         //Copyright
         string = string.replace("(c)", "\u00A9");
