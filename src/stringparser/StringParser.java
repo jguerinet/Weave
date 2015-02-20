@@ -172,6 +172,21 @@ public class StringParser{
         }
     }
 
+    /**
+     * Processes a given String with the common changes to make between Android and iOS
+     *
+     * @param string The String to process
+     */
+    private static String processString(String string){
+        //Unescaped quotations
+        string = string.replace("\"", "\\" + "\"");
+
+        //Copyright
+        string = string.replace("(c)", "\u00A9");
+
+        return string;
+    }
+
     /** ANDROID STRING PARSING **/
     //Stuff for Android Strings
     public static final String XML_OPENER = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
@@ -253,11 +268,11 @@ public class StringParser{
         //If not, treat is as a normal string
         else{
             /* Character checks */
+            //Process the String with the generalized method first
+            string = processString(string);
+
             //Unescaped apostrophes
             string = string.replace("\'", "\\" + "\'");
-
-            //Unescaped quotations
-            string = string.replace("\"", "\\" + "\"");
 
             //Unescaped @ signs
             string = string.replace("@", "\\" + "@");
@@ -277,9 +292,6 @@ public class StringParser{
                         string = string.replace("&", "&amp;");
                     }
                 }
-
-                //Copyright
-                string = string.replace("(c)", "\u00A9");
 
                 //Ellipses
                 string = string.replace("...", "&#8230;");
@@ -346,6 +358,9 @@ public class StringParser{
         //Add initial indentation
         String xmlString = "";
 
+        //Process the String with the generalized method first
+        string = processString(string);
+
         //Replace %s format specifiers with %@
         string = string.replace("%s","%@");
         string = string.replace("$s", "$@");
@@ -355,7 +370,6 @@ public class StringParser{
         string = string.replace("</html>", "");
         string = string.replace("<HTML>", "");
         string = string.replace("</HTML>", "");
-        string = string.replace("(c)", "\u00A9");
 
         //Check if it's a header section
         if(key.equalsIgnoreCase("header")){
