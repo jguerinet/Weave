@@ -256,6 +256,9 @@ public class StringParser{
             //Unescaped apostrophes
             string = string.replace("\'", "\\" + "\'");
 
+            //Unescaped quotations
+            string = string.replace("\"", "\\" + "\"");
+
             //Unescaped @ signs
             string = string.replace("@", "\\" + "@");
 
