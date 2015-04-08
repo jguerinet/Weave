@@ -6,5 +6,4 @@
 URL: CSV_URL_HERE
 Platform: Android/iOS
 
-English Path: PUT_PATH_HERE
-French Path: PUT_PATH_HERE
+LANGUAGE_ID_HERE, LANGUAGE_PATH_HERE
