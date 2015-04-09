@@ -1,13 +1,11 @@
-package stringparser;
-
-/**
- * Author : Julien
- * Date : 04/11/13, 9:02 AM
- * Copyright (c) 2014 Julien Guerinet. All rights reserved.
+/*
+ * Copyright (c) 2015 Julien Guerinet. All rights reserved.
  */
 
+package stringparser;
+
 import org.supercsv.cellprocessor.ift.CellProcessor;
-import org.supercsv.io.CsvBeanReader;
+import org.supercsv.io.CsvListReader;
 import org.supercsv.prefs.CsvPreference;
 
 import java.io.*;
@@ -16,88 +14,118 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Main class, executes the main code for parsing the Google Docs file
+ * @author Julien Guerinet
+ * @version 1.0
+ * @since 1.0
+ */
 public class StringParser{
-    //Config Variables
-    private static String url = null;
-    private static String englishPath = null;
-    private static String frenchPath = null;
-
-    //Platforms
+    /* PLATFORMS */
+    /**
+     * The platform chosen
+     */
     private static int platform = -1;
+    /**
+     * Android platform
+     */
     private static final int ANDROID = 0;
+    /**
+     * iOS platform
+     */
     private static final int IOS = 1;
-    private static final int WINDOWS = 2;
 
-    //Stuff from the file
+    /* FILE STRINGS */
+    /**
+     * The URL in the file
+     */
     private static final String URL = "URL:";
+    /**
+     * The platform in the file
+     */
     private static final String PLATFORM = "Platform:";
-    private static final String ANDROID_ENGLISH = "Android English Path:";
-    private static final String ANDROID_FRENCH = "Android French Path:";
-    private static final String IOS_ENGLISH = "iOS English Path:";
-    private static final String IOS_FRENCH = "iOS French Path:";
-    private static final String WINDOWS_ENGLISH = "Windows English Path:";
-    private static final String WINDOWS_FRENCH = "Windows French Path:";
+    /**
+     * Languages in the file
+     */
+    private static final String LANGUAGE= "Language:";
 
-    //Writers
-    private static PrintWriter englishWriter;
-    private static PrintWriter frenchWriter;
+    /* ANDROID STRINGS */
+    /**
+     * Android XML Opener
+     */
+    private static final String XML_OPENER = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
+    /**
+     * Android Resources Opener
+     */
+    private static final String RESOURCES_OPENER = "<resources>";
+    /**
+     * Android Resources Closer
+     */
+    private static final String RESOURCES_CLOSER = "</resources>";
 
-    //To keep track of which line number you are at
-    private static int lineNumber;
+    /* OTHER */
+    /**
+     * The English Id, used to get the English Strings for the header
+     */
+    private static final String ENGLISH_ID = "en";
+    /**
+     * The key used for the header in the Strings document
+     */
+    private static final String HEADER_KEY = "header";
 
     public static void main(String[] args) throws IOException {
+        //Keep a list of all of the languages the Strings are in
+        List<Language> languages = new ArrayList<Language>();
+        //The list of language Strings
+        List<LanguageString> strings = new ArrayList<LanguageString>();
+        //Url
+        String url = null;
+
         //Read from the config file
-        BufferedReader configReader;
+        BufferedReader configReader = null;
         try{
             configReader = new BufferedReader(new FileReader("../config.txt"));
         }
         catch(FileNotFoundException e){
-            configReader = new BufferedReader(new FileReader("config.txt"));
+            try{
+                configReader = new BufferedReader(new FileReader("config.txt"));
+            }
+            catch(FileNotFoundException ex){
+                System.out.println("Error: Config file not found");
+                System.exit(-1);
+            }
         }
 
         String line;
         while ((line = configReader.readLine()) != null) {
-
-            //Get the Docs URL
+            //Get the URL
             if(line.startsWith(URL)){
                 url = line.replace(URL, "").trim();
             }
-
             //Get the platform
             else if(line.startsWith(PLATFORM)){
+                //Remove the header
                 String platformString = line.replace(PLATFORM, "").trim();
+                //Android
                 if(platformString.equalsIgnoreCase("android")){
                     platform = ANDROID;
                 }
+                //iOS
                 else if(platformString.equalsIgnoreCase("ios")){
                     platform = IOS;
                 }
-                else if(platformString.equalsIgnoreCase("windows")){
-                    platform = WINDOWS;
-                }
+                //Not recognized
                 else{
                     System.out.println("Error: Platform must be either Android, iOS, or Windows.");
                 }
             }
+            //Get the languages
+            else if(line.startsWith(LANGUAGE)){
+                //Remove the header and separate the language Id from the path
+                String[] languageInfo = line.replace(LANGUAGE, "").trim().split(", ");
 
-            //Get the path for the file.
-            else if(platform == ANDROID && line.startsWith(ANDROID_ENGLISH)){
-                englishPath = line.replace(ANDROID_ENGLISH, "").trim();
-            }
-            else if(platform == ANDROID && line.startsWith(ANDROID_FRENCH)){
-                frenchPath = line.replace(ANDROID_FRENCH, "").trim();
-            }
-            else if(platform == IOS && line.startsWith(IOS_ENGLISH)){
-                englishPath = line.replace(IOS_ENGLISH, "").trim();
-            }
-            else if(platform == IOS && line.startsWith(IOS_FRENCH)){
-                frenchPath = line.replace(IOS_FRENCH, "").trim();
-            }
-            else if(platform == WINDOWS && line.startsWith(WINDOWS_ENGLISH)){
-                englishPath = line.replace(WINDOWS_ENGLISH, "").trim();
-            }
-            else if(platform == WINDOWS&& line.startsWith(WINDOWS_FRENCH)){
-                frenchPath = line.replace(WINDOWS_FRENCH, "").trim();
+                //Save it as a new language in the list of languages
+                languages.add(new Language(languageInfo[0], languageInfo[1]));
             }
         }
         configReader.close();
@@ -105,75 +133,142 @@ public class StringParser{
         //Make sure nothing is null
         if(url == null){
             System.out.println("Error: URL Cannot be null");
-            System.exit(0);
+            System.exit(-1);
         }
         else if(platform == -1){
             System.out.println("Error: You need to input a platform");
-            System.exit(0);
+            System.exit(-1);
         }
-        else if(englishPath == null){
-            System.out.println("Error: You need to input a path for the english strings");
-            System.exit(0);
+        else if(languages.isEmpty()){
+            System.out.println("Error: You need to add at least one language");
+            System.exit(-1);
         }
-        else if(frenchPath == null){
-            System.out.println("Error: You need to input a path for the french strings");
-            System.exit(0);
-        }
-
-        //Set up the writers
-        englishWriter = new PrintWriter(englishPath, "UTF-8");
-        frenchWriter = new PrintWriter(frenchPath, "UTF-8");
 
         //Connect to the URL
         URL link = new URL(url);
-        HttpURLConnection httpConnection = (HttpURLConnection) link.openConnection();
-        httpConnection.setRequestMethod("GET");
-        httpConnection.connect();
+        HttpURLConnection connection = (HttpURLConnection) link.openConnection();
+        connection.setRequestMethod("GET");
+        connection.connect();
 
-        //Parse the strings
-        List<Strings> strings = new ArrayList<Strings>();
-        CsvBeanReader reader = new CsvBeanReader(new InputStreamReader(httpConnection.getInputStream()), CsvPreference.EXCEL_PREFERENCE);
+        //Set up the CSV reader
+        CsvListReader reader = new CsvListReader(new InputStreamReader(connection.getInputStream()),
+                CsvPreference.EXCEL_PREFERENCE);
 
-        try {
-            final String[] header = reader.getHeader(true);
-            final CellProcessor[] processors = getProcessors();
+        //Get the header
+        final String[] header = reader.getHeader(true);
 
-            Strings currentLine;
-            while( (currentLine = reader.read(Strings.class, header, processors)) != null){
-                strings.add(currentLine);
-            }
-            if(!strings.isEmpty()){
-                processStrings(strings);
+        //First column will be key, so ignore it
+        for(int i = 1; i < header.length; i++){
+            String string = header[i];
+
+            //Check if the string matches any of the languages parsed
+            for(Language language : languages){
+                if(string.equals(language.getId())){
+                    //If we find a match, set the column index for this language
+                    language.setColumnIndex(i);
+                    break;
+                }
             }
         }
-        finally {
-            reader.close();
+
+        //Make sure that all languages have an index
+        for(Language language : languages){
+            if(language.getColumnIndex() == -1){
+                System.out.println("Error: " + language.getId() +
+                        " does not have any translations.");
+                System.exit(-1);
+            }
         }
+
+        //Make a CellProcessor with the right length
+        final CellProcessor[] processors = new CellProcessor[header.length];
+
+        //Go through each line of the CSV document into a list of objects.
+        List<Object> currentLine;
+        while((currentLine = reader.read(processors)) != null){
+            //Add a new language String
+            LanguageString languageString = new LanguageString((String)currentLine.get(0));
+
+            //Go through the languages, add each translation
+            boolean allNull = true;
+            for(Language language : languages){
+                languageString.addTranslation(language.getId(),
+                        (String)currentLine.get(language.getColumnIndex()));
+
+                //If at least one language is not null, then they are not all null
+                if(languageString.getString(language.getId()) != null){
+                    allNull = false;
+                }
+            }
+
+            //Check if all of the values are null
+            if(allNull){
+                //Show a warning message
+                System.out.println("Warning: Line " + (strings.size() + 2) + " has no " +
+                    "translations so it will not be parsed.");
+            }
+            else{
+                strings.add(languageString);
+            }
+        }
+
+        //Close the CSV reader
+        reader.close();
+
+        //Check if there are any errors with the keys
+        for (int i = 0; i < strings.size(); i++){
+            LanguageString string1 = strings.get(i);
+
+            //Check if there are any spaces in the keys
+            if(string1.getKey().trim().contains(" ")){
+                System.out.println("Error: Line " + getLineNumber(string1, strings) + " contains " +
+                                "a space in its key.");
+                System.exit(-1);
+            }
+
+            //Check if there are any duplicated
+            for(int j = i + 1; j < strings.size(); j++){
+                LanguageString string2 = strings.get(j);
+
+                //If the keys are the same and it's not a header, show an error and stop
+                if(!string1.getKey().equalsIgnoreCase(HEADER_KEY) &&
+                        string1.getKey().equals(string2.getKey())){
+                    System.out.println("Error: Lines " + getLineNumber(string1, strings) + " and " +
+                            getLineNumber(string2, strings) + " have the same key.");
+                    System.exit(-1);
+                }
+            }
+        }
+
+        //Go through each language, and write the file
+        for(Language language : languages){
+            if(platform == ANDROID){
+                processAndroidStrings(language, strings);
+            }
+            else{
+                processIOSStrings(language, strings);
+            }
+        }
+
+        //Exit message
+        System.out.println("Done parsing Strings");
     }
 
-    public static CellProcessor[] getProcessors(){
-        return new CellProcessor[]{
-                null,
-                null,
-                null,
-                null,
-        };
-    }
+    /* HELPERS */
 
-    public static void processStrings(List<Strings> strings)throws FileNotFoundException, UnsupportedEncodingException{
-        if(platform == ANDROID){
-            processAndroidStrings(strings);
-        }
-        else if(platform == IOS){
-            processIOSStrings(strings);
-        }
-        else{
-            processWindowsStrings(strings);
-        }
+    /**
+     * Get the line number of a given String for any warnings or errors shown to the user
+     *
+     * @param string The String
+     * @return The line number of the String
+     */
+    private static int getLineNumber(LanguageString string, List<LanguageString> strings){
+        //+2 to account for the header and the fact that Google Drive starts numbering at 1
+        return strings.indexOf(string) + 2;
     }
 
     /**
-     * Processes a given String with the common changes to make between Android and iOS
+     * Processes a given String with the common changes to make between the platforms
      *
      * @param string The String to process
      */
@@ -187,180 +282,148 @@ public class StringParser{
         return string;
     }
 
-    /** ANDROID STRING PARSING **/
-    //Stuff for Android Strings
-    public static final String XML_OPENER = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
-    public static final String RESOURCES_OPENER = "<resources>";
-    public static final String RESOURCES_CLOSER = "</resources>";
-
-    public static void processAndroidStrings(List<Strings> strings)throws FileNotFoundException, UnsupportedEncodingException{
-        //Add the XML header for Android files
-        englishWriter.println(XML_OPENER);
-        frenchWriter.println(XML_OPENER);
-
-        //Add the resources opening for Android files
-        englishWriter.println(RESOURCES_OPENER);
-        frenchWriter.println(RESOURCES_OPENER);
-
-        //Go through the strings
-        for(Strings currentStrings : strings){
-            try{
-                lineNumber = strings.indexOf(currentStrings) + 2;
-
-                //If there is no ID, we cannot parse it, so show a warning
-                if(currentStrings.getKey() == null){
-                    System.out.println("Warning! Line " + lineNumber + " has no ID, and therefore cannot be parsed");
-                    continue;
-                }
-
-                //Android strings
-                String androidEnglishString = addAndroidEnglishString(currentStrings);
-                String androidFrenchString = addAndroidFrenchString(currentStrings);
-
-                //If one is null, there is no value, so do not add it
-                if(androidEnglishString != null){
-                    englishWriter.println(androidEnglishString);
-                }
-                if(androidFrenchString != null){
-                    frenchWriter.println(androidFrenchString);
-                }
-            }
-            catch (Exception e){
-                System.out.println("Error on Line " + lineNumber);
-                e.printStackTrace();
-            }
+    /**
+     * Add a language String
+     *
+     * @param platform The platform this is for
+     * @param string   The LanguageString object
+     * @param language The language to parse the String for
+     * @return The formatted String for the given language and platform
+     */
+    private static String getLanguageString(int platform, LanguageString string, Language language){
+        String key = string.getKey();
+        String value;
+        //Check if we are parsing a header, use the English translation for the value
+        if(string.getKey().equalsIgnoreCase(HEADER_KEY)){
+            value = string.getString(ENGLISH_ID);
+        }
+        else{
+            value = string.getString(language.getId());
         }
 
-        //Add the resources closing to android files
-        englishWriter.println(RESOURCES_CLOSER);
-        frenchWriter.println(RESOURCES_CLOSER);
-
-        //Close the writers
-        englishWriter.close();
-        frenchWriter.close();
-    }
-
-    public static String addAndroidEnglishString(Strings strings){
-        return addAndroidString(strings.getKey(), strings.getEn());
-    }
-
-    public static String addAndroidFrenchString(Strings strings){
-        //For headers in the french XML
-        if(strings.getKey().equalsIgnoreCase("header")){
-            return addAndroidString(strings.getKey(), strings.getEn());
-        }
-        return addAndroidString(strings.getKey(), strings.getFr());
-    }
-
-    public static String addAndroidString(String key, String string){
-        //First check if string is empty: if it is, return null
-        if(string.isEmpty()){
+        //Check if value is or null empty: if it is, return null
+        if(value == null || value.isEmpty()){
             return null;
         }
 
+        //Process the value with the general methods first
+        value = processString(value);
+
+        //Use the right platform method
+        if(platform == ANDROID){
+            return getAndroidString(key, value);
+        }
+        return getIOSString(key, value);
+    }
+
+    /* ANDROID STRING PARSING */
+
+    /**
+     * Get the formatted String for the Android Strings document
+     *
+     * @param key    The String key
+     * @param string The String
+     * @return The formatted String
+     */
+    private static String getAndroidString(String key, String string){
         //Add initial indentation
         String xmlString = "    ";
 
         //Check if it's a header section
-        if(key.trim().equalsIgnoreCase("header")){
+        if(key.trim().equalsIgnoreCase(HEADER_KEY)){
+            //Leave a space before it, add the header as a comment
             xmlString = "\n" + xmlString + "<!-- " + string + " -->";
         }
         //If not, treat is as a normal string
         else{
             /* Character checks */
-            //Process the String with the generalized method first
-            string = processString(string);
-
             //Unescaped apostrophes
             string = string.replace("\'", "\\" + "\'");
 
             //Unescaped @ signs
             string = string.replace("@", "\\" + "@");
 
+            //Ampersands
+            if(string.contains("&")){
+                string = string.replace("&", "&amp;");
+            }
+
+            //Ellipses
+            string = string.replace("...", "&#8230;");
+
+            //HTML content
             if(string.contains("<html>") || string.contains("<HTML>")){
-                //Take care of html tags
                 string = string.replace("<html>", "<![CDATA[");
                 string = string.replace("</html>", "]]>");
                 string = string.replace("<HTML>", "<![CDATA[");
                 string = string.replace("</HTML>", "]]>");
             }
-            else{
-                //Ampersands
-                if(string.contains("&")){
-                    //If it's an icon, do not do anything
-                    if(!string.contains("&#x")){
-                        string = string.replace("&", "&amp;");
-                    }
-                }
 
-                //Ellipses
-                string = string.replace("...", "&#8230;");
-            }
-
+            //Add the XML tag
             xmlString = xmlString + "<string name=\"" + key.trim() + "\">" + string + "</string>";
         }
+
         return xmlString;
     }
 
-    /** IOS STRING PARSING **/
-    public static void processIOSStrings(List<Strings> strings)throws FileNotFoundException, UnsupportedEncodingException{
-        //Go through the strings
-        for(Strings currentStrings : strings){
-            try{
-                lineNumber = strings.indexOf(currentStrings) + 2;
+    /**
+     * Processes the list of parsed Strings into the Android XML document
+     *
+     * @param language The language to parse the Strings for
+     * @throws FileNotFoundException
+     * @throws UnsupportedEncodingException
+     */
+    private static void processAndroidStrings(Language language, List<LanguageString> strings)
+            throws FileNotFoundException, UnsupportedEncodingException{
 
-                //If there is no ID, we cannot parse it, so show a warning
-                if(currentStrings.getKey() == null){
-                    System.out.println("Warning! Line " + lineNumber + " has no ID, and therefore cannot be parsed");
+        //Set up the writer for the given language
+        PrintWriter writer = new PrintWriter(language.getPath());
+
+        //Add the header
+        writer.println(XML_OPENER);
+        writer.println(RESOURCES_OPENER);
+
+        //Go through the strings
+        for(LanguageString currentString : strings){
+            try{
+                //If there is no key, we cannot parse it so show a warning and move on
+                if(currentString.getKey() == null || currentString.getKey().trim().isEmpty()){
+                    System.out.println("Warning: Line " + getLineNumber(currentString, strings) +
+                            " has no key, and therefore cannot be parsed");
                     continue;
                 }
 
-                //iOS strings
-                String iOSEnglishString = addIOSEnglishString(currentStrings);
-                String iOSFrenchString = addIOSFrenchString(currentStrings);
+                //Get the String
+                String androidString = getLanguageString(ANDROID, currentString, language);
 
-                //If one is null, there is no value, so do not add it
-                if(iOSEnglishString != null) {
-                    englishWriter.println(iOSEnglishString);
-                }
-                if(iOSFrenchString != null) {
-                    frenchWriter.println(iOSFrenchString);
+                //If it is null, there is no value so don't add it
+                if(androidString != null){
+                    writer.println(androidString);
                 }
             }
             catch (Exception e){
-                System.out.println("Error on Line " + lineNumber);
+                System.out.println("Error on Line " + getLineNumber(currentString, strings));
                 e.printStackTrace();
             }
         }
 
-        englishWriter.close();
-        frenchWriter.close();
+        //Add the resources closing to android files
+        writer.println(RESOURCES_CLOSER);
+
+        //Close the writer
+        writer.close();
     }
 
-    public static String addIOSEnglishString(Strings strings){
-        return addIOSString(strings.getKey(), strings.getEn());
-    }
+    /* IOS STRING PARSING */
 
-    public static String addIOSFrenchString(Strings strings){
-        //For headers in the french XML
-        if(strings.getKey().equalsIgnoreCase("header")){
-            return addIOSString(strings.getKey(), strings.getEn());
-        }
-        return addIOSString(strings.getKey(), strings.getFr());
-    }
-
-    public static String addIOSString(String key, String string){
-        //First check if string is empty: if it is, return null
-        if (string.isEmpty()) {
-            return null;
-        }
-
-        //Add initial indentation
-        String xmlString = "";
-
-        //Process the String with the generalized method first
-        string = processString(string);
-
+    /**
+     * Get the formatted String for the iOS Strings document
+     *
+     * @param key    The String key
+     * @param string The String
+     * @return The formatted String
+     */
+    private static String getIOSString(String key, String string){
         //Replace %s format specifiers with %@
         string = string.replace("%s","%@");
         string = string.replace("$s", "$@");
@@ -372,268 +435,53 @@ public class StringParser{
         string = string.replace("</HTML>", "");
 
         //Check if it's a header section
-        if(key.equalsIgnoreCase("header")){
-            xmlString = "\n" + xmlString + "/*  " + string + " */";
+        if(key.equalsIgnoreCase(HEADER_KEY)){
+            return "\n" + "/*  " + string + " */";
         }
         //If not, treat is as a normal string
         else{
-            xmlString = "\"" + key + "\" = \"" + string + "\";";
+            return "\"" + key + "\" = \"" + string + "\";";
         }
-        return xmlString;
     }
 
-    /**WINDOWS STRING PARSING**/
-    public static final String WINDOWS_FILE_OPENER = "<root>\n" +
-            "  <!-- \n" +
-            "    Microsoft ResX Schema \n" +
-            "    \n" +
-            "    Version 2.0\n" +
-            "    \n" +
-            "    The primary goals of this format is to allow a simple XML format \n" +
-            "    that is mostly human readable. The generation and parsing of the \n" +
-            "    various data types are done through the TypeConverter classes \n" +
-            "    associated with the data types.\n" +
-            "    \n" +
-            "    Example:\n" +
-            "    \n" +
-            "    ... ado.net/XML headers & schema ...\n" +
-            "    <resheader name=\"resmimetype\">text/microsoft-resx</resheader>\n" +
-            "    <resheader name=\"version\">2.0</resheader>\n" +
-            "    <resheader name=\"reader\">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>\n" +
-            "    <resheader name=\"writer\">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>\n" +
-            "    <data name=\"Name1\"><value>this is my long string</value><comment>this is a comment</comment></data>\n" +
-            "    <data name=\"Color1\" type=\"System.Drawing.Color, System.Drawing\">Blue</data>\n" +
-            "    <data name=\"Bitmap1\" mimetype=\"application/x-microsoft.net.object.binary.base64\">\n" +
-            "        <value>[base64 mime encoded serialized .NET Framework object]</value>\n" +
-            "    </data>\n" +
-            "    <data name=\"Icon1\" type=\"System.Drawing.Icon, System.Drawing\" mimetype=\"application/x-microsoft.net.object.bytearray.base64\">\n" +
-            "        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>\n" +
-            "        <comment>This is a comment</comment>\n" +
-            "    </data>\n" +
-            "                \n" +
-            "    There are any number of \"resheader\" rows that contain simple \n" +
-            "    name/value pairs.\n" +
-            "    \n" +
-            "    Each data row contains a name, and value. The row also contains a \n" +
-            "    type or mimetype. Type corresponds to a .NET class that support \n" +
-            "    text/value conversion through the TypeConverter architecture. \n" +
-            "    Classes that don't support this are serialized and stored with the \n" +
-            "    mimetype set.\n" +
-            "    \n" +
-            "    The mimetype is used for serialized objects, and tells the \n" +
-            "    ResXResourceReader how to depersist the object. This is currently not \n" +
-            "    extensible. For a given mimetype the value must be set accordingly:\n" +
-            "    \n" +
-            "    Note - application/x-microsoft.net.object.binary.base64 is the format \n" +
-            "    that the ResXResourceWriter will generate, however the reader can \n" +
-            "    read any of the formats listed below.\n" +
-            "    \n" +
-            "    mimetype: application/x-microsoft.net.object.binary.base64\n" +
-            "    value   : The object must be serialized with \n" +
-            "            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter\n" +
-            "            : and then encoded with base64 encoding.\n" +
-            "    \n" +
-            "    mimetype: application/x-microsoft.net.object.soap.base64\n" +
-            "    value   : The object must be serialized with \n" +
-            "            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter\n" +
-            "            : and then encoded with base64 encoding.\n" +
-            "\n" +
-            "    mimetype: application/x-microsoft.net.object.bytearray.base64\n" +
-            "    value   : The object must be serialized into a byte array \n" +
-            "            : using a System.ComponentModel.TypeConverter\n" +
-            "            : and then encoded with base64 encoding.\n" +
-            "    -->\n" +
-            "  <xsd:schema id=\"root\" xmlns=\"\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:msdata=\"urn:schemas-microsoft-com:xml-msdata\">\n" +
-            "    <xsd:import namespace=\"http://www.w3.org/XML/1998/namespace\" />\n" +
-            "    <xsd:element name=\"root\" msdata:IsDataSet=\"true\">\n" +
-            "      <xsd:complexType>\n" +
-            "        <xsd:choice maxOccurs=\"unbounded\">\n" +
-            "          <xsd:element name=\"metadata\">\n" +
-            "            <xsd:complexType>\n" +
-            "              <xsd:sequence>\n" +
-            "                <xsd:element name=\"value\" type=\"xsd:string\" minOccurs=\"0\" />\n" +
-            "              </xsd:sequence>\n" +
-            "              <xsd:attribute name=\"name\" use=\"required\" type=\"xsd:string\" />\n" +
-            "              <xsd:attribute name=\"type\" type=\"xsd:string\" />\n" +
-            "              <xsd:attribute name=\"mimetype\" type=\"xsd:string\" />\n" +
-            "              <xsd:attribute ref=\"xml:space\" />\n" +
-            "            </xsd:complexType>\n" +
-            "          </xsd:element>\n" +
-            "          <xsd:element name=\"assembly\">\n" +
-            "            <xsd:complexType>\n" +
-            "              <xsd:attribute name=\"alias\" type=\"xsd:string\" />\n" +
-            "              <xsd:attribute name=\"name\" type=\"xsd:string\" />\n" +
-            "            </xsd:complexType>\n" +
-            "          </xsd:element>\n" +
-            "          <xsd:element name=\"data\">\n" +
-            "            <xsd:complexType>\n" +
-            "              <xsd:sequence>\n" +
-            "                <xsd:element name=\"value\" type=\"xsd:string\" minOccurs=\"0\" msdata:Ordinal=\"1\" />\n" +
-            "                <xsd:element name=\"comment\" type=\"xsd:string\" minOccurs=\"0\" msdata:Ordinal=\"2\" />\n" +
-            "              </xsd:sequence>\n" +
-            "              <xsd:attribute name=\"name\" type=\"xsd:string\" use=\"required\" msdata:Ordinal=\"1\" />\n" +
-            "              <xsd:attribute name=\"type\" type=\"xsd:string\" msdata:Ordinal=\"3\" />\n" +
-            "              <xsd:attribute name=\"mimetype\" type=\"xsd:string\" msdata:Ordinal=\"4\" />\n" +
-            "              <xsd:attribute ref=\"xml:space\" />\n" +
-            "            </xsd:complexType>\n" +
-            "          </xsd:element>\n" +
-            "          <xsd:element name=\"resheader\">\n" +
-            "            <xsd:complexType>\n" +
-            "              <xsd:sequence>\n" +
-            "                <xsd:element name=\"value\" type=\"xsd:string\" minOccurs=\"0\" msdata:Ordinal=\"1\" />\n" +
-            "              </xsd:sequence>\n" +
-            "              <xsd:attribute name=\"name\" type=\"xsd:string\" use=\"required\" />\n" +
-            "            </xsd:complexType>\n" +
-            "          </xsd:element>\n" +
-            "        </xsd:choice>\n" +
-            "      </xsd:complexType>\n" +
-            "    </xsd:element>\n" +
-            "  </xsd:schema>\n" +
-            "  <resheader name=\"resmimetype\">\n" +
-            "    <value>text/microsoft-resx</value>\n" +
-            "  </resheader>\n" +
-            "  <resheader name=\"version\">\n" +
-            "    <value>2.0</value>\n" +
-            "  </resheader>\n" +
-            "  <resheader name=\"reader\">\n" +
-            "    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>\n" +
-            "  </resheader>\n" +
-            "  <resheader name=\"writer\">\n" +
-            "    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>\n" +
-            "  </resheader>\n" +
-            "  <data name=\"ResourceFlowDirection\" xml:space=\"preserve\">\n" +
-            "    <value>LeftToRight</value>\n" +
-            "    <comment>Controls the FlowDirection for all elements in the RootFrame. Set to the traditional direction of this resource file's language</comment>\n" +
-            "  </data>";
+    /**
+     * Processes the list of parsed Strings into the iOS Strings document
+     *
+     * @param language The language to parse the Strings for
+     * @throws FileNotFoundException
+     * @throws UnsupportedEncodingException
+     */
+    public static void processIOSStrings(Language language, List<LanguageString> strings)
+            throws FileNotFoundException, UnsupportedEncodingException{
 
-    public static final String WINDOWS_ENGLISH_OPENER =
-            "<data name=\"ResourceLanguage\" xml:space=\"preserve\">\n" +
-            "    <value>en-US</value>\n" +
-            "    <comment>Controls the Language and ensures that the font for all elements in the RootFrame aligns with the app's language. Set to the language code of this resource file's language.</comment>\n" +
-            "  </data>";
-
-    public static final String WINDOWS_FRENCH_OPENER =
-            "<data name=\"ResourceLanguage\" xml:space=\"preserve\">\n" +
-                    "    <value>fr-CA</value>\n" +
-                    "    <comment>Controls the Language and ensures that the font for all elements in the RootFrame aligns with the app's language. Set to the language code of this resource file's language.</comment>\n" +
-                    "  </data>";
-
-    public static final String WINDOWS_CLOSER = "</root>";
-
-    public static void processWindowsStrings(List<Strings> strings)throws FileNotFoundException, UnsupportedEncodingException{
-        //Add the XML header for Android files
-        englishWriter.println(XML_OPENER);
-        frenchWriter.println(XML_OPENER);
-
-        //Add the Windows opening
-        englishWriter.println(WINDOWS_FILE_OPENER);
-        frenchWriter.println(WINDOWS_FILE_OPENER);
-
-        //Add the language
-        englishWriter.print(WINDOWS_ENGLISH_OPENER);
-        frenchWriter.print(WINDOWS_FRENCH_OPENER);
+        //Set up the writer for the given language
+        PrintWriter writer = new PrintWriter(language.getPath());
 
         //Go through the strings
-        for(Strings currentStrings : strings){
+        for(LanguageString currentString : strings){
             try{
-                lineNumber = strings.indexOf(currentStrings) + 2;
-
-                //If there is no ID, we cannot parse it, so show a warning
-                if(currentStrings.getKey() == null){
-                    System.out.println("Warning! Line " + lineNumber + " has no ID, and therefore cannot be parsed");
+                //If there is no Id, we cannot parse it so show a warning and continue
+                if(currentString.getKey() == null){
+                    System.out.println("Warning: Line " + getLineNumber(currentString, strings) +
+                            " has no Id, and therefore cannot be parsed");
                     continue;
                 }
 
-                String englishString = addWindowsEnglishString(currentStrings);
-                String frenchString = addWindowsFrenchString(currentStrings);
+                //Get the iOS String
+                String iOSString = getLanguageString(IOS, currentString, language);
 
-                //If one is null, there is no value, so do not add it
-                if(englishString != null){
-                    englishWriter.println(englishString);
-                }
-                if(frenchString != null){
-                    frenchWriter.println(frenchString);
+                //If the String is null, there is no value so do not add it
+                if(iOSString != null) {
+                    writer.println(iOSString);
                 }
             }
             catch (Exception e){
-                System.out.println("Error on Line " + lineNumber);
+                System.out.println("Error on Line " + getLineNumber(currentString, strings));
                 e.printStackTrace();
             }
         }
 
-        //Add the resources closing to android files
-        englishWriter.println(WINDOWS_CLOSER);
-        frenchWriter.println(WINDOWS_CLOSER);
-
-        //Close the writers
-        englishWriter.close();
-        frenchWriter.close();
-    }
-
-    public static String addWindowsEnglishString(Strings strings){
-        return addWindowsString(strings.getKey(), strings.getEn());
-    }
-
-    public static String addWindowsFrenchString(Strings strings){
-        //For headers in the french XML
-        if(strings.getKey().equalsIgnoreCase("header")){
-            return addWindowsString(strings.getKey(), strings.getEn());
-        }
-        return addWindowsString(strings.getKey(), strings.getFr());
-    }
-
-    public static String addWindowsString(String key, String string){
-        //First check if string is empty: if it is, return null
-        if(string.isEmpty()){
-            return null;
-        }
-
-        //Add initial indentation
-        String xmlString = "  ";
-
-        //Check if it's a header section
-        if(key.trim().equalsIgnoreCase("header")){
-            xmlString = "\n" + xmlString + "<!-- " + string + " -->";
-        }
-        //If not, treat is as a normal string
-        else{
-            /* Character checks */
-            //Unescaped apostrophes
-            string = string.replace("\'", "\\" + "\'");
-
-            //Unescaped @ signs
-            string = string.replace("@", "\\" + "@");
-
-            if(string.contains("<html>") || string.contains("<HTML>")){
-                //Take care of html tags
-                string = string.replace("<html>", "<![CDATA[");
-                string = string.replace("</html>", "]]>");
-                string = string.replace("<HTML>", "<![CDATA[");
-                string = string.replace("</HTML>", "]]>");
-            }
-            else{
-                //Ampersands
-                if(string.contains("&")){
-                    //If it's an icon, do not do anything
-                    if(!string.contains("&#x")){
-                        string = string.replace("&", "&amp;");
-                    }
-                }
-
-                //Copyright
-                string = string.replace("(c)", "\u00A9");
-
-                //Ellipses
-                string = string.replace("...", "&#8230;");
-            }
-
-            //Beginning of object (ID)
-            xmlString += "<data name=\"" + key.trim() + "\" xml:space=\"preserve\">";
-            //The value
-            xmlString += "\n        <value>" + string + "</value>";
-            //Closing Object
-            xmlString += "\n  </data>";
-        }
-        return xmlString;
+        //Close the writer
+        writer.close();
     }
 }

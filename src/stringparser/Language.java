@@ -19,6 +19,10 @@ public class Language {
      * The language path
      */
     private String path;
+    /**
+     * The column index of the language in the CSV file
+     */
+    private int columnIndex;
 
     /**
      * Default Constructor
@@ -29,6 +33,7 @@ public class Language {
     public Language(String id, String path){
         this.id = id;
         this.path = path;
+        this.columnIndex = -1;
     }
 
     /* GETTERS */
@@ -45,5 +50,21 @@ public class Language {
      */
     public String getPath(){
         return this.path;
+    }
+
+    /**
+     * @return The column index of this language
+     */
+    public int getColumnIndex(){
+        return this.columnIndex;
+    }
+
+    /* SETTERS */
+
+    /**
+     * @param columnIndex The column index of this language
+     */
+    public void setColumnIndex(int columnIndex){
+        this.columnIndex = columnIndex;
     }
 }
