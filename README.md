@@ -1,7 +1,7 @@
 # String Parser
 
 ## Version History
-* Version 2.1 - April 15, 2015 (Removing new line characters, created bach file to run the jar)
+* Version 2.1 - April 15, 2015 (Removing new line characters)
 * Version 2.0 - April 08, 2015 (Multiple Language Support, Code Cleanup)
 * Version 1.3 - February 20, 2015 (Escaping Quotations)
 * Version 1.2 - June 02, 2014 (Error and Warning Messages)
