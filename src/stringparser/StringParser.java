@@ -279,6 +279,9 @@ public class StringParser{
         //Copyright
         string = string.replace("(c)", "\u00A9");
 
+        //New Lines
+        string = string.replace("\n", "");
+
         return string;
     }
 
