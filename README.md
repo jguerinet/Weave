@@ -15,10 +15,10 @@ It will also show any warnings or errors that the Strings file might have.
 ## Instructions
 To use this: 
 
-* Set up your config file (file the instructions in Sample Config.txt
+* Set up your config file (follow the instructions in Sample Config.txt)
 * Have a URL to an online CSV file (recommended: Google Drive file) 
 * The first column of your file must be the keys
-* Any columns containing translations must have a header with the 2 character language Id
+* Any columns containing translations must have a header with the 2 character language Id (ex: en, fr)
 * Keys must be unique, not have spaces, and not be null
 
 ## Branches
