@@ -11,6 +11,7 @@ import org.supercsv.prefs.CsvPreference;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -254,8 +255,9 @@ public class StringParser{
             //Go through each language, and write the file
             PrintWriter writer;
             for(Language language : languages){
-                //Set up the writer for the given language
-                writer = new PrintWriter(language.getPath());
+                //Set up the writer for the given language, enforcing UTF-8
+                writer = new PrintWriter(new OutputStreamWriter(
+                        new FileOutputStream(language.getPath()), StandardCharsets.UTF_8), true);
 
                 if(platform == ANDROID){
                     processAndroidStrings(writer, language, strings);
