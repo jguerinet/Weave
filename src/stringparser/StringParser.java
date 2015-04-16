@@ -116,7 +116,7 @@ public class StringParser{
                 }
                 //Not recognized
                 else{
-                    System.out.println("Error: Platform must be either Android, iOS, or Windows.");
+                    System.out.println("Error: Platform must be either Android or iOS.");
                 }
             }
             //Get the languages
