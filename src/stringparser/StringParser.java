@@ -122,7 +122,14 @@ public class StringParser{
             //Get the languages
             else if(line.startsWith(LANGUAGE)){
                 //Remove the header and separate the language Id from the path
-                String[] languageInfo = line.replace(LANGUAGE, "").trim().split(", ");
+                String languageString= line.replace(LANGUAGE, "").trim();
+                String[] languageInfo = languageString.split(", ");
+
+                if(languageInfo.length != 2){
+                    System.out.println("Error: The following format has too few or too many " +
+                        "arguments for a language: " + languageString);
+                    System.exit(-1);
+                }
 
                 //Save it as a new language in the list of languages
                 languages.add(new Language(languageInfo[0], languageInfo[1]));
@@ -148,110 +155,128 @@ public class StringParser{
         URL link = new URL(url);
         HttpURLConnection connection = (HttpURLConnection) link.openConnection();
         connection.setRequestMethod("GET");
+        System.out.println("Connecting to " + url);
         connection.connect();
+        int responseCode = connection.getResponseCode();
+        System.out.println("Response Code: " + responseCode);
 
-        //Set up the CSV reader
-        CsvListReader reader = new CsvListReader(new InputStreamReader(connection.getInputStream()),
-                CsvPreference.EXCEL_PREFERENCE);
+        if(responseCode == 200){
+            //Set up the CSV reader
+            CsvListReader reader = new CsvListReader(new InputStreamReader(
+                    connection.getInputStream()), CsvPreference.EXCEL_PREFERENCE);
 
-        //Get the header
-        final String[] header = reader.getHeader(true);
+            //Get the header
+            final String[] header = reader.getHeader(true);
 
-        //First column will be key, so ignore it
-        for(int i = 1; i < header.length; i++){
-            String string = header[i];
+            //First column will be key, so ignore it
+            for(int i = 1; i < header.length; i++){
+                String string = header[i];
 
-            //Check if the string matches any of the languages parsed
-            for(Language language : languages){
-                if(string.equals(language.getId())){
-                    //If we find a match, set the column index for this language
-                    language.setColumnIndex(i);
-                    break;
-                }
-            }
-        }
-
-        //Make sure that all languages have an index
-        for(Language language : languages){
-            if(language.getColumnIndex() == -1){
-                System.out.println("Error: " + language.getId() +
-                        " does not have any translations.");
-                System.exit(-1);
-            }
-        }
-
-        //Make a CellProcessor with the right length
-        final CellProcessor[] processors = new CellProcessor[header.length];
-
-        //Go through each line of the CSV document into a list of objects.
-        List<Object> currentLine;
-        while((currentLine = reader.read(processors)) != null){
-            //Add a new language String
-            LanguageString languageString = new LanguageString((String)currentLine.get(0));
-
-            //Go through the languages, add each translation
-            boolean allNull = true;
-            for(Language language : languages){
-                languageString.addTranslation(language.getId(),
-                        (String)currentLine.get(language.getColumnIndex()));
-
-                //If at least one language is not null, then they are not all null
-                if(languageString.getString(language.getId()) != null){
-                    allNull = false;
+                //Check if the string matches any of the languages parsed
+                for(Language language : languages){
+                    if(string.equals(language.getId())){
+                        //If we find a match, set the column index for this language
+                        language.setColumnIndex(i);
+                        break;
+                    }
                 }
             }
 
-            //Check if all of the values are null
-            if(allNull){
-                //Show a warning message
-                System.out.println("Warning: Line " + (strings.size() + 2) + " has no " +
-                    "translations so it will not be parsed.");
-            }
-            else{
-                strings.add(languageString);
-            }
-        }
-
-        //Close the CSV reader
-        reader.close();
-
-        //Check if there are any errors with the keys
-        for (int i = 0; i < strings.size(); i++){
-            LanguageString string1 = strings.get(i);
-
-            //Check if there are any spaces in the keys
-            if(string1.getKey().trim().contains(" ")){
-                System.out.println("Error: Line " + getLineNumber(string1, strings) + " contains " +
-                                "a space in its key.");
-                System.exit(-1);
-            }
-
-            //Check if there are any duplicated
-            for(int j = i + 1; j < strings.size(); j++){
-                LanguageString string2 = strings.get(j);
-
-                //If the keys are the same and it's not a header, show an error and stop
-                if(!string1.getKey().equalsIgnoreCase(HEADER_KEY) &&
-                        string1.getKey().equals(string2.getKey())){
-                    System.out.println("Error: Lines " + getLineNumber(string1, strings) + " and " +
-                            getLineNumber(string2, strings) + " have the same key.");
+            //Make sure that all languages have an index
+            for(Language language : languages){
+                if(language.getColumnIndex() == -1){
+                    System.out.println("Error: " + language.getId() +
+                            " does not have any translations.");
                     System.exit(-1);
                 }
             }
-        }
 
-        //Go through each language, and write the file
-        for(Language language : languages){
-            if(platform == ANDROID){
-                processAndroidStrings(language, strings);
-            }
-            else{
-                processIOSStrings(language, strings);
-            }
-        }
+            //Make a CellProcessor with the right length
+            final CellProcessor[] processors = new CellProcessor[header.length];
 
-        //Exit message
-        System.out.println("Done parsing Strings");
+            //Go through each line of the CSV document into a list of objects.
+            List<Object> currentLine;
+            while((currentLine = reader.read(processors)) != null){
+                //Add a new language String
+                LanguageString languageString = new LanguageString((String)currentLine.get(0));
+
+                //Go through the languages, add each translation
+                boolean allNull = true;
+                for(Language language : languages){
+                    languageString.addTranslation(language.getId(),
+                            (String)currentLine.get(language.getColumnIndex()));
+
+                    //If at least one language is not null, then they are not all null
+                    if(languageString.getString(language.getId()) != null){
+                        allNull = false;
+                    }
+                }
+
+                //Check if all of the values are null
+                if(allNull){
+                    //Show a warning message
+                    System.out.println("Warning: Line " + (strings.size() + 2) + " has no " +
+                            "translations so it will not be parsed.");
+                }
+                else{
+                    strings.add(languageString);
+                }
+            }
+
+            //Close the CSV reader
+            reader.close();
+
+            //Check if there are any errors with the keys
+            for (int i = 0; i < strings.size(); i++){
+                LanguageString string1 = strings.get(i);
+
+                //Check if there are any spaces in the keys
+                if(string1.getKey().trim().contains(" ")){
+                    System.out.println("Error: Line " + getLineNumber(string1, strings) +
+                            " contains a space in its key.");
+                    System.exit(-1);
+                }
+
+                //Check if there are any duplicated
+                for(int j = i + 1; j < strings.size(); j++){
+                    LanguageString string2 = strings.get(j);
+
+                    //If the keys are the same and it's not a header, show an error and stop
+                    if(!string1.getKey().equalsIgnoreCase(HEADER_KEY) &&
+                            string1.getKey().equals(string2.getKey())){
+                        System.out.println("Error: Lines " + getLineNumber(string1, strings) +
+                                " and " + getLineNumber(string2, strings) + " have the same key.");
+                        System.exit(-1);
+                    }
+                }
+            }
+
+            //Go through each language, and write the file
+            PrintWriter writer;
+            for(Language language : languages){
+                //Set up the writer for the given language
+                writer = new PrintWriter(language.getPath());
+
+                if(platform == ANDROID){
+                    processAndroidStrings(writer, language, strings);
+                }
+                else{
+                    processIOSStrings(writer, language, strings);
+                }
+
+                System.out.println("Wrote " + language.getId() + " to file: " + language.getPath());
+
+                writer.close();
+            }
+
+
+            //Exit message
+            System.out.println("Strings parsing complete");
+        }
+        else{
+            System.out.println("Error: Response Code not 200");
+            System.out.println("Response Message: " + connection.getResponseMessage());
+        }
     }
 
     /* HELPERS */
@@ -372,16 +397,15 @@ public class StringParser{
     /**
      * Processes the list of parsed Strings into the Android XML document
      *
+     * @param writer   The writer to use to write to the file
      * @param language The language to parse the Strings for
+     * @param strings  The list of Strings
      * @throws FileNotFoundException
      * @throws UnsupportedEncodingException
      */
-    private static void processAndroidStrings(Language language, List<LanguageString> strings)
+    private static void processAndroidStrings(PrintWriter writer, Language language,
+                                              List<LanguageString> strings)
             throws FileNotFoundException, UnsupportedEncodingException{
-
-        //Set up the writer for the given language
-        PrintWriter writer = new PrintWriter(language.getPath());
-
         //Add the header
         writer.println(XML_OPENER);
         writer.println(RESOURCES_OPENER);
@@ -412,9 +436,6 @@ public class StringParser{
 
         //Add the resources closing to android files
         writer.println(RESOURCES_CLOSER);
-
-        //Close the writer
-        writer.close();
     }
 
     /* IOS STRING PARSING */
@@ -450,16 +471,15 @@ public class StringParser{
     /**
      * Processes the list of parsed Strings into the iOS Strings document
      *
+     * @param writer   The writer to use to write to file
      * @param language The language to parse the Strings for
+     * @param strings  The list of Strings
      * @throws FileNotFoundException
      * @throws UnsupportedEncodingException
      */
-    public static void processIOSStrings(Language language, List<LanguageString> strings)
+    public static void processIOSStrings(PrintWriter writer, Language language,
+                                         List<LanguageString> strings)
             throws FileNotFoundException, UnsupportedEncodingException{
-
-        //Set up the writer for the given language
-        PrintWriter writer = new PrintWriter(language.getPath());
-
         //Go through the strings
         for(LanguageString currentString : strings){
             try{
@@ -483,8 +503,5 @@ public class StringParser{
                 e.printStackTrace();
             }
         }
-
-        //Close the writer
-        writer.close();
     }
 }
