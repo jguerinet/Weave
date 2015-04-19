@@ -198,7 +198,8 @@ public class StringParser{
             List<Object> currentLine;
             while((currentLine = reader.read(processors)) != null){
                 //Add a new language String
-                LanguageString languageString = new LanguageString((String)currentLine.get(0));
+                LanguageString languageString =
+                        new LanguageString(((String)currentLine.get(0)).trim());
 
                 //Go through the languages, add each translation
                 boolean allNull = true;
@@ -231,7 +232,7 @@ public class StringParser{
                 LanguageString string1 = strings.get(i);
 
                 //Check if there are any spaces in the keys
-                if(string1.getKey().trim().contains(" ")){
+                if(string1.getKey().contains(" ")){
                     System.out.println("Error: Line " + getLineNumber(string1, strings) +
                             " contains a space in its key.");
                     System.exit(-1);
@@ -242,6 +243,7 @@ public class StringParser{
                     LanguageString string2 = strings.get(j);
 
                     //If the keys are the same and it's not a header, show an error and stop
+                    //TODO TRIM
                     if(!string1.getKey().equalsIgnoreCase(HEADER_KEY) &&
                             string1.getKey().equals(string2.getKey())){
                         System.out.println("Error: Lines " + getLineNumber(string1, strings) +
@@ -358,7 +360,7 @@ public class StringParser{
         String xmlString = "    ";
 
         //Check if it's a header section
-        if(key.trim().equalsIgnoreCase(HEADER_KEY)){
+        if(key.equalsIgnoreCase(HEADER_KEY)){
             //Leave a space before it, add the header as a comment
             xmlString = "\n" + xmlString + "<!-- " + string + " -->";
         }
@@ -388,7 +390,7 @@ public class StringParser{
             }
 
             //Add the XML tag
-            xmlString = xmlString + "<string name=\"" + key.trim() + "\">" + string + "</string>";
+            xmlString = xmlString + "<string name=\"" + key + "\">" + string + "</string>";
         }
 
         return xmlString;
@@ -414,7 +416,7 @@ public class StringParser{
         for(LanguageString currentString : strings){
             try{
                 //If there is no key, we cannot parse it so show a warning and move on
-                if(currentString.getKey() == null || currentString.getKey().trim().isEmpty()){
+                if(currentString.getKey() == null || currentString.getKey().isEmpty()){
                     System.out.println("Warning: Line " + getLineNumber(currentString, strings) +
                             " has no key, and therefore cannot be parsed");
                     continue;

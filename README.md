@@ -1,6 +1,7 @@
 # String Parser
 
 ## Version History
+* Version 2.3 - April 18, 2015 (Fixed key trimming bug)
 * Version 2.2 - April 16, 2015 (Added logging and connection checking)
 * Version 2.1 - April 15, 2015 (Removing new line characters)
 * Version 2.0 - April 08, 2015 (Multiple Language Support, Code Cleanup)
@@ -34,4 +35,4 @@ To use this:
 * Julien Guerinet
 
 ##Copyright 
-Copyright (c) Julien Guerinet. All rights reserved.
+Copyright 2014-2015 Julien Guerinet. All rights reserved.
