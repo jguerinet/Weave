@@ -367,27 +367,23 @@ public class StringParser{
         //If not, treat is as a normal string
         else{
             /* Character checks */
-            //Unescaped apostrophes
-            string = string.replace("\'", "\\" + "\'");
+            //Ampersands
+            string = string.replace("&", "&amp;");
+
+            //Apostrophes
+            string = string.replace("'", "\\'");
 
             //Unescaped @ signs
             string = string.replace("@", "\\" + "@");
-
-            //Ampersands
-            if(string.contains("&")){
-                string = string.replace("&", "&amp;");
-            }
 
             //Ellipses
             string = string.replace("...", "&#8230;");
 
             //HTML content
-            if(string.contains("<html>") || string.contains("<HTML>")){
-                string = string.replace("<html>", "<![CDATA[");
-                string = string.replace("</html>", "]]>");
-                string = string.replace("<HTML>", "<![CDATA[");
-                string = string.replace("</HTML>", "]]>");
-            }
+            string = string.replace("<html>", "<![CDATA[");
+            string = string.replace("</html>", "]]>");
+            string = string.replace("<HTML>", "<![CDATA[");
+            string = string.replace("</HTML>", "]]>");
 
             //Add the XML tag
             xmlString = xmlString + "<string name=\"" + key + "\">" + string + "</string>";
@@ -459,6 +455,9 @@ public class StringParser{
         string = string.replace("</html>", "");
         string = string.replace("<HTML>", "");
         string = string.replace("</HTML>", "");
+
+        //Unescaped quotations
+        string = string.replace("\"", "\\" + "\"");
 
         //Check if it's a header section
         if(key.equalsIgnoreCase(HEADER_KEY)){
