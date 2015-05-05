@@ -7,7 +7,7 @@ package stringparser;
 /**
  * One language that the Strings are in
  * @author Julien Guerinet
- * @version 2.1
+ * @version 2.4
  * @since 2.0
  */
 public class Language {

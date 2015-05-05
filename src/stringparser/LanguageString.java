@@ -9,7 +9,7 @@ import java.util.HashMap;
 /**
  * One String with all of the translations
  * @author Julien Guerinet
- * @version 2.1
+ * @version 2.4
  * @since 1.0
  */
 public class LanguageString {

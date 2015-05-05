@@ -1,6 +1,7 @@
 # String Parser
 
 ## Version History
+* Version 2.4 - May 05, 2015 (Fixed encoding bug and started using okio/okhttp)
 * Version 2.3 - April 18, 2015 (Fixed key trimming bug)
 * Version 2.2 - April 16, 2015 (Added logging and connection checking)
 * Version 2.1 - April 15, 2015 (Removing new line characters)
@@ -13,6 +14,7 @@
 ## Summary
 The String Parser takes an online CSV file and parses the content to produce the Strings files for and Android or iOS app.
 It will also show any warnings or errors that the Strings file might have. 
+Please note that it assumes that the file is in UTF-8 and also produces UTF-8 files. 
 
 ## Instructions
 To use this: 
