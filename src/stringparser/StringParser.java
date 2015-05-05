@@ -4,13 +4,14 @@
 
 package stringparser;
 
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 import org.supercsv.cellprocessor.ift.CellProcessor;
 import org.supercsv.io.CsvListReader;
 import org.supercsv.prefs.CsvPreference;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -152,18 +153,20 @@ public class StringParser{
         }
 
         //Connect to the URL
-        URL link = new URL(url);
-        HttpURLConnection connection = (HttpURLConnection) link.openConnection();
-        connection.setRequestMethod("GET");
         System.out.println("Connecting to " + url);
-        connection.connect();
-        int responseCode = connection.getResponseCode();
+        Request request = new Request.Builder()
+                .get()
+                .url(url)
+                .build();
+        Response response = new OkHttpClient().newCall(request).execute();
+
+        int responseCode = response.code();
         System.out.println("Response Code: " + responseCode);
 
         if(responseCode == 200){
             //Set up the CSV reader
             CsvListReader reader = new CsvListReader(new InputStreamReader(
-                    connection.getInputStream()), CsvPreference.EXCEL_PREFERENCE);
+                    response.body().byteStream(), "UTF-8"), CsvPreference.EXCEL_PREFERENCE);
 
             //Get the header
             final String[] header = reader.getHeader(true);
@@ -243,7 +246,6 @@ public class StringParser{
                     LanguageString string2 = strings.get(j);
 
                     //If the keys are the same and it's not a header, show an error and stop
-                    //TODO TRIM
                     if(!string1.getKey().equalsIgnoreCase(HEADER_KEY) &&
                             string1.getKey().equals(string2.getKey())){
                         System.out.println("Error: Lines " + getLineNumber(string1, strings) +
@@ -271,13 +273,12 @@ public class StringParser{
                 writer.close();
             }
 
-
             //Exit message
             System.out.println("Strings parsing complete");
         }
         else{
             System.out.println("Error: Response Code not 200");
-            System.out.println("Response Message: " + connection.getResponseMessage());
+            System.out.println("Response Message: " + response.message());
         }
     }
 
