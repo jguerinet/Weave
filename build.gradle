@@ -19,13 +19,16 @@
 
 apply plugin: 'java'
 apply plugin:'application'
-mainClassName = "com.guerinet.stringparser.StringParser"
 
 sourceCompatibility = 1.7
 version = '1.0'
 
 repositories {
     mavenCentral()
+}
+
+run {
+    mainClassName = "com.guerinet.stringparser.StringParser"
 }
 
 dependencies {
