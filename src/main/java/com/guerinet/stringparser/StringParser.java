@@ -89,9 +89,9 @@ public class StringParser{
 
     public static void main(String[] args) throws IOException {
         //Keep a list of all of the languages the Strings are in
-        List<Language> languages = new ArrayList<Language>();
+        List<Language> languages = new ArrayList<>();
         //The list of language Strings
-        List<LanguageString> strings = new ArrayList<LanguageString>();
+        List<LanguageString> strings = new ArrayList<>();
         //Url
         String url = null;
 

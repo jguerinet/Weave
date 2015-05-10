@@ -42,7 +42,7 @@ public class LanguageString {
      */
     public LanguageString(String key){
         this.key = key;
-        this.translations = new HashMap<String, String>();
+        this.translations = new HashMap<>();
     }
 
     /* GETTERS */
