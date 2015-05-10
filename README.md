@@ -8,15 +8,15 @@ Please note that it assumes that the file is in UTF-8 and also produces UTF-8 fi
 ## Instructions
 To use this: 
 
-* Download the [jar][1] and the [sample config][2].
+* Download the [jar][1] and the [sample config][2]
 * Set up your config file (follow the instructions in sample-config.txt)
 * The first column of your CSV file must be the keys with the header 'key' 
 * Any columns containing translations in your CSV file must have a header with the 2 character language Id (ex: en, fr)
 * Keys must be unique, not have spaces, and not be null (the parser will inform of any of these errors when you run it) 
 * Run the jar
 
-[1]:https://raw.githubusercontent.com/jguerinet/mobile-string-parser/dev/mobile-string-parser-2.5.jar
-[2]:https://raw.githubusercontent.com/jguerinet/mobile-string-parser/dev/sample-config.txt
+[1]:https://raw.githubusercontent.com/jguerinet/mobile-string-parser/master/mobile-string-parser-2.5.jar
+[2]:https://raw.githubusercontent.com/jguerinet/mobile-string-parser/master/sample-config.txt
 
 ## Branches
 * master: Contains the main code 
