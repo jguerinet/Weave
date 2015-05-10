@@ -8,7 +8,7 @@ Please note that it assumes that the file is in UTF-8 and also produces UTF-8 fi
 ## Instructions
 To use this: 
 
-* Download the [jar][1] and the [sample config][2].
+* Download the [jar][1] and the [sample config][2]
 * Set up your config file (follow the instructions in sample-config.txt)
 * The first column of your CSV file must be the keys with the header 'key' 
 * Any columns containing translations in your CSV file must have a header with the 2 character language Id (ex: en, fr)
