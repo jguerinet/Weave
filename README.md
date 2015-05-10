@@ -15,8 +15,8 @@ To use this:
 * Keys must be unique, not have spaces, and not be null (the parser will inform of any of these errors when you run it) 
 * Run the jar
 
-[1]:https://raw.githubusercontent.com/jguerinet/mobile-string-parser/master/mobile-string-parser-2.5.jar
-[2]:https://raw.githubusercontent.com/jguerinet/mobile-string-parser/master/sample-config.txt
+[1]:https://raw.githubusercontent.com/jguerinet/mobile-string-parser/dev/mobile-string-parser-2.5.jar
+[2]:https://raw.githubusercontent.com/jguerinet/mobile-string-parser/dev/sample-config.txt
 
 ## Branches
 * master: Contains the main code 
