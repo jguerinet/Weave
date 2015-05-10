@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * Main class, executes the main code for parsing the Google Docs file
  * @author Julien Guerinet
- * @version 2.4
+ * @version 2.5
  * @since 1.0
  */
 public class StringParser{
