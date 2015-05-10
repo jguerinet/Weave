@@ -5,17 +5,6 @@ The Mobile String Parser takes an online CSV file and parses the content to prod
 It will also show any warnings or errors that the Strings file might have. 
 Please note that it assumes that the file is in UTF-8 and also produces UTF-8 files. 
 
-## Version History
-* Version 2.4 - May 05, 2015 (Fixed encoding bug and started using okio/okhttp)
-* Version 2.3 - April 18, 2015 (Fixed key trimming bug)
-* Version 2.2 - April 16, 2015 (Added logging and connection checking)
-* Version 2.1 - April 15, 2015 (Removing new line characters)
-* Version 2.0 - April 08, 2015 (Multiple Language Support, Code Cleanup)
-* Version 1.3 - February 20, 2015 (Escaping Quotations)
-* Version 1.2 - June 02, 2014 (Error and Warning Messages)
-* Version 1.1 - May 27, 2014 (Windows Phone Code Addition)
-* Version 1.0 - May 02, 2014 (Initial Code)
-
 ## Instructions
 To use this: 
 
@@ -36,6 +25,17 @@ To use this:
 ## Contributors
 * Julien Guerinet
 * Yulric Sequeira 
+
+## Version History
+* Version 2.4 - May 05, 2015 (Fixed encoding bug and started using okio/okhttp)
+* Version 2.3 - April 18, 2015 (Fixed key trimming bug)
+* Version 2.2 - April 16, 2015 (Added logging and connection checking)
+* Version 2.1 - April 15, 2015 (Removing new line characters)
+* Version 2.0 - April 08, 2015 (Multiple Language Support, Code Cleanup)
+* Version 1.3 - February 20, 2015 (Escaping Quotations)
+* Version 1.2 - June 02, 2014 (Error and Warning Messages)
+* Version 1.1 - May 27, 2014 (Windows Phone Code Addition)
+* Version 1.0 - May 02, 2014 (Initial Code)
 
 ##Copyright 
     Copyright 2013-2015 Julien Guerinet
