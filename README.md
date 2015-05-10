@@ -27,8 +27,8 @@ To use this:
 * super-csv:    CSV parsing
 
 ## Contributors
-* Julien Guerinet
-* Yulric Sequeira 
+* [Julien Guerinet](https://github.com/jguerinet)
+* [Yulric Sequeira](https://github.com/yulric)  
 
 ## Version History
 See the 'Releases' section
