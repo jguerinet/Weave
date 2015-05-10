@@ -15,8 +15,6 @@
  *
  */
 
-4
-
 apply plugin: 'java'
 apply plugin:'application'
 
@@ -29,6 +27,13 @@ repositories {
 
 run {
     mainClassName = "com.guerinet.stringparser.StringParser"
+}
+
+jar {
+    //Change the destination directory to the project directory
+    destinationDir = new File(project.projectDir, "")
+    //Add the sources to the jar
+    from sourceSets.main.allSource
 }
 
 dependencies {
