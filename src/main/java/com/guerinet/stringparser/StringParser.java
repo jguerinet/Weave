@@ -35,20 +35,6 @@ import java.util.List;
  * @since 1.0
  */
 public class StringParser{
-    /* PLATFORMS */
-    /**
-     * The platform chosen
-     */
-    private static int platform = -1;
-    /**
-     * Android platform
-     */
-    private static final int ANDROID = 0;
-    /**
-     * iOS platform
-     */
-    private static final int IOS = 1;
-
     /* FILE STRINGS */
     /**
      * The URL in the file
@@ -94,6 +80,8 @@ public class StringParser{
         List<LanguageString> strings = new ArrayList<>();
         //Url
         String url = null;
+        //True if it's for Android, false if it's for iOS
+        Boolean android = null;
 
         //Read from the config file
         BufferedReader configReader = null;
@@ -122,15 +110,16 @@ public class StringParser{
                 String platformString = line.replace(PLATFORM, "").trim();
                 //Android
                 if(platformString.equalsIgnoreCase("android")){
-                    platform = ANDROID;
+                    android = true;
                 }
                 //iOS
                 else if(platformString.equalsIgnoreCase("ios")){
-                    platform = IOS;
+                    android = false;
                 }
                 //Not recognized
                 else{
                     System.out.println("Error: Platform must be either Android or iOS.");
+                    System.exit(-1);
                 }
             }
             //Get the languages
@@ -156,7 +145,7 @@ public class StringParser{
             System.out.println("Error: URL Cannot be null");
             System.exit(-1);
         }
-        else if(platform == -1){
+        else if(android == null){
             System.out.println("Error: You need to input a platform");
             System.exit(-1);
         }
@@ -274,7 +263,7 @@ public class StringParser{
                 //Set up the writer for the given language, enforcing UTF-8
                 writer = new PrintWriter(language.getPath(), "UTF-8");
 
-                if(platform == ANDROID){
+                if(android){
                     processAndroidStrings(writer, language, strings);
                 }
                 else{
@@ -329,12 +318,13 @@ public class StringParser{
     /**
      * Add a language String
      *
-     * @param platform The platform this is for
+     * @param android  True if this is for Android, false if this is for iOS
      * @param string   The LanguageString object
      * @param language The language to parse the String for
      * @return The formatted String for the given language and platform
      */
-    private static String getLanguageString(int platform, LanguageString string, Language language){
+    private static String getLanguageString(boolean android, LanguageString string,
+                                            Language language){
         String key = string.getKey();
         String value;
         //Check if we are parsing a header, use the English translation for the value
@@ -354,10 +344,7 @@ public class StringParser{
         value = processString(value);
 
         //Use the right platform method
-        if(platform == ANDROID){
-            return getAndroidString(key, value);
-        }
-        return getIOSString(key, value);
+        return android ? getAndroidString(key, value) : getIOSString(key, value);
     }
 
     /* ANDROID STRING PARSING */
@@ -433,7 +420,7 @@ public class StringParser{
                 }
 
                 //Get the String
-                String androidString = getLanguageString(ANDROID, currentString, language);
+                String androidString = getLanguageString(true, currentString, language);
 
                 //If it is null, there is no value so don't add it
                 if(androidString != null){
@@ -506,7 +493,7 @@ public class StringParser{
                 }
 
                 //Get the iOS String
-                String iOSString = getLanguageString(IOS, currentString, language);
+                String iOSString = getLanguageString(false, currentString, language);
 
                 //If the String is null, there is no value so do not add it
                 if(iOSString != null) {
