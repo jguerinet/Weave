@@ -31,16 +31,7 @@ To use this:
 * Yulric Sequeira 
 
 ## Version History
-* Version 2.5 - May 10, 2015 (Moved to Gradle based project)
-* Version 2.4 - May 05, 2015 (Fixed encoding bug and started using okio/okhttp)
-* Version 2.3 - April 18, 2015 (Fixed key trimming bug)
-* Version 2.2 - April 16, 2015 (Added logging and connection checking)
-* Version 2.1 - April 15, 2015 (Removing new line characters)
-* Version 2.0 - April 08, 2015 (Multiple Language Support, Code Cleanup)
-* Version 1.3 - February 20, 2015 (Escaping Quotations)
-* Version 1.2 - June 02, 2014 (Error and Warning Messages)
-* Version 1.1 - May 27, 2014 (Windows Phone Code Addition)
-* Version 1.0 - May 02, 2014 (Initial Code)
+See the 'Releases' section
 
 ##Copyright 
     Copyright 2013-2015 Julien Guerinet
