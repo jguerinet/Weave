@@ -22,7 +22,7 @@ import java.util.HashMap;
 /**
  * One String with all of the translations
  * @author Julien Guerinet
- * @version 2.5
+ * @version 2.6
  * @since 1.0
  */
 public class LanguageString {
