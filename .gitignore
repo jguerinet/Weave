@@ -1,12 +1,8 @@
-.DS_Store
-gen/
-.idea/
 .gradle
-*.iml
-local.properties
+/local.properties
+/.idea/workspace.xml
+/.idea/libraries
+.DS_Store
 Thumbs.db
-.metadata
-.settings/
-tmp/
 /build
 /captures
