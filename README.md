@@ -8,7 +8,7 @@ Please note that it assumes that the file is in UTF-8 and also produces UTF-8 fi
 ## Instructions
 To use this: 
 
-* Download the [jar][1] and the [sample config][2]
+* Download the [jar][1] and the [sample config](sample-config.txt)
 * Set up your config file (follow the instructions in sample-config.txt)
 * The first column of your CSV file must be the keys with the header 'key' 
 * Any columns containing translations in your CSV file must have a header with the 2 character language Id (ex: en, fr)
@@ -16,7 +16,6 @@ To use this:
 * Run the jar
 
 [1]:https://github.com/jguerinet/mobile-string-parser/releases/download/v2.6/mobile-string-parser-2.6.jar
-[2]:https://raw.githubusercontent.com/jguerinet/mobile-string-parser/master/sample-config.txt
 
 ## Branches
 * master: Contains the main code 
@@ -31,7 +30,7 @@ To use this:
 * [Yulric Sequeira](https://github.com/yulric)  
 
 ## Version History
-See the 'Releases' section
+See the [Change Log](CHANGELOG.md).
 
 ##Copyright 
     Copyright 2013-2015 Julien Guerinet
