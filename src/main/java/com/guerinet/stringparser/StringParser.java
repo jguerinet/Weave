@@ -160,7 +160,16 @@ public class StringParser{
                 .get()
                 .url(url)
                 .build();
-        Response response = new OkHttpClient().newCall(request).execute();
+
+        Response response;
+        try{
+            response = new OkHttpClient().newCall(request).execute();
+        } catch(IOException e){
+            //Catch the exception here to be able to continue a build even if we are not connected
+            System.out.println("IOException while connecting to the URL");
+            System.out.println("Error Message: " + e.getMessage());
+            return;
+        }
 
         int responseCode = response.code();
         System.out.println("Response Code: " + responseCode);
