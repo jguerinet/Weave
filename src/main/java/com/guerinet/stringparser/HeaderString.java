@@ -17,53 +17,47 @@
 
 package com.guerinet.stringparser;
 
-import java.util.HashMap;
-
 /**
- * One String with all of the translations
+ * A String used for a header within the Strings file. Will be a comment within the Strings file
  * @author Julien Guerinet
  * @version 2.6
- * @since 1.0
+ * @since 2.6
  */
-public class LanguageString extends HeaderString {
+public class HeaderString {
+    /**
+     * The key to store the String under, or the header to use
+     */
+    protected String key;
 
     /**
-     * A HashMap of translations, with the key being the language Id and the value being the String
+     * The line number in the CSV that this String was on
      */
-    private HashMap<String, String> translations;
+    protected int lineNumber;
 
     /**
      * Default Constructor
      *
-     * @param key        The String key
+     * @param header     The header comment
      * @param lineNumber Line number in the CSV that this String was on
      */
-    public LanguageString(String key, int lineNumber){
-        super(key, lineNumber);
-        this.translations = new HashMap<>();
+    public HeaderString(String header, int lineNumber){
+        this.key = header;
+        this.lineNumber = lineNumber;
     }
 
     /* GETTERS */
 
     /**
-     * Get the String in a given language
-     *
-     * @param id The language Id
-     * @return The String in that language
+     * @return The String Key
      */
-    public String getString(String id){
-        return this.translations.get(id);
+    public String getKey(){
+        return this.key;
     }
 
-    /* SETTERS */
-
     /**
-     * Add a translation
-     *
-     * @param id     The language Id
-     * @param string The String
+     * @return The line number in the CSV that this String was on
      */
-    public void addTranslation(String id, String string){
-        this.translations.put(id, string);
+    public int getLineNumber(){
+        return lineNumber;
     }
 }
