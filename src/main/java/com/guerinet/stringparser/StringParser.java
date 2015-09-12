@@ -210,10 +210,12 @@ public class StringParser{
 
             //Go through each line of the CSV document into a list of objects.
             List<Object> currentLine;
+            //The current line number (start at 2 since 1 is the header)
+            int currentLineNumber = 2;
             while((currentLine = reader.read(processors)) != null){
                 //Add a new language String
                 LanguageString languageString =
-                        new LanguageString(((String)currentLine.get(0)).trim());
+                        new LanguageString(((String)currentLine.get(0)).trim(), currentLineNumber);
 
                 //Go through the languages, add each translation
                 boolean allNull = true;
@@ -236,6 +238,9 @@ public class StringParser{
                 else{
                     strings.add(languageString);
                 }
+
+                //Increment the line number
+                currentLineNumber++;
             }
 
             //Close the CSV reader

@@ -34,15 +34,21 @@ public class LanguageString {
      * A HashMap of translations, with the key being the language Id and the value being the String
      */
     private HashMap<String, String> translations;
+    /**
+     * The line number in the CSV that this String was on
+     */
+    private int lineNumber;
 
     /**
      * Default Constructor
      *
-     * @param key The String key
+     * @param key        The String key
+     * @param lineNumber Line number in the CSV that this String was on
      */
-    public LanguageString(String key){
+    public LanguageString(String key, int lineNumber){
         this.key = key;
         this.translations = new HashMap<>();
+        this.lineNumber = lineNumber;
     }
 
     /* GETTERS */
@@ -62,6 +68,13 @@ public class LanguageString {
      */
     public String getString(String id){
         return this.translations.get(id);
+    }
+
+    /**
+     * @return The line number in the CSV that this String was on
+     */
+    public int getLineNumber(){
+        return lineNumber;
     }
 
     /* SETTERS */
