@@ -67,7 +67,7 @@ public class StringParser{
     /**
      * The key used for the header in the Strings document
      */
-    private static final String HEADER_KEY = "header";
+    private static final String HEADER_KEY = "###";
 
     public static void main(String[] args) throws IOException {
         //Keep a list of all of the languages the Strings are in
@@ -221,6 +221,15 @@ public class StringParser{
                     lineNumber++;
 
                     //Move on to the new String
+                    continue;
+                }
+
+                //Check if this is a header
+                if(key.trim().startsWith(HEADER_KEY)){
+                    strings.add(new HeaderString(key.replace("###", "").trim(), lineNumber));
+
+                    //Increment the line number and continue
+                    lineNumber++;
                     continue;
                 }
 
