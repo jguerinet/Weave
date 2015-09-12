@@ -269,6 +269,11 @@ public class StringParser{
             for (int i = 0; i < strings.size(); i++){
                 HeaderString string1 = strings.get(i);
 
+                //Skip headers for the checks
+                if(!(string1 instanceof LanguageString)){
+                    continue;
+                }
+
                 //Check if there are any spaces in the keys
                 if(string1.getKey().contains(" ")){
                     System.out.println("Error: Line " + string1.getLineNumber() +
@@ -281,8 +286,7 @@ public class StringParser{
                     HeaderString string2 = strings.get(j);
 
                     //If the keys are the same and it's not a header, show an error and stop
-                    if(!(string1 instanceof LanguageString) &&
-                            string1.getKey().equals(string2.getKey())){
+                    if(string1.getKey().equals(string2.getKey())){
                         System.out.println("Error: Lines " + string1.getLineNumber() + " and " +
                                 string2.getLineNumber() + " have the same key.");
                         System.exit(-1);
