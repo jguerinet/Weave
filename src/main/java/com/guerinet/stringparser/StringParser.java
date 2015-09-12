@@ -315,17 +315,6 @@ public class StringParser{
     /* HELPERS */
 
     /**
-     * Get the line number of a given String for any warnings or errors shown to the user
-     *
-     * @param string The String
-     * @return The line number of the String
-     */
-    private static int getLineNumber(LanguageString string, List<LanguageString> strings){
-        //+2 to account for the header and the fact that Google Drive starts numbering at 1
-        return strings.indexOf(string) + 2;
-    }
-
-    /**
      * Processes a given String with the common changes to make between the platforms
      *
      * @param string The String to process
@@ -440,13 +429,6 @@ public class StringParser{
         //Go through the strings
         for(LanguageString currentString : strings){
             try{
-                //If there is no key, we cannot parse it so show a warning and move on
-                if(currentString.getKey() == null || currentString.getKey().isEmpty()){
-                    System.out.println("Warning: Line " + getLineNumber(currentString, strings) +
-                            " has no key, and therefore cannot be parsed");
-                    continue;
-                }
-
                 //Get the String
                 String androidString = getLanguageString(true, currentString, language);
 
@@ -456,7 +438,7 @@ public class StringParser{
                 }
             }
             catch (Exception e){
-                System.out.println("Error on Line " + getLineNumber(currentString, strings));
+                System.out.println("Error on Line " + currentString.getLineNumber());
                 e.printStackTrace();
             }
         }
@@ -513,13 +495,6 @@ public class StringParser{
         //Go through the strings
         for(LanguageString currentString : strings){
             try{
-                //If there is no Id, we cannot parse it so show a warning and continue
-                if(currentString.getKey() == null){
-                    System.out.println("Warning: Line " + getLineNumber(currentString, strings) +
-                            " has no Id, and therefore cannot be parsed");
-                    continue;
-                }
-
                 //Get the iOS String
                 String iOSString = getLanguageString(false, currentString, language);
 
@@ -529,7 +504,7 @@ public class StringParser{
                 }
             }
             catch (Exception e){
-                System.out.println("Error on Line " + getLineNumber(currentString, strings));
+                System.out.println("Error on Line " + currentString.getLineNumber());
                 e.printStackTrace();
             }
         }
