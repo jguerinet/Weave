@@ -266,20 +266,20 @@ public class StringParser{
 
                 //Check if there are any spaces in the keys
                 if(string1.getKey().contains(" ")){
-                    System.out.println("Error: Line " + getLineNumber(string1, strings) +
+                    System.out.println("Error: Line " + string1.getLineNumber() +
                             " contains a space in its key.");
                     System.exit(-1);
                 }
 
-                //Check if there are any duplicated
+                //Check if there are any duplicates
                 for(int j = i + 1; j < strings.size(); j++){
                     LanguageString string2 = strings.get(j);
 
                     //If the keys are the same and it's not a header, show an error and stop
                     if(!string1.getKey().equalsIgnoreCase(HEADER_KEY) &&
                             string1.getKey().equals(string2.getKey())){
-                        System.out.println("Error: Lines " + getLineNumber(string1, strings) +
-                                " and " + getLineNumber(string2, strings) + " have the same key.");
+                        System.out.println("Error: Lines " + string1.getLineNumber() + " and " +
+                                string2.getLineNumber() + " have the same key.");
                         System.exit(-1);
                     }
                 }
