@@ -211,11 +211,25 @@ public class StringParser{
             //Go through each line of the CSV document into a list of objects.
             List<Object> currentLine;
             //The current line number (start at 2 since 1 is the header)
-            int currentLineNumber = 2;
+            int lineNumber = 2;
             while((currentLine = reader.read(processors)) != null){
+                //Get the key from the current line
+                String key = (String)currentLine.get(0);
+
+                //Check if there's a key
+                if(key == null || key.trim().isEmpty()){
+                    System.out.println("Warning: Line " + lineNumber + " does not have " +
+                            "a kay and will not be parsed");
+
+                    //Increment the line number
+                    lineNumber++;
+
+                    //Move on to the new String
+                    continue;
+                }
+
                 //Add a new language String
-                LanguageString languageString =
-                        new LanguageString(((String)currentLine.get(0)).trim(), currentLineNumber);
+                LanguageString languageString = new LanguageString(key.trim(), lineNumber);
 
                 //Go through the languages, add each translation
                 boolean allNull = true;
@@ -232,7 +246,7 @@ public class StringParser{
                 //Check if all of the values are null
                 if(allNull){
                     //Show a warning message
-                    System.out.println("Warning: Line " + (strings.size() + 2) + " has no " +
+                    System.out.println("Warning: Line " + lineNumber + " has no " +
                             "translations so it will not be parsed.");
                 }
                 else{
@@ -240,7 +254,7 @@ public class StringParser{
                 }
 
                 //Increment the line number
-                currentLineNumber++;
+                lineNumber++;
             }
 
             //Close the CSV reader
