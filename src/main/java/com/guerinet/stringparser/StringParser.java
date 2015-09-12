@@ -65,10 +65,6 @@ public class StringParser{
 
     /* OTHER */
     /**
-     * The English Id, used to get the English Strings for the header
-     */
-    private static final String ENGLISH_ID = "en";
-    /**
      * The key used for the header in the Strings document
      */
     private static final String HEADER_KEY = "header";
@@ -77,7 +73,7 @@ public class StringParser{
         //Keep a list of all of the languages the Strings are in
         List<Language> languages = new ArrayList<>();
         //The list of language Strings
-        List<LanguageString> strings = new ArrayList<>();
+        List<HeaderString> strings = new ArrayList<>();
         //Url
         String url = null;
         //True if it's for Android, false if it's for iOS
@@ -262,7 +258,7 @@ public class StringParser{
 
             //Check if there are any errors with the keys
             for (int i = 0; i < strings.size(); i++){
-                LanguageString string1 = strings.get(i);
+                HeaderString string1 = strings.get(i);
 
                 //Check if there are any spaces in the keys
                 if(string1.getKey().contains(" ")){
@@ -273,10 +269,10 @@ public class StringParser{
 
                 //Check if there are any duplicates
                 for(int j = i + 1; j < strings.size(); j++){
-                    LanguageString string2 = strings.get(j);
+                    HeaderString string2 = strings.get(j);
 
                     //If the keys are the same and it's not a header, show an error and stop
-                    if(!string1.getKey().equalsIgnoreCase(HEADER_KEY) &&
+                    if(!(string1 instanceof LanguageString) &&
                             string1.getKey().equals(string2.getKey())){
                         System.out.println("Error: Lines " + string1.getLineNumber() + " and " +
                                 string2.getLineNumber() + " have the same key.");
@@ -315,41 +311,20 @@ public class StringParser{
     /* HELPERS */
 
     /**
-     * Processes a given String with the common changes to make between the platforms
+     * Processes the String by doing some checks and preparing some special characters
      *
-     * @param string The String to process
-     */
-    private static String processString(String string){
-        //Unescaped quotations
-        string = string.replace("\"", "\\" + "\"");
-
-        //Copyright
-        string = string.replace("(c)", "\u00A9");
-
-        //New Lines
-        string = string.replace("\n", "");
-
-        return string;
-    }
-
-    /**
-     * Add a language String
-     *
-     * @param android  True if this is for Android, false if this is for iOS
      * @param string   The LanguageString object
      * @param language The language to parse the String for
      * @return The formatted String for the given language and platform
      */
-    private static String getLanguageString(boolean android, LanguageString string,
-                                            Language language){
-        String key = string.getKey();
+    private static String processString(HeaderString string, Language language){
         String value;
-        //Check if we are parsing a header, use the English translation for the value
-        if(string.getKey().equalsIgnoreCase(HEADER_KEY)){
-            value = string.getString(ENGLISH_ID);
+        //Check if we are parsing a header, use the key for the value
+        if(!(string instanceof LanguageString)){
+            value = string.getKey();
         }
         else{
-            value = string.getString(language.getId());
+            value = ((LanguageString) string).getString(language.getId());
         }
 
         //Check if value is or null empty: if it is, return null
@@ -357,57 +332,18 @@ public class StringParser{
             return null;
         }
 
-        //Process the value with the general methods first
-        value = processString(value);
+        //Process the value with the general methods first:
 
-        //Use the right platform method
-        return android ? getAndroidString(key, value) : getIOSString(key, value);
-    }
+        //Unescaped quotations
+        value = value.replace("\"", "\\" + "\"");
 
-    /* ANDROID STRING PARSING */
+        //Copyright
+        value = value.replace("(c)", "\u00A9");
 
-    /**
-     * Get the formatted String for the Android Strings document
-     *
-     * @param key    The String key
-     * @param string The String
-     * @return The formatted String
-     */
-    private static String getAndroidString(String key, String string){
-        //Add initial indentation
-        String xmlString = "    ";
+        //New Lines
+        value = value.replace("\n", "");
 
-        //Check if it's a header section
-        if(key.equalsIgnoreCase(HEADER_KEY)){
-            //Leave a space before it, add the header as a comment
-            xmlString = "\n" + xmlString + "<!-- " + string + " -->";
-        }
-        //If not, treat is as a normal string
-        else{
-            /* Character checks */
-            //Ampersands
-            string = string.replace("&", "&amp;");
-
-            //Apostrophes
-            string = string.replace("'", "\\'");
-
-            //Unescaped @ signs
-            string = string.replace("@", "\\" + "@");
-
-            //Ellipses
-            string = string.replace("...", "&#8230;");
-
-            //HTML content
-            string = string.replace("<html>", "<![CDATA[");
-            string = string.replace("</html>", "]]>");
-            string = string.replace("<HTML>", "<![CDATA[");
-            string = string.replace("</HTML>", "]]>");
-
-            //Add the XML tag
-            xmlString = xmlString + "<string name=\"" + key + "\">" + string + "</string>";
-        }
-
-        return xmlString;
+        return value;
     }
 
     /**
@@ -420,22 +356,59 @@ public class StringParser{
      * @throws UnsupportedEncodingException
      */
     private static void processAndroidStrings(PrintWriter writer, Language language,
-                                              List<LanguageString> strings)
+                                              List<HeaderString> strings)
             throws FileNotFoundException, UnsupportedEncodingException{
         //Add the header
         writer.println(XML_OPENER);
         writer.println(RESOURCES_OPENER);
 
         //Go through the strings
-        for(LanguageString currentString : strings){
+        for(HeaderString currentString : strings){
             try{
-                //Get the String
-                String androidString = getLanguageString(true, currentString, language);
+                //Process the String
+                String string = processString(currentString, language);
 
-                //If it is null, there is no value so don't add it
-                if(androidString != null){
-                    writer.println(androidString);
+                //If the String is null, continue
+                if(string == null){
+                    continue;
                 }
+
+                //Add initial indentation
+                String xmlString = "    ";
+
+                //Check if it's a header section
+                if(!(currentString instanceof LanguageString)){
+                    //Leave a space before it, add the header as a comment
+                    xmlString = "\n" + xmlString + "<!-- " + string + " -->";
+                }
+                //If not, treat is as a normal string
+                else{
+                    /* Character checks */
+                    //Ampersands
+                    string = string.replace("&", "&amp;");
+
+                    //Apostrophes
+                    string = string.replace("'", "\\'");
+
+                    //Unescaped @ signs
+                    string = string.replace("@", "\\" + "@");
+
+                    //Ellipses
+                    string = string.replace("...", "&#8230;");
+
+                    //HTML content
+                    string = string.replace("<html>", "<![CDATA[");
+                    string = string.replace("</html>", "]]>");
+                    string = string.replace("<HTML>", "<![CDATA[");
+                    string = string.replace("</HTML>", "]]>");
+
+                    //Add the XML tag
+                    xmlString = xmlString + "<string name=\"" + currentString.getKey() + "\">" +
+                            string + "</string>";
+                }
+
+                //Write the String
+                writer.println(xmlString);
             }
             catch (Exception e){
                 System.out.println("Error on Line " + currentString.getLineNumber());
@@ -445,39 +418,6 @@ public class StringParser{
 
         //Add the resources closing to android files
         writer.println(RESOURCES_CLOSER);
-    }
-
-    /* IOS STRING PARSING */
-
-    /**
-     * Get the formatted String for the iOS Strings document
-     *
-     * @param key    The String key
-     * @param string The String
-     * @return The formatted String
-     */
-    private static String getIOSString(String key, String string){
-        //Replace %s format specifiers with %@
-        string = string.replace("%s","%@");
-        string = string.replace("$s", "$@");
-
-        //Remove <html> </html>tags
-        string = string.replace("<html>", "");
-        string = string.replace("</html>", "");
-        string = string.replace("<HTML>", "");
-        string = string.replace("</HTML>", "");
-
-        //Unescaped quotations
-        string = string.replace("\"", "\\" + "\"");
-
-        //Check if it's a header section
-        if(key.equalsIgnoreCase(HEADER_KEY)){
-            return "\n" + "/*  " + string + " */";
-        }
-        //If not, treat is as a normal string
-        else{
-            return "\"" + key + "\" = \"" + string + "\";";
-        }
     }
 
     /**
@@ -490,18 +430,39 @@ public class StringParser{
      * @throws UnsupportedEncodingException
      */
     public static void processIOSStrings(PrintWriter writer, Language language,
-                                         List<LanguageString> strings)
+                                         List<HeaderString> strings)
             throws FileNotFoundException, UnsupportedEncodingException{
         //Go through the strings
-        for(LanguageString currentString : strings){
+        for(HeaderString currentString : strings){
             try{
-                //Get the iOS String
-                String iOSString = getLanguageString(false, currentString, language);
+                //Get the processed String
+                String string = processString(currentString, language);
 
                 //If the String is null, there is no value so do not add it
-                if(iOSString != null) {
-                    writer.println(iOSString);
+                if(string == null){
+                    continue;
                 }
+
+                //Replace %s format specifiers with %@
+                string = string.replace("%s", "%@");
+                string = string.replace("$s", "$@");
+
+                //Remove <html> </html>tags
+                string = string.replace("<html>", "");
+                string = string.replace("</html>", "");
+                string = string.replace("<HTML>", "");
+                string = string.replace("</HTML>", "");
+
+                //Check if it's a header section
+                if(!(currentString instanceof LanguageString)){
+                    string = "\n" + "/*  " + string + " */";
+                }
+                //If not, treat is as a normal string
+                else{
+                    string = "\"" + currentString.getKey() + "\" = \"" + string + "\";";
+                }
+
+                writer.println(string);
             }
             catch (Exception e){
                 System.out.println("Error on Line " + currentString.getLineNumber());
