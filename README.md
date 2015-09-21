@@ -13,9 +13,11 @@ To use this:
 * The first column of your CSV file must be the keys with the header 'key' 
 * Any columns containing translations in your CSV file must have a header with the 2 character language Id (ex: en, fr)
 * Keys must be unique, not have spaces, and not be null (the parser will inform of any of these errors when you run it) 
+* You can add headers (which will be parsed as comments) in your Strings file by adding or surrounding your header with '###'. 
+For example, if you put ### General ### (or ### General), it will be parsed as `/* General */` on iOS and `<!-- General -->` on Android
 * Run the jar
 
-[1]:https://github.com/jguerinet/mobile-string-parser/releases/download/v2.6/mobile-string-parser-2.6.jar
+[1]:https://github.com/jguerinet/mobile-string-parser/releases/download/v2.7/mobile-string-parser-2.7.jar
 
 ## Branches
 * master: Contains the main code 
