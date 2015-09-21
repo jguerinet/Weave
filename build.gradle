@@ -19,7 +19,7 @@ apply plugin: 'java'
 apply plugin:'application'
 
 sourceCompatibility = 1.7
-version = '2.6'
+version = '2.7.0'
 
 repositories {
     mavenCentral()
@@ -41,6 +41,6 @@ jar {
 }
 
 dependencies {
-    compile 'com.squareup.okhttp:okhttp:2.3.0'
+    compile 'com.squareup.okhttp:okhttp:2.5z.0'
     compile 'net.sf.supercsv:super-csv:2.3.1'
 }
