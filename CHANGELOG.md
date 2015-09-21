@@ -1,5 +1,9 @@
 # Change Log
 
+## Version 2.7.0 (2015-09-21)
+* Fixed bug regarding single quotation marks in parsing iOS Strings
+* Changed header identifier to be less common 
+
 ## Version 2.6.0 (2015-05-20)
 * Added the external dependencies to the generated jar
 
