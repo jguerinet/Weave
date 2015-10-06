@@ -1,5 +1,8 @@
 # Change Log
 
+## Version 2.8.0 (2015-10-06)
+* Added correct parsing for "<" and ">" in Android
+
 ## Version 2.7.0 (2015-09-21)
 * Fixed bug regarding single quotation marks in parsing iOS Strings
 * Changed header identifier to be less common 

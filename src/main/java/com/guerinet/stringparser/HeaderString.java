@@ -20,8 +20,8 @@ package com.guerinet.stringparser;
 /**
  * A String used for a header within the Strings file. Will be a comment within the Strings file
  * @author Julien Guerinet
- * @version 2.6
- * @since 2.6
+ * @version 2.8.0
+ * @since 2.6.0
  */
 public class HeaderString {
     /**
