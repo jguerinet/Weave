@@ -6,3 +6,5 @@
 Thumbs.db
 /build
 /captures
+## We're not committing the test config file
+config.txt
