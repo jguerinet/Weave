@@ -53,6 +53,6 @@ jar {
 }
 
 dependencies {
-    compile 'com.squareup.okhttp:okhttp:2.5.0'
-    compile 'net.sf.supercsv:super-csv:2.3.1'
+    compile 'com.squareup.okhttp:okhttp:2.6.0'
+    compile 'net.sf.supercsv:super-csv:2.4.0'
 }

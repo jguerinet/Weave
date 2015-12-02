@@ -15,24 +15,24 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library">
-      <library name="Gradle: com.squareup.okhttp:okhttp:2.5.0">
+      <library name="Gradle: com.squareup.okhttp:okhttp:2.6.0">
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.squareup.okhttp/okhttp/2.5.0/4de2b4ed3445c37ec1720a7d214712e845a24636/okhttp-2.5.0.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.squareup.okhttp/okhttp/2.6.0/212387a39088ecd3daff8e3bfc3bdc4123e33c67/okhttp-2.6.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.squareup.okhttp/okhttp/2.5.0/cd4ddf1fb4ad84ea5d67ee3b386aea25f02ea096/okhttp-2.5.0-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.squareup.okhttp/okhttp/2.6.0/83cbecfe4a4ec39d8f3bce7dc05d98038272e1f3/okhttp-2.6.0-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library">
-      <library name="Gradle: net.sf.supercsv:super-csv:2.3.1">
+      <library name="Gradle: net.sf.supercsv:super-csv:2.4.0">
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.sf.supercsv/super-csv/2.3.1/6cf24b5ca8950650f60563568bf66c2320f92616/super-csv-2.3.1.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.sf.supercsv/super-csv/2.4.0/17f8708c929029dde48bc298deaf3c7ae2452d3/super-csv-2.4.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.sf.supercsv/super-csv/2.3.1/b78387cfbedc3d3b3d6024d9f07388e0b39bd5aa/super-csv-2.3.1-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.sf.supercsv/super-csv/2.4.0/ee5c3d3b967056f2bc088b787a365d0da6208666/super-csv-2.4.0-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
