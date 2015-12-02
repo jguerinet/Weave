@@ -408,17 +408,23 @@ public class StringParser{
                     //Ellipses
                     string = string.replace("...", "&#8230;");
 
-                    //HTML content
-                    string = string.replace("<html>", "<![CDATA[");
-                    string = string.replace("</html>", "]]>");
-                    string = string.replace("<HTML>", "<![CDATA[");
-                    string = string.replace("</HTML>", "]]>");
+                    //Check if this is an HTML String
+                    if (string.contains("<html>") || string.contains("<HTML>")) {
+                        //Don't format the greater than and less than symbols
+                        string = string.replace("<html>", "<![CDATA[");
+                        string = string.replace("</html>", "]]>");
+                        string = string.replace("<HTML>", "<![CDATA[");
+                        string = string.replace("</HTML>", "]]>");
+                    }
+                    //Format the greater then and less than symbol otherwise
+                    else {
+                        //Greater than
+                        string = string.replace(">", "&gt;");
 
-                    //Greater than
-                    string = string.replace(">", "&gt;");
+                        //Less than
+                        string = string.replace("<", "&lt;");
+                    }
 
-                    //Less than
-                    string = string.replace("<", "&lt;");
 
                     //Add the XML tag
                     xmlString = xmlString + "<string name=\"" + currentString.getKey() + "\">" +
