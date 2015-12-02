@@ -19,13 +19,9 @@ For example, if you put ### General ### (or ### General), it will be parsed as `
 
 [1]:https://github.com/jguerinet/mobile-string-parser/releases/download/2.8.1/mobile-string-parser-2.8.1.jar
 
-## Branches
-* master: Contains the main code 
-* dev: Contains WIP code
-
 ## Gradle Dependencies
-* okhttp:       HTTP client
-* super-csv:    CSV parsing
+* [okhttp](http://square.github.io/okhttp/)
+* [super-csv](http://super-csv.github.io/super-csv/)
 
 ## Contributors
 * [Julien Guerinet](https://github.com/jguerinet)
