@@ -17,7 +17,7 @@ To use this:
 For example, if you put ### General ### (or ### General), it will be parsed as `/* General */` on iOS and `<!-- General -->` on Android
 * Run the jar
 
-[1]:https://github.com/jguerinet/mobile-string-parser/releases/download/v2.8.0/mobile-string-parser-2.8.0.jar
+[1]:https://github.com/jguerinet/mobile-string-parser/releases/download/v2.8.1/mobile-string-parser-2.8.1.jar
 
 ## Branches
 * master: Contains the main code 

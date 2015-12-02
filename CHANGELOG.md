@@ -1,5 +1,8 @@
 # Change Log
 
+## Version 2.8.1 (2015-12-02)
+* Fixed bug where the HTML tags would be parsed after the "<" and ">" symbols in Android
+
 ## Version 2.8.0 (2015-10-06)
 * Added correct parsing for "<" and ">" in Android
 
