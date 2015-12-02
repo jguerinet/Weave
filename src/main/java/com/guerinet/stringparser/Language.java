@@ -20,7 +20,6 @@ package com.guerinet.stringparser;
 /**
  * One language that the Strings are in
  * @author Julien Guerinet
- * @version 2.8.0
  * @since 2.0.0
  */
 public class Language {
