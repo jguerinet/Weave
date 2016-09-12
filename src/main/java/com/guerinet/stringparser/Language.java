@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 Julien Guerinet
+ * Copyright 2013-2016 Julien Guerinet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,11 @@ public class Language {
     /**
      * The language Id
      */
-    private String id;
+    private final String id;
     /**
      * The language path
      */
-    private String path;
+    private final String path;
     /**
      * The column index of the language in the CSV file
      */
@@ -42,7 +42,7 @@ public class Language {
      * @param id   The language Id
      * @param path The language path
      */
-    public Language(String id, String path){
+    public Language(String id, String path) {
         this.id = id;
         this.path = path;
         this.columnIndex = -1;
@@ -53,21 +53,21 @@ public class Language {
     /**
      * @return The language Id
      */
-    public String getId(){
+    public String getId() {
         return this.id;
     }
 
     /**
      * @return The language path
      */
-    public String getPath(){
+    public String getPath() {
         return this.path;
     }
 
     /**
      * @return The column index of this language
      */
-    public int getColumnIndex(){
+    public int getColumnIndex() {
         return this.columnIndex;
     }
 
@@ -76,7 +76,7 @@ public class Language {
     /**
      * @param columnIndex The column index of this language
      */
-    public void setColumnIndex(int columnIndex){
+    public void setColumnIndex(int columnIndex) {
         this.columnIndex = columnIndex;
     }
 }

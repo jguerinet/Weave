@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 Julien Guerinet
+ * Copyright 2013-2016 Julien Guerinet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,12 @@ public class HeaderString {
     /**
      * The key to store the String under, or the header to use
      */
-    protected String key;
+    protected final String key;
 
     /**
      * The line number in the CSV that this String was on
      */
-    protected int lineNumber;
+    protected final int lineNumber;
 
     /**
      * Default Constructor
@@ -39,7 +39,7 @@ public class HeaderString {
      * @param header     The header comment
      * @param lineNumber Line number in the CSV that this String was on
      */
-    public HeaderString(String header, int lineNumber){
+    public HeaderString(String header, int lineNumber) {
         this.key = header;
         this.lineNumber = lineNumber;
     }
@@ -49,14 +49,14 @@ public class HeaderString {
     /**
      * @return The String Key
      */
-    public String getKey(){
+    public String getKey() {
         return this.key;
     }
 
     /**
      * @return The line number in the CSV that this String was on
      */
-    public int getLineNumber(){
+    public int getLineNumber() {
         return lineNumber;
     }
 }
