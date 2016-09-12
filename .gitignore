@@ -1,10 +1,18 @@
 .gradle
 /local.properties
-/.idea/workspace.xml
-/.idea/libraries
 .DS_Store
 Thumbs.db
 /build
 /captures
+*/signing.properties
+*.iml
+.idea/libraries
+.idea/shelf
+app.xml
+gradle.xml
+misc.xml
+modules.xml
+workspace.xml
+.name
 ## We're not committing the test config file
 config.txt
