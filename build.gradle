@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 Julien Guerinet
+ * Copyright 2013-2017 Julien Guerinet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.github.ben-manes:gradle-versions-plugin:0.11.3'
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.14.0'
     }
 }
 
@@ -53,6 +53,6 @@ jar {
 }
 
 dependencies {
-    compile 'com.squareup.okhttp:okhttp:2.6.0'
+    compile 'com.squareup.okhttp:okhttp:2.7.5'
     compile 'net.sf.supercsv:super-csv:2.4.0'
 }
