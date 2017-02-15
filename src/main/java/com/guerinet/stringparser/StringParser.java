@@ -315,7 +315,8 @@ public class StringParser {
 
             // For web Strings, all of the languages are in the same file
             if (platform == WEB) {
-
+                processWebStrings(path, languages, strings);
+                System.out.println("Wrote Web Strings to file: " + path);
             } else {
                 // Go through each language, and write the file
                 PrintWriter writer;
@@ -510,5 +511,85 @@ public class StringParser {
                 e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * Processes the list of parsed Strings into the Web Strings document
+     *
+     * @param path      Path of the web file
+     * @param languages List of languages to parse for
+     * @param strings   List of Strings
+     * @throws FileNotFoundException Thrown if the file we should be writing to isn't found
+     * @throws UnsupportedEncodingException Should never be thrown
+     */
+    private static void processWebStrings(String path, List<Language> languages,
+            List<HeaderString> strings) throws FileNotFoundException, UnsupportedEncodingException {
+        PrintWriter writer = new PrintWriter(path, "UTF-8");
+
+        // Open the JSON object
+        writer.println("{");
+
+        // Go through the strings
+        for (int i = 0; i < strings.size(); i ++) {
+            HeaderString string = strings.get(i);
+            // We don't deal with header strings
+            if (!(string instanceof LanguageString)) {
+                continue;
+            }
+
+            try {
+                // Open the object
+                writer.println("    \"" + string.getKey() + "\": {");
+
+                // Go through the languages
+                LanguageString languageString = (LanguageString) string;
+                for (int j = 0; j < languages.size(); j ++) {
+                    Language language = languages.get(j);
+                    writer.print("        \"" + language.getId() + "\": ");
+
+                    String value = languageString.getString(language.getId());
+                    if (value == null) {
+                        value = "";
+                    }
+
+                    // Unescaped quotes
+                    value = value.replace("\"", "\\" + "\"");
+
+                    // New Lines
+                    value = value.replace("\n", "");
+
+                    // Remove <html> </html>tags
+                    value = value.replace("<html>", "");
+                    value = value.replace("</html>", "");
+                    value = value.replace("<HTML>", "");
+                    value = value.replace("</HTML>", "");
+
+
+                    writer.print("\"" + value + "\"");
+
+                    if (j != languages.size() - 1) {
+                        writer.println(",");
+                    } else {
+                        writer.println();
+                    }
+                }
+
+                // Close the object
+                if (i != strings.size() - 1) {
+                    // Add a comma if this isn't the last String
+                    writer.println("    },");
+                } else {
+                    writer.println("    }");
+                }
+            } catch (Exception e) {
+                System.out.println("Error on Line " + string.getLineNumber());
+                e.printStackTrace();
+            }
+        }
+
+        // Close the JSON object
+        writer.print("}");
+
+        writer.close();
     }
 }
