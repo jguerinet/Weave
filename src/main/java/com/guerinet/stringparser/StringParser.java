@@ -160,6 +160,16 @@ public class StringParser {
             System.exit(-1);
         }
 
+        // Make sure that if we are on Android/iOS that we have a path per language
+        if (platform == ANDROID || platform == IOS) {
+            for (Language language : languages) {
+                if (language.getPath() == null) {
+                    System.out.println("Error: Languages need a file path for Android and iOS");
+                    System.exit(-1);
+                }
+            }
+        }
+
         // Connect to the URL
         System.out.println("Connecting to " + url);
         Request request = new Request.Builder()
