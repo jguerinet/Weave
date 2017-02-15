@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 Julien Guerinet
+ * Copyright 2013-2017 Julien Guerinet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,10 @@ import java.util.List;
  * @since 1.0.0
  */
 public class StringParser {
+    /* PLATFORM CONSTANTS */
+    private static final int ANDROID = 0;
+    private static final int IOS = 1;
+    private static final int WEB = 3;
     /* FILE STRINGS */
     /**
      * The URL in the file
@@ -47,6 +51,10 @@ public class StringParser {
      * Languages in the file
      */
     private static final String LANGUAGE= "Language:";
+    /**
+     * File path in the file (for Web Strings only)
+     */
+    private static final String PATH = "Path:";
 
     /* ANDROID STRINGS */
     /**
@@ -75,8 +83,10 @@ public class StringParser {
         List<HeaderString> strings = new ArrayList<>();
         // Url
         String url = null;
-        // True if it's for Android, false if it's for iOS
-        Boolean android = null;
+        // Platform this is for (-1 is not chosen)
+        int platform = -1;
+        // File path (for Web Strings only)
+        String path = null;
 
         // Read from the config file
         BufferedReader configReader = null;
@@ -101,10 +111,13 @@ public class StringParser {
                 String platformString = line.replace(PLATFORM, "").trim();
                 if (platformString.equalsIgnoreCase("android")) {
                     // Android
-                    android = true;
+                    platform = ANDROID;
                 } else if (platformString.equalsIgnoreCase("ios")) {
-                    //iOS
-                    android = false;
+                    // iOS
+                    platform = IOS;
+                } else if (platformString.equalsIgnoreCase("web")) {
+                    // Web
+                    platform = WEB;
                 } else {
                     // Not recognized
                     System.out.println("Error: Platform must be either Android or iOS.");
@@ -123,16 +136,21 @@ public class StringParser {
 
                 // Save it as a new language in the list of languages
                 languages.add(new Language(languageInfo[0], languageInfo[1]));
+            } else if (line.startsWith(PATH)) {
+                path = line.replace(PATH, "").trim();
             }
         }
         configReader.close();
 
-        // Make sure nothing is null
-        if (url == null) {
+        // Make sure everything is set
+        if (url == null || url.isEmpty()) {
             System.out.println("Error: URL Cannot be null");
             System.exit(-1);
-        } else if (android == null) {
+        } else if (platform == -1) {
             System.out.println("Error: You need to input a platform");
+            System.exit(-1);
+        } else if (platform == WEB && (path == null || path.isEmpty())) {
+            System.out.println("Error: File path cannot be null for web Strings");
             System.exit(-1);
         } else if (languages.isEmpty()) {
             System.out.println("Error: You need to add at least one language");
@@ -199,7 +217,7 @@ public class StringParser {
             int lineNumber = 2;
             while ((currentLine = reader.read(processors)) != null) {
                 // Get the key from the current line
-                String key = (String)currentLine.get(0);
+                String key = (String) currentLine.get(0);
 
                 // Check if there's a key
                 if (key == null || key.trim().isEmpty()) {
@@ -282,21 +300,27 @@ public class StringParser {
                 }
             }
 
-            // Go through each language, and write the file
-            PrintWriter writer;
-            for (Language language : languages) {
-                // Set up the writer for the given language, enforcing UTF-8
-                writer = new PrintWriter(language.getPath(), "UTF-8");
+            // For web Strings, all of the languages are in the same file
+            if (platform == WEB) {
 
-                if (android) {
-                    processAndroidStrings(writer, language, strings);
-                } else {
-                    processIOSStrings(writer, language, strings);
+            } else {
+                // Go through each language, and write the file
+                PrintWriter writer;
+                for (Language language : languages) {
+                    // Set up the writer for the given language, enforcing UTF-8
+                    writer = new PrintWriter(language.getPath(), "UTF-8");
+
+                    if (platform == ANDROID) {
+                        processAndroidStrings(writer, language, strings);
+                    } else {
+                        processIOSStrings(writer, language, strings);
+                    }
+
+                    System.out.println("Wrote " + language.getId() + " to file: " + language
+                            .getPath());
+
+                    writer.close();
                 }
-
-                System.out.println("Wrote " + language.getId() + " to file: " + language.getPath());
-
-                writer.close();
             }
 
             // Exit message
@@ -350,8 +374,8 @@ public class StringParser {
      * @param writer   The writer to use to write to the file
      * @param language The language to parse the Strings for
      * @param strings  The list of Strings
-     * @throws FileNotFoundException
-     * @throws UnsupportedEncodingException
+     * @throws FileNotFoundException Thrown if the file we should be writing to is not found
+     * @throws UnsupportedEncodingException Should never be thrown
      */
     private static void processAndroidStrings(PrintWriter writer, Language language,
             List<HeaderString> strings) throws FileNotFoundException, UnsupportedEncodingException {
@@ -433,10 +457,10 @@ public class StringParser {
      * @param writer   The writer to use to write to file
      * @param language The language to parse the Strings for
      * @param strings  The list of Strings
-     * @throws FileNotFoundException
-     * @throws UnsupportedEncodingException
+     * @throws FileNotFoundException Thrown if the file we should be writing to isn't found
+     * @throws UnsupportedEncodingException Should never be thrown
      */
-    public static void processIOSStrings(PrintWriter writer, Language language,
+    private static void processIOSStrings(PrintWriter writer, Language language,
             List<HeaderString> strings) throws FileNotFoundException, UnsupportedEncodingException {
         // Go through the strings
         for (HeaderString currentString : strings) {
