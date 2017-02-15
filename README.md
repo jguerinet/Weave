@@ -2,6 +2,8 @@
 
 ## Summary
 The Mobile String Parser takes an online CSV file and parses the content to produce the Strings files for an Android or iOS app.
+It also parses the Strings for Web in the form of a JSON: an array of objects where the key is the String key and within each object are the Strings, 
+with their keys being the language keys. 
 It will also show any warnings or errors that the Strings file might have. 
 Please note that it assumes that the file is in UTF-8 and also produces UTF-8 files. 
 
@@ -17,7 +19,7 @@ To use this:
 For example, if you put ### General ### (or ### General), it will be parsed as `/* General */` on iOS and `<!-- General -->` on Android
 * Run the jar
 
-[1]:https://github.com/jguerinet/mobile-string-parser/releases/download/2.8.1/mobile-string-parser-2.8.1.jar
+[1]:https://github.com/jguerinet/mobile-string-parser/releases/download/3.0.0/mobile-string-parser-3.0.0.jar
 
 ## Gradle Dependencies
 * [okhttp](http://square.github.io/okhttp/)
@@ -31,7 +33,7 @@ For example, if you put ### General ### (or ### General), it will be parsed as `
 See the [Change Log](CHANGELOG.md).
 
 ##Copyright 
-    Copyright 2013-2015 Julien Guerinet
+    Copyright 2013-2017 Julien Guerinet
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.

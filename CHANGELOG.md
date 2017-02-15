@@ -1,5 +1,8 @@
 # Change Log
 
+## Version 3.0.0 (2017-02-15)
+* Added String parsing for web
+
 ## Version 2.8.1 (2015-12-02)
 * Fixed bug where the HTML tags would be parsed after the "<" and ">" symbols in Android
 
