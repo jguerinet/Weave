@@ -128,14 +128,17 @@ public class StringParser {
                 String languageString= line.replace(LANGUAGE, "").trim();
                 String[] languageInfo = languageString.split(", ");
 
-                if (languageInfo.length != 2) {
-                    System.out.println("Error: The following format has too few or too many " +
+                if (languageInfo.length < 1) {
+                    System.out.println("Error: The following format has too few " +
                         "arguments for a language: " + languageString);
                     System.exit(-1);
                 }
 
+                // If there isn't a second argument (path for Web), add null
+                String languagePath = languageInfo.length > 1 ? languageInfo[1] : null;
+
                 // Save it as a new language in the list of languages
-                languages.add(new Language(languageInfo[0], languageInfo[1]));
+                languages.add(new Language(languageInfo[0], languagePath));
             } else if (line.startsWith(PATH)) {
                 path = line.replace(PATH, "").trim();
             }

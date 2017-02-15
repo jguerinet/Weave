@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 Julien Guerinet
+ * Copyright 2013-2017 Julien Guerinet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,21 +53,21 @@ public class Language {
     /**
      * @return The language Id
      */
-    public String getId() {
+    String getId() {
         return this.id;
     }
 
     /**
      * @return The language path
      */
-    public String getPath() {
+    String getPath() {
         return this.path;
     }
 
     /**
      * @return The column index of this language
      */
-    public int getColumnIndex() {
+    int getColumnIndex() {
         return this.columnIndex;
     }
 
@@ -76,7 +76,7 @@ public class Language {
     /**
      * @param columnIndex The column index of this language
      */
-    public void setColumnIndex(int columnIndex) {
+    void setColumnIndex(int columnIndex) {
         this.columnIndex = columnIndex;
     }
 }
