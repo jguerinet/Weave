@@ -4,6 +4,4 @@
 
 URL: CSV_URL_HERE
 Platform: Android/iOS/Web
-Path: WEB_PATH_HERE (web only)
-
-Language: LANGUAGE_ID_HERE, LANGUAGE_PATH_HERE (Path here not needed for web)
+Language: LANGUAGE_ID_HERE, LANGUAGE_PATH_HERE
