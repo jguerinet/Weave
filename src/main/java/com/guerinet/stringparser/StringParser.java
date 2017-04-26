@@ -51,10 +51,6 @@ public class StringParser {
      * Languages in the file
      */
     private static final String LANGUAGE= "Language:";
-    /**
-     * File path in the file (for Web Strings only)
-     */
-    private static final String PATH = "Path:";
 
     /* ANDROID STRINGS */
     /**
@@ -85,8 +81,6 @@ public class StringParser {
         String url = null;
         // Platform this is for (-1 is not chosen)
         int platform = -1;
-        // File path (for Web Strings only)
-        String path = null;
 
         // Read from the config file
         BufferedReader configReader = null;
@@ -128,19 +122,14 @@ public class StringParser {
                 String languageString= line.replace(LANGUAGE, "").trim();
                 String[] languageInfo = languageString.split(", ");
 
-                if (languageInfo.length < 1) {
+                if (languageInfo.length < 2) {
                     System.out.println("Error: The following format has too few " +
                         "arguments for a language: " + languageString);
                     System.exit(-1);
                 }
 
-                // If there isn't a second argument (path for Web), add null
-                String languagePath = languageInfo.length > 1 ? languageInfo[1] : null;
-
                 // Save it as a new language in the list of languages
-                languages.add(new Language(languageInfo[0], languagePath));
-            } else if (line.startsWith(PATH)) {
-                path = line.replace(PATH, "").trim();
+                languages.add(new Language(languageInfo[0], languageInfo[1]));
             }
         }
         configReader.close();
@@ -151,9 +140,6 @@ public class StringParser {
             System.exit(-1);
         } else if (platform == -1) {
             System.out.println("Error: You need to input a platform");
-            System.exit(-1);
-        } else if (platform == WEB && (path == null || path.isEmpty())) {
-            System.out.println("Error: File path cannot be null for web Strings");
             System.exit(-1);
         } else if (languages.isEmpty()) {
             System.out.println("Error: You need to add at least one language");
@@ -313,28 +299,24 @@ public class StringParser {
                 }
             }
 
-            // For web Strings, all of the languages are in the same file
-            if (platform == WEB) {
-                processWebStrings(path, languages, strings);
-                System.out.println("Wrote Web Strings to file: " + path);
-            } else {
-                // Go through each language, and write the file
-                PrintWriter writer;
-                for (Language language : languages) {
-                    // Set up the writer for the given language, enforcing UTF-8
-                    writer = new PrintWriter(language.getPath(), "UTF-8");
+            // Go through each language, and write the file
+            PrintWriter writer;
+            for (Language language : languages) {
+                // Set up the writer for the given language, enforcing UTF-8
+                writer = new PrintWriter(language.getPath(), "UTF-8");
 
-                    if (platform == ANDROID) {
-                        processAndroidStrings(writer, language, strings);
-                    } else {
-                        processIOSStrings(writer, language, strings);
-                    }
-
-                    System.out.println("Wrote " + language.getId() + " to file: " + language
-                            .getPath());
-
-                    writer.close();
+                if (platform == ANDROID) {
+                    processAndroidStrings(writer, language, strings);
+                } else if (platform == IOS) {
+                    processIOSStrings(writer, language, strings);
+                } else {
+                    processWebStrings(writer, language, strings);
                 }
+
+                System.out.println("Wrote " + language.getId() + " to file: " + language
+                        .getPath());
+
+                writer.close();
             }
 
             // Exit message
@@ -516,15 +498,14 @@ public class StringParser {
     /**
      * Processes the list of parsed Strings into the Web Strings document
      *
-     * @param path      Path of the web file
-     * @param languages List of languages to parse for
-     * @param strings   List of Strings
+     * @param writer   The writer to use to write to file
+     * @param language The language to parse the Strings for
+     * @param strings  The list of Strings
      * @throws FileNotFoundException Thrown if the file we should be writing to isn't found
      * @throws UnsupportedEncodingException Should never be thrown
      */
-    private static void processWebStrings(String path, List<Language> languages,
+    private static void processWebStrings(PrintWriter writer, Language language,
             List<HeaderString> strings) throws FileNotFoundException, UnsupportedEncodingException {
-        PrintWriter writer = new PrintWriter(path, "UTF-8");
 
         // Open the JSON object
         writer.println("{");
@@ -532,6 +513,7 @@ public class StringParser {
         // Go through the strings
         for (int i = 0; i < strings.size(); i ++) {
             HeaderString string = strings.get(i);
+
             // We don't deal with header strings
             if (!(string instanceof LanguageString)) {
                 continue;
@@ -539,47 +521,31 @@ public class StringParser {
 
             try {
                 // Open the object
-                writer.println("    \"" + string.getKey() + "\": {");
+                writer.print("    \"" + string.getKey() + "\": ");
 
-                // Go through the languages
-                LanguageString languageString = (LanguageString) string;
-                for (int j = 0; j < languages.size(); j ++) {
-                    Language language = languages.get(j);
-                    writer.print("        \"" + language.getId() + "\": ");
-
-                    String value = languageString.getString(language.getId());
-                    if (value == null) {
-                        value = "";
-                    }
-
-                    // Unescaped quotes
-                    value = value.replace("\"", "\\" + "\"");
-
-                    // New Lines
-                    value = value.replace("\n", "");
-
-                    // Remove <html> </html>tags
-                    value = value.replace("<html>", "");
-                    value = value.replace("</html>", "");
-                    value = value.replace("<HTML>", "");
-                    value = value.replace("</HTML>", "");
-
-
-                    writer.print("\"" + value + "\"");
-
-                    if (j != languages.size() - 1) {
-                        writer.println(",");
-                    } else {
-                        writer.println();
-                    }
+                String value = ((LanguageString) string).getString(language.getId());
+                if (value == null) {
+                    value = "";
                 }
 
-                // Close the object
+                // Unescaped quotes
+                value = value.replace("\"", "\\" + "\"");
+
+                // New Lines
+                value = value.replace("\n", "");
+
+                // Remove <html> </html>tags
+                value = value.replace("<html>", "");
+                value = value.replace("</html>", "");
+                value = value.replace("<HTML>", "");
+                value = value.replace("</HTML>", "");
+
+                writer.print("\"" + value + "\"");
+
                 if (i != strings.size() - 1) {
-                    // Add a comma if this isn't the last String
-                    writer.println("    },");
+                    writer.println(",");
                 } else {
-                    writer.println("    }");
+                    writer.println();
                 }
             } catch (Exception e) {
                 System.out.println("Error on Line " + string.getLineNumber());
