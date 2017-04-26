@@ -2,8 +2,7 @@
 
 ## Summary
 The Mobile String Parser takes an online CSV file and parses the content to produce the Strings files for an Android or iOS app.
-It also parses the Strings for Web in the form of a JSON: an array of objects where the key is the String key and within each object are the Strings, 
-with their keys being the language keys. 
+It also parses the Strings for Web in the form of a JSON: an on object with a bunch of key-value pairs, the key being the String key and the value being the translated String for that language.   
 It will also show any warnings or errors that the Strings file might have. 
 Please note that it assumes that the file is in UTF-8 and also produces UTF-8 files. 
 
@@ -17,9 +16,11 @@ To use this:
 * Keys must be unique, not have spaces, and not be null (the parser will inform of any of these errors when you run it) 
 * You can add headers (which will be parsed as comments) in your Strings file by adding or surrounding your header with '###'. 
 For example, if you put ### General ### (or ### General), it will be parsed as `/* General */` on iOS and `<!-- General -->` on Android
+* You can add formatted Strings by putting either the normal placeholder (i.e. %s for a String) if there is one argument, or numbering them 
+like this for multiple: %1$s, %2$s...
 * Run the jar
 
-[1]:https://github.com/jguerinet/mobile-string-parser/releases/download/3.0.0/mobile-string-parser-3.0.0.jar
+[1]:https://github.com/jguerinet/mobile-string-parser/releases/download/3.1.0/mobile-string-parser-3.1.0.jar
 
 ## Gradle Dependencies
 * [okhttp](http://square.github.io/okhttp/)
