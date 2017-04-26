@@ -1,5 +1,9 @@
 # Change Log
 
+## Version 3.1.0 (2017-04-26)
+* Switched the web parsing to work like the other platforms (1 file per language) 
+* Added warnings for when there is a translation missing
+
 ## Version 3.0.0 (2017-02-15)
 * Added String parsing for web
 
