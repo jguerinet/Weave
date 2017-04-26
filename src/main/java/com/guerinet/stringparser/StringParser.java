@@ -429,6 +429,10 @@ public class StringParser {
                         string = string.replace("<", "&lt;");
                     }
 
+                    if (string.isEmpty()) {
+                        System.out.println("Warning: Line " + currentString.getLineNumber() +
+                                " doesn't have a translation for " + language.getId());
+                    }
 
                     // Add the XML tag
                     xmlString = xmlString + "<string name=\"" + currentString.getKey() + "\">" +
@@ -478,6 +482,11 @@ public class StringParser {
                 string = string.replace("</html>", "");
                 string = string.replace("<HTML>", "");
                 string = string.replace("</HTML>", "");
+
+                if (string.isEmpty()) {
+                    System.out.println("Warning: Line " + currentString.getLineNumber() +
+                            " doesn't have a translation for " + language.getId());
+                }
 
                 // Check if it's a header section
                 if (!(currentString instanceof LanguageString)) {
@@ -539,6 +548,11 @@ public class StringParser {
                 value = value.replace("</html>", "");
                 value = value.replace("<HTML>", "");
                 value = value.replace("</HTML>", "");
+
+                if (value.isEmpty()) {
+                    System.out.println("Warning: Line " + string.getLineNumber() + " doesn't have" +
+                            " a translation for " + language.getId());
+                }
 
                 writer.print("\"" + value + "\"");
 
