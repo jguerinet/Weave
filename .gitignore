@@ -16,3 +16,4 @@ workspace.xml
 .name
 ## We're not committing the test config file
 config.txt
+node_modules

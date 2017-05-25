@@ -1,0 +1,30 @@
+{
+  "name": "@ottawamhealth/mobile-string-parser",
+  "version": "1.0.0",
+  "description": "Grab online CSV, parse it to produce JSON string file (for translations)",
+  "main": "mobile-string-parser.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jguerinet/mobile-string-parser.git"
+  },
+  "keywords": [
+    "java",
+    "jar",
+    "strings",
+    "parsing",
+    "csv"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jguerinet/mobile-string-parser/issues"
+  },
+  "homepage": "https://github.com/jguerinet/mobile-string-parser#readme",
+  "private": true,
+  "dependencies": {
+    "mad-utils": "^0.5.7"
+  }
+}
