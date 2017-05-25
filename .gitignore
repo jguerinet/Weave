@@ -17,3 +17,7 @@ workspace.xml
 ## We're not committing the test config file
 config.txt
 node_modules
+mobile-string-parser.js.map
+mobile-string-parser.js
+mobile-string-parser.d.ts
+STRING_TRANSLATIONS.json

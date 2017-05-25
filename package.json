@@ -3,8 +3,18 @@
   "version": "1.0.0",
   "description": "Grab online CSV, parse it to produce JSON string file (for translations)",
   "main": "mobile-string-parser.js",
+  "typings": "mobile-string-parser",
+  "files": [
+    "./mobile-string-parser.js",
+    "./mobile-string-parser.d.ts",
+    "./mobile-string-parser.js.map"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile-ts": "tsc",
+    "ts-compile": "tsc",
+    "start": "npm run ts-compile; node ./mobile-string-parser.js",
+    "prepublish": "npm run ts-compile"
   },
   "repository": {
     "type": "git",
@@ -25,6 +35,15 @@
   "homepage": "https://github.com/jguerinet/mobile-string-parser#readme",
   "private": true,
   "dependencies": {
+    "mad-logs": "^8.3.0",
     "mad-utils": "^0.5.7"
+  },
+  "devDependencies": {
+    "lodash": "^4.17.4",
+    "chai": "^3.5.0"
+  },
+  "peerDependencies": {
+    "lodash": "^4.17.4",
+    "chai": "^3.5.0"
   }
 }
