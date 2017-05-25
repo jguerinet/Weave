@@ -1,6 +1,6 @@
 {
   "name": "@ottawamhealth/mobile-string-parser",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Grab online CSV, parse it to produce JSON string file (for translations)",
   "main": "mobile-string-parser.js",
   "typings": "mobile-string-parser",
