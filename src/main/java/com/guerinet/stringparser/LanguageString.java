@@ -83,7 +83,7 @@ class LanguageString extends BaseString {
      * @param platformCsv List of platforms in Csv format
      */
     void addPlatforms(String platformCsv) {
-        if (!platformCsv.isEmpty()) {
+        if (platformCsv != null && !platformCsv.isEmpty()) {
             for (String platform : platformCsv.split(",")) {
                 platforms.add(platform.trim().toLowerCase());
             }
