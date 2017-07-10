@@ -1,7 +1,7 @@
-# Mobile String Parser
+# String Parser
 
 ## Summary
-The Mobile String Parser takes an online CSV file and parses the content to produce the Strings files for an Android or iOS app.
+The String Parser takes an online CSV file and parses the content to produce the Strings files for an Android or iOS app.
 It also parses the Strings for Web in the form of a JSON: an on object with a bunch of key-value pairs, the key being the String key and the value being the translated String for that language.   
 It will also show any warnings or errors that the Strings file might have. 
 Please note that it assumes that the file is in UTF-8 and also produces UTF-8 files. 
@@ -11,8 +11,9 @@ To use this:
 
 * Download the [jar][1] and the [sample config](sample-config.txt)
 * Set up your config file (follow the instructions in sample-config.txt)
-* The first column of your CSV file must be the keys with the header 'key' 
+* There should be at least one column with the 'key' to represent the String keys 
 * Any columns containing translations in your CSV file must have a header with the 2 character language Id (ex: en, fr)
+* You may also add a 'platforms' column and put in a CSV list of the platforms that a particular String should be parsed for. If the column doesn't exist or the platform value is empty for a specific String it will be parsed for all platforms
 * Keys must be unique, not have spaces, and not be null (the parser will inform of any of these errors when you run it) 
 * You can add headers (which will be parsed as comments) in your Strings file by adding or surrounding your header with '###'. 
 For example, if you put ### General ### (or ### General), it will be parsed as `/* General */` on iOS and `<!-- General -->` on Android
@@ -20,10 +21,10 @@ For example, if you put ### General ### (or ### General), it will be parsed as `
 like this for multiple: %1$s, %2$s...
 * Run the jar
 
-[1]:https://github.com/jguerinet/mobile-string-parser/releases/download/3.1.0/mobile-string-parser-3.1.0.jar
+[1]:https://github.com/jguerinet/string-parser/releases/download/4.0.0/string-parser-4.0.0.jar
 
 ## Gradle Dependencies
-* [okhttp](http://square.github.io/okhttp/)
+* [OkHttp](http://square.github.io/okhttp/)
 * [super-csv](http://super-csv.github.io/super-csv/)
 
 ## Contributors
