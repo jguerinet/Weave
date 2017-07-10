@@ -43,10 +43,11 @@ class LanguageString extends BaseString {
      * Default Constructor
      *
      * @param key        String key
+     * @param url        Url of the file this String comes from
      * @param lineNumber Line number in the CSV that this String was on
      */
-    LanguageString(String key, int lineNumber) {
-        super(key, lineNumber);
+    LanguageString(String key, String url, int lineNumber) {
+        super(key, url, lineNumber);
         translations = new HashMap<>();
         platforms = new ArrayList<>();
     }

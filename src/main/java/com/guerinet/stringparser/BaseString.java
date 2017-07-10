@@ -31,6 +31,11 @@ class BaseString {
     private final String key;
 
     /**
+     * Url of the file this String comes from
+     */
+    private final String url;
+
+    /**
      * Line number in the CSV that this String was on
      */
     private final int lineNumber;
@@ -39,10 +44,12 @@ class BaseString {
      * Default Constructor
      *
      * @param key        Key to store the String under, or header String
+     * @param url        Url of the file this String comes from
      * @param lineNumber Line number in the CSV that this String was on
      */
-    BaseString(String key, int lineNumber) {
+    BaseString(String key, String url, int lineNumber) {
         this.key = key;
+        this.url = url;
         this.lineNumber = lineNumber;
     }
 
@@ -53,6 +60,13 @@ class BaseString {
      */
     String getKey() {
         return key;
+    }
+
+    /**
+     * @return Url of the file this String comes from
+     */
+    String getUrl() {
+        return url;
     }
 
     /**

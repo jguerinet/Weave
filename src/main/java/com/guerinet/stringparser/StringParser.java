@@ -31,7 +31,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -105,7 +107,7 @@ public class StringParser {
         List<Language> languages = new ArrayList<>();
 
         // List of Urls to get the Strings from
-        List<String> urls = new ArrayList<>();
+        Map<String, String> urls = new HashMap<>();
 
         // Platform this is for (null if not chosen)
         String platform = null;
@@ -126,11 +128,19 @@ public class StringParser {
         String line;
         while ((line = configReader.readLine()) != null) {
             if (line.startsWith(URL)) {
-                // Get the URL
-                String url = line.replace(URL, "").trim();
+                // Get the Url: remove the header and separate the file name from the Url
+                String urlString = line.replace(URL, "").trim();
+                String[] urlInfo = urlString.split(",");
 
-                if (!url.isEmpty()) {
-                    urls.add(url);
+                if (urlInfo.length < 2) {
+                    System.out.println("Error: The following format has too few " +
+                            "arguments for a Url: " + urlString);
+                    System.exit(-1);
+                }
+
+                if (!urlInfo[1].trim().isEmpty()) {
+                    // Save it as a new Url in the Url map
+                    urls.put(urlInfo[0].trim(), urlInfo[1].trim());
                 }
             } else if (line.startsWith(PLATFORM)) {
                 // Get the platform: Remove the header
@@ -148,7 +158,7 @@ public class StringParser {
                 }
             } else if (line.startsWith(LANGUAGE)) {
                 // Get the languages: remove the header and separate the language Id from the path
-                String languageString= line.replace(LANGUAGE, "").trim();
+                String languageString = line.replace(LANGUAGE, "").trim();
                 String[] languageInfo = languageString.split(",");
 
                 if (languageInfo.length < 2) {
@@ -186,9 +196,9 @@ public class StringParser {
         // List of language Strings
         List<BaseString> strings = new ArrayList<>();
 
-        for (String url : urls) {
+        for (String urlKey : urls.keySet()) {
             // Go through the Urls and download all of the Strings
-            List<BaseString> urlStrings = downloadStrings(url, languages);
+            List<BaseString> urlStrings = downloadStrings(urlKey, urls.get(urlKey), languages);
 
             if (urlStrings == null) {
                 // Don't continue if there's an error downloading the Strings
@@ -209,13 +219,12 @@ public class StringParser {
 
             // Check if there are any spaces in the keys
             if (string1.getKey().contains(" ")) {
-                System.out.println("Error: Line " + string1.getLineNumber() +
-                        " contains a space in its key.");
+                System.out.println("Error: " + getLog(string1) + " contains a space in its key.");
                 System.exit(-1);
             }
 
             if (Pattern.matches("[^A-Za-z0-9_]", string1.getKey())) {
-                System.out.println("Error: Line " + string1.getLineNumber() +
+                System.out.println("Error: " + getLog(string1) +
                         " contains some illegal characters.");
                 System.exit(-1);
             }
@@ -226,8 +235,8 @@ public class StringParser {
 
                 // If the keys are the same and it's not a header, show an error and stop
                 if (string1.getKey().equals(string2.getKey())) {
-                    System.out.println("Error: Lines " + string1.getLineNumber() + " and " +
-                            string2.getLineNumber() + " have the same key.");
+                    System.out.println("Error: " + getLog(string1) + " and " + getLog(string2) +
+                            " have the same key.");
                     System.exit(-1);
                 }
             }
@@ -252,6 +261,14 @@ public class StringParser {
     }
 
     /**
+     * @param string String we want to log
+     * @return Log message to use to designate the given String
+     */
+    private static String getLog(BaseString string) {
+        return "Line " + string.getLineNumber() + " from " + string.getUrl();
+    }
+
+    /**
      * Connects to the given Url and downloads the Strings in the right format
      *
      * @param url       Url to connect to
@@ -259,8 +276,8 @@ public class StringParser {
      * @return List of Strings that were downloaded, null if there was an error
      * @throws IOException Thrown if there was any errors parsing the Strings
      */
-    private static List<BaseString> downloadStrings(String url, List<Language> languages)
-            throws IOException {
+    private static List<BaseString> downloadStrings(String urlName, String url,
+            List<Language> languages) throws IOException {
         // Connect to the URL
         System.out.println("Connecting to " + url);
         Request request = new Request.Builder()
@@ -368,7 +385,7 @@ public class StringParser {
 
             // Check if this is a header
             if (key.startsWith(HEADER_KEY)) {
-                strings.add(new BaseString(key.replace("###", "").trim(), lineNumber));
+                strings.add(new BaseString(key.replace("###", "").trim(), urlName, lineNumber));
 
                 // Increment the line number and continue
                 lineNumber ++;
@@ -376,7 +393,7 @@ public class StringParser {
             }
 
             // Add a new language String
-            LanguageString languageString = new LanguageString(key, lineNumber);
+            LanguageString languageString = new LanguageString(key, urlName, lineNumber);
 
             // Go through the languages, add each translation
             boolean allNull = true;
@@ -401,12 +418,12 @@ public class StringParser {
             // Check if all of the values are null
             if (allNull) {
                 // Show a warning message
-                System.out.println("Warning: Line " + lineNumber + " has no translations so it " +
-                        "will not be parsed.");
+                System.out.println("Warning: Line " + lineNumber + " from " + urlName +
+                        " has no translations so it will not be parsed.");
             } else {
                 if (oneNull) {
-                    System.out.println("Warning: Line " + lineNumber + " is missing at least one " +
-                            "translation");
+                    System.out.println("Warning: Line " + lineNumber + " from " + urlName +
+                            " is missing at least one translation");
                 }
                 strings.add(languageString);
             }
@@ -477,7 +494,7 @@ public class StringParser {
                 write(writer, getProcessedString(platform, languageString.getKey(), string,
                         i == strings.size() - 1));
             } catch (Exception e) {
-                System.out.println("Error on Line " + currentString.getLineNumber());
+                System.out.println("Error on " + getLog(currentString));
                 e.printStackTrace();
             }
         }
@@ -592,7 +609,7 @@ public class StringParser {
      * @param platform Current platform
      * @return String to include as the footer of the Strings file, null if none
      */
-    public static String getFooter(String platform) {
+    private static String getFooter(String platform) {
         if (platform.equalsIgnoreCase(ANDROID)) {
             return RESOURCES_CLOSER;
         } else if (platform.equalsIgnoreCase(IOS)) {
