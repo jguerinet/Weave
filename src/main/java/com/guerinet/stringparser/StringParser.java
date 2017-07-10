@@ -33,6 +33,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Main class, executes the main code for parsing the Google Docs file
@@ -351,9 +352,9 @@ public class StringParser {
                 System.exit(-1);
             }
 
-            if (string1.getKey().contains("-")) {
+            if (Pattern.matches("[^A-Za-z0-9_]", string1.getKey())) {
                 System.out.println("Error: Line " + string1.getLineNumber() +
-                        " contains a dash in its key.");
+                        " contains some illegal characters.");
                 System.exit(-1);
             }
 
