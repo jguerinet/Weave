@@ -22,59 +22,63 @@ package com.guerinet.stringparser;
  * @author Julien Guerinet
  * @since 2.0.0
  */
-public class Language {
+class Language {
+
     /**
-     * The language Id
+     * Language Id (2 character representation, i.e. 'en')
      */
     private final String id;
+
     /**
-     * The language path
+     * Path to the file the Strings in this language should be stored in
      */
     private final String path;
+
     /**
-     * The column index of the language in the CSV file
+     * Index of the column of this language in the CSV file
      */
     private int columnIndex;
 
     /**
      * Default Constructor
      *
-     * @param id   The language Id
-     * @param path The language path
+     * @param id   Language Id
+     * @param path Path to the file for the Strings in this language
      */
-    public Language(String id, String path) {
+    Language(String id, String path) {
         this.id = id;
         this.path = path;
-        this.columnIndex = -1;
+        // Column starts out as -1 until we find the right column in the Csv file
+        columnIndex = -1;
     }
 
     /* GETTERS */
 
     /**
-     * @return The language Id
+     * @return Language Id
      */
     String getId() {
-        return this.id;
+        return id;
     }
 
     /**
-     * @return The language path
+     * @return Language path
      */
     String getPath() {
-        return this.path;
+        return path;
     }
 
     /**
-     * @return The column index of this language
+     * @return Column index of this language
      */
     int getColumnIndex() {
-        return this.columnIndex;
+        return columnIndex;
     }
 
     /* SETTERS */
 
     /**
-     * @param columnIndex The column index of this language
+     * @param columnIndex Column index of this language
      */
     void setColumnIndex(int columnIndex) {
         this.columnIndex = columnIndex;
