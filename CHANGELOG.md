@@ -1,5 +1,12 @@
 # Change Log
 
+## Version 4.0.0 (2017-07-10)
+* Reworked the entire String formatting section to remove redundant code
+* Added support for multiple Csv files from multiple Urls
+* Added support for platform specific Strings
+* Added checks for illegal characters within the String keys
+* Added support for a different column order (the keys column doesn't need to be first anymore) 
+
 ## Version 3.1.0 (2017-04-26)
 * Switched the web parsing to work like the other platforms (1 file per language) 
 * Added warnings for when there is a translation missing
