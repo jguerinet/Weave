@@ -351,6 +351,12 @@ public class StringParser {
                 System.exit(-1);
             }
 
+            if (string1.getKey().contains("-")) {
+                System.out.println("Error: Line " + string1.getLineNumber() +
+                        " contains a dash in its key.");
+                System.exit(-1);
+            }
+
             // Check if there are any duplicates
             for (int j = i + 1; j < strings.size(); j ++) {
                 BaseString string2 = strings.get(j);
