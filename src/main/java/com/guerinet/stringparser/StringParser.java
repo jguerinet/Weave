@@ -24,7 +24,13 @@ import org.supercsv.cellprocessor.ift.CellProcessor;
 import org.supercsv.io.CsvListReader;
 import org.supercsv.prefs.CsvPreference;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,7 +82,7 @@ public class StringParser {
         // Keep a list of all of the languages the Strings are in
         List<Language> languages = new ArrayList<>();
         // The list of language Strings
-        List<HeaderString> strings = new ArrayList<>();
+        List<BaseString> strings = new ArrayList<>();
         // Url
         String url = null;
         // Platform this is for (-1 is not chosen)
@@ -232,7 +238,7 @@ public class StringParser {
 
                 // Check if this is a header
                 if (key.trim().startsWith(HEADER_KEY)) {
-                    strings.add(new HeaderString(key.replace("###", "").trim(), lineNumber));
+                    strings.add(new BaseString(key.replace("###", "").trim(), lineNumber));
 
                     // Increment the line number and continue
                     lineNumber++;
@@ -272,7 +278,7 @@ public class StringParser {
 
             // Check if there are any errors with the keys
             for (int i = 0; i < strings.size(); i ++) {
-                HeaderString string1 = strings.get(i);
+                BaseString string1 = strings.get(i);
 
                 // Skip headers for the checks
                 if (!(string1 instanceof LanguageString)) {
@@ -288,7 +294,7 @@ public class StringParser {
 
                 // Check if there are any duplicates
                 for (int j = i + 1; j < strings.size(); j ++) {
-                    HeaderString string2 = strings.get(j);
+                    BaseString string2 = strings.get(j);
 
                     // If the keys are the same and it's not a header, show an error and stop
                     if (string1.getKey().equals(string2.getKey())) {
@@ -336,7 +342,7 @@ public class StringParser {
      * @param language The language to parse the String for
      * @return The formatted String for the given language and platform
      */
-    private static String processString(HeaderString string, Language language) {
+    private static String processString(BaseString string, Language language) {
         String value;
         // Check if we are parsing a header, use the key for the value
         if (!(string instanceof LanguageString)) {
@@ -374,13 +380,13 @@ public class StringParser {
      * @throws UnsupportedEncodingException Should never be thrown
      */
     private static void processAndroidStrings(PrintWriter writer, Language language,
-            List<HeaderString> strings) throws FileNotFoundException, UnsupportedEncodingException {
+            List<BaseString> strings) throws FileNotFoundException, UnsupportedEncodingException {
         // Add the header
         writer.println(XML_OPENER);
         writer.println(RESOURCES_OPENER);
 
         // Go through the strings
-        for (HeaderString currentString : strings) {
+        for (BaseString currentString : strings) {
             try {
                 // Process the String
                 String string = processString(currentString, language);
@@ -461,9 +467,9 @@ public class StringParser {
      * @throws UnsupportedEncodingException Should never be thrown
      */
     private static void processIOSStrings(PrintWriter writer, Language language,
-            List<HeaderString> strings) throws FileNotFoundException, UnsupportedEncodingException {
+            List<BaseString> strings) throws FileNotFoundException, UnsupportedEncodingException {
         // Go through the strings
-        for (HeaderString currentString : strings) {
+        for (BaseString currentString : strings) {
             try {
                 // Get the processed String
                 String string = processString(currentString, language);
@@ -514,14 +520,14 @@ public class StringParser {
      * @throws UnsupportedEncodingException Should never be thrown
      */
     private static void processWebStrings(PrintWriter writer, Language language,
-            List<HeaderString> strings) throws FileNotFoundException, UnsupportedEncodingException {
+            List<BaseString> strings) throws FileNotFoundException, UnsupportedEncodingException {
 
         // Open the JSON object
         writer.println("{");
 
         // Go through the strings
         for (int i = 0; i < strings.size(); i ++) {
-            HeaderString string = strings.get(i);
+            BaseString string = strings.get(i);
 
             // We don't deal with header strings
             if (!(string instanceof LanguageString)) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 Julien Guerinet
+ * Copyright 2013-2017 Julien Guerinet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,45 +18,47 @@
 package com.guerinet.stringparser;
 
 /**
- * A String used for a header within the Strings file. Will be a comment within the Strings file
+ * Basic String information. Will be used for headers (Key will be a comment) and subclasses by
+ *  the actual Strings
  * @author Julien Guerinet
  * @since 2.6.0
  */
-public class HeaderString {
-    /**
-     * The key to store the String under, or the header to use
-     */
-    protected final String key;
+class BaseString {
 
     /**
-     * The line number in the CSV that this String was on
+     * Key to store the String under, or the header to use
      */
-    protected final int lineNumber;
+    private final String key;
+
+    /**
+     * Line number in the CSV that this String was on
+     */
+    private final int lineNumber;
 
     /**
      * Default Constructor
      *
-     * @param header     The header comment
+     * @param key        Key to store the String under, or header String
      * @param lineNumber Line number in the CSV that this String was on
      */
-    public HeaderString(String header, int lineNumber) {
-        this.key = header;
+    BaseString(String key, int lineNumber) {
+        this.key = key;
         this.lineNumber = lineNumber;
     }
 
     /* GETTERS */
 
     /**
-     * @return The String Key
+     * @return String Key
      */
-    public String getKey() {
-        return this.key;
+    String getKey() {
+        return key;
     }
 
     /**
-     * @return The line number in the CSV that this String was on
+     * @return Line number in the CSV that this String was on
      */
-    public int getLineNumber() {
+    int getLineNumber() {
         return lineNumber;
     }
 }
