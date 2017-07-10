@@ -30,7 +30,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -44,9 +43,9 @@ public class StringParser {
 
     /* PLATFORM CONSTANTS */
 
-    private static final int ANDROID = 0;
-    private static final int IOS = 1;
-    private static final int WEB = 2;
+    private static final String ANDROID = "Android";
+    private static final String IOS = "iOS";
+    private static final String WEB = "Web";
 
     /* FILE STRINGS */
 
@@ -108,8 +107,8 @@ public class StringParser {
         List<BaseString> strings = new ArrayList<>();
         // Url
         String url = null;
-        // Platform this is for (-1 is not chosen)
-        int platform = -1;
+        // Platform this is for (null is not chosen)
+        String platform = null;
 
         // Read from the config file
         BufferedReader configReader = null;
@@ -164,7 +163,7 @@ public class StringParser {
         if (url == null || url.isEmpty()) {
             System.out.println("Error: URL Cannot be null");
             System.exit(-1);
-        } else if (platform == -1) {
+        } else if (platform == null) {
             System.out.println("Error: You need to input a platform");
             System.exit(-1);
         } else if (languages.isEmpty()) {
@@ -172,13 +171,11 @@ public class StringParser {
             System.exit(-1);
         }
 
-        // Make sure that if we are on Android/iOS that we have a path per language
-        if (platform == ANDROID || platform == IOS) {
-            for (Language language : languages) {
-                if (language.getPath() == null) {
-                    System.out.println("Error: Languages need a file path for Android and iOS");
-                    System.exit(-1);
-                }
+        // Make sure that we have a path per language
+        for (Language language : languages) {
+            if (language.getPath() == null) {
+                System.out.println("Error: Languages need a file path for Android and iOS");
+                System.exit(-1);
             }
         }
 
@@ -377,16 +374,9 @@ public class StringParser {
             // Set up the writer for the given language, enforcing UTF-8
             writer = new PrintWriter(language.getPath(), "UTF-8");
 
-            if (platform == ANDROID) {
-                processAndroidStrings(writer, language, strings);
-            } else if (platform == IOS) {
-                processIOSStrings(writer, language, strings);
-            } else {
-                processWebStrings(writer, language, strings);
-            }
+            processStrings(writer, language, platform, strings);
 
-            System.out.println("Wrote " + language.getId() + " to file: " + language
-                    .getPath());
+            System.out.println("Wrote " + language.getId() + " to file: " + language.getPath());
 
             writer.close();
         }
@@ -398,246 +388,180 @@ public class StringParser {
     /* HELPERS */
 
     /**
-     * Processes the String by doing some checks and preparing some special characters
+     * Processes the Strings and writes them to a given file
      *
-     * @param string   The LanguageString object
-     * @param language The language to parse the String for
-     * @return The formatted String for the given language and platform
+     * @param writer   Writer to use to write the Strings to the given file
+     * @param language Language we are writing for
+     * @param platform Current platform
+     * @param strings  Strings to add to the file
+     * @throws FileNotFoundException Thrown if the file does not exist
      */
-    private static String processString(BaseString string, Language language) {
-        String value;
-        // Check if we are parsing a header, use the key for the value
-        if (!(string instanceof LanguageString)) {
-            value = string.getKey();
-        } else {
-            value = ((LanguageString) string).getString(language.getId());
-        }
+    private static void processStrings(PrintWriter writer, Language language, String platform,
+            List<BaseString> strings) throws FileNotFoundException {
 
-        // Check if value is or null empty: if it is, return null
-        if (value == null || value.isEmpty()) {
-            return null;
-        }
+        // Header
+        write(writer, getHeader(platform));
 
-        // Process the value with the general methods first:
-
-        // Unescaped quotations
-        value = value.replace("\"", "\\" + "\"");
-
-        // Copyright
-        value = value.replace("(c)", "\u00A9");
-
-        // New Lines
-        value = value.replace("\n", "");
-
-        return value;
-    }
-
-    /**
-     * Processes the list of parsed Strings into the Android XML document
-     *
-     * @param writer   The writer to use to write to the file
-     * @param language The language to parse the Strings for
-     * @param strings  The list of Strings
-     * @throws FileNotFoundException Thrown if the file we should be writing to is not found
-     * @throws UnsupportedEncodingException Should never be thrown
-     */
-    private static void processAndroidStrings(PrintWriter writer, Language language,
-            List<BaseString> strings) throws FileNotFoundException, UnsupportedEncodingException {
-        // Add the header
-        writer.println(XML_OPENER);
-        writer.println(RESOURCES_OPENER);
-
-        // Go through the strings
-        for (BaseString currentString : strings) {
-            try {
-                // Process the String
-                String string = processString(currentString, language);
-
-                // If the String is null, continue
-                if (string == null) {
-                    continue;
-                }
-
-                // Add initial indentation
-                String xmlString = "    ";
-
-                // Check if it's a header section
-                if (!(currentString instanceof LanguageString)) {
-                    // Leave a space before it, add the header as a comment
-                    xmlString = "\n" + xmlString + "<!-- " + string + " -->";
-                } else {
-                    // If not, treat is as a normal string
-
-                    /* Character checks */
-                    // Ampersands
-                    string = string.replace("&", "&amp;");
-
-                    // Apostrophes
-                    string = string.replace("'", "\\'");
-
-                    // Unescaped @ signs
-                    string = string.replace("@", "\\" + "@");
-
-                    // Ellipses
-                    string = string.replace("...", "&#8230;");
-
-                    // Check if this is an HTML String
-                    if (string.contains("<html>") || string.contains("<HTML>")) {
-                        // Don't format the greater than and less than symbols
-                        string = string.replace("<html>", "<![CDATA[");
-                        string = string.replace("</html>", "]]>");
-                        string = string.replace("<HTML>", "<![CDATA[");
-                        string = string.replace("</HTML>", "]]>");
-                    } else {
-                        // Format the greater then and less than symbol otherwise
-                        // Greater than
-                        string = string.replace(">", "&gt;");
-
-                        // Less than
-                        string = string.replace("<", "&lt;");
-                    }
-
-                    if (string.isEmpty()) {
-                        System.out.println("Warning: Line " + currentString.getLineNumber() +
-                                " doesn't have a translation for " + language.getId());
-                    }
-
-                    // Add the XML tag
-                    xmlString = xmlString + "<string name=\"" + currentString.getKey() + "\">" +
-                            string + "</string>";
-                }
-
-                // Write the String
-                writer.println(xmlString);
-            } catch (Exception e) {
-                System.out.println("Error on Line " + currentString.getLineNumber());
-                e.printStackTrace();
-            }
-        }
-
-        // Add the resources closing to android files
-        writer.println(RESOURCES_CLOSER);
-    }
-
-    /**
-     * Processes the list of parsed Strings into the iOS Strings document
-     *
-     * @param writer   The writer to use to write to file
-     * @param language The language to parse the Strings for
-     * @param strings  The list of Strings
-     * @throws FileNotFoundException Thrown if the file we should be writing to isn't found
-     * @throws UnsupportedEncodingException Should never be thrown
-     */
-    private static void processIOSStrings(PrintWriter writer, Language language,
-            List<BaseString> strings) throws FileNotFoundException, UnsupportedEncodingException {
-        // Go through the strings
-        for (BaseString currentString : strings) {
-            try {
-                // Get the processed String
-                String string = processString(currentString, language);
-
-                // If the String is null, there is no value so do not add it
-                if (string == null) {
-                    continue;
-                }
-
-                // Replace %s format specifiers with %@
-                string = string.replace("%s", "%@");
-                string = string.replace("$s", "$@");
-
-                // Remove <html> </html>tags
-                string = string.replace("<html>", "");
-                string = string.replace("</html>", "");
-                string = string.replace("<HTML>", "");
-                string = string.replace("</HTML>", "");
-
-                if (string.isEmpty()) {
-                    System.out.println("Warning: Line " + currentString.getLineNumber() +
-                            " doesn't have a translation for " + language.getId());
-                }
-
-                // Check if it's a header section
-                if (!(currentString instanceof LanguageString)) {
-                    string = "\n" + "/*  " + string + " */";
-                } else {
-                    // If not, treat is as a normal string
-                    string = "\"" + currentString.getKey() + "\" = \"" + string + "\";";
-                }
-
-                writer.println(string);
-            } catch (Exception e) {
-                System.out.println("Error on Line " + currentString.getLineNumber());
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     * Processes the list of parsed Strings into the Web Strings document
-     *
-     * @param writer   The writer to use to write to file
-     * @param language The language to parse the Strings for
-     * @param strings  The list of Strings
-     * @throws FileNotFoundException Thrown if the file we should be writing to isn't found
-     * @throws UnsupportedEncodingException Should never be thrown
-     */
-    private static void processWebStrings(PrintWriter writer, Language language,
-            List<BaseString> strings) throws FileNotFoundException, UnsupportedEncodingException {
-
-        // Open the JSON object
-        writer.println("{");
-
-        // Go through the strings
         for (int i = 0; i < strings.size(); i ++) {
-            BaseString string = strings.get(i);
-
-            // We don't deal with header strings
-            if (!(string instanceof LanguageString)) {
-                continue;
-            }
+            BaseString currentString = strings.get(i);
 
             try {
-                // Open the object
-                writer.print("    \"" + string.getKey() + "\": ");
+                if (!(currentString instanceof LanguageString)) {
+                    // If we are parsing a header, right the value as a comment
+                    write(writer, getComment(platform, currentString.getKey()));
+                    continue;
+                }
+                // Normal String
+                LanguageString languageString = (LanguageString) currentString;
 
-                String value = ((LanguageString) string).getString(language.getId());
-                if (value == null) {
-                    value = "";
+                // Check that it's for the right platform
+                if (!languageString.isForPlatform(platform)) {
+                    continue;
                 }
 
-                // Unescaped quotes
-                value = value.replace("\"", "\\" + "\"");
+                String string = languageString.getString(language.getId());
+
+                // Check if value is or null empty: if it is, continue
+                if (string == null) {
+                    string = "";
+                }
+
+                if (string.isEmpty() && !platform.equalsIgnoreCase(WEB)) {
+                    // Skip over the empty values unless we're on Web
+                    continue;
+                }
+
+                // Unescaped quotations
+                string = string.replace("\"", "\\" + "\"");
+
+                // Copyright
+                string = string.replace("(c)", "\u00A9");
 
                 // New Lines
-                value = value.replace("\n", "");
+                string = string.replace("\n", "");
 
-                // Remove <html> </html>tags
-                value = value.replace("<html>", "");
-                value = value.replace("</html>", "");
-                value = value.replace("<HTML>", "");
-                value = value.replace("</HTML>", "");
-
-                if (value.isEmpty()) {
-                    System.out.println("Warning: Line " + string.getLineNumber() + " doesn't have" +
-                            " a translation for " + language.getId());
-                }
-
-                writer.print("\"" + value + "\"");
-
-                if (i != strings.size() - 1) {
-                    writer.println(",");
-                } else {
-                    writer.println();
-                }
+                write(writer, getProcessedString(platform, languageString.getKey(), string,
+                        i == strings.size() - 1));
             } catch (Exception e) {
-                System.out.println("Error on Line " + string.getLineNumber());
+                System.out.println("Error on Line " + currentString.getLineNumber());
                 e.printStackTrace();
             }
         }
+    }
 
-        // Close the JSON object
-        writer.print("}");
+    /**
+     * @param writer Writer to use to write the String
+     * @param string String to write, null if none
+     */
+    private static void write(PrintWriter writer, String string) {
+        if (string != null) {
+            writer.println(string);
+        }
+    }
 
-        writer.close();
+    /**
+     * @param platform Current platform
+     * @return String to use as the header for the Strings file, null if none
+     */
+    private static String getHeader(String platform) {
+        if (platform.equalsIgnoreCase(ANDROID)) {
+            return XML_OPENER + "\n" + RESOURCES_OPENER;
+        } else if (platform.equalsIgnoreCase(IOS)) {
+            return null;
+        } else {
+            return "{";
+        }
+    }
+
+    /**
+     * @param platform Current platform
+     * @param comment  Comment String
+     * @return String to include in the Strings file as a comment, null if none
+     */
+    private static String getComment(String platform, String comment) {
+        if (platform.equalsIgnoreCase(ANDROID)) {
+            return "\n    <!-- " + comment + " -->";
+        } else if (platform.equalsIgnoreCase(IOS)) {
+            return "\n/* " + comment + " */";
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * @param platform   Current platform
+     * @param key        String key
+     * @param string     String to process
+     * @param lastString True if this is the last String, false otherwise
+     * @return String to include in the Strings file for the given platform, null if none
+     */
+    private static String getProcessedString(String platform, String key, String string,
+            boolean lastString) {
+        if (platform.equalsIgnoreCase(ANDROID)) {
+            // Ampersands
+            string = string.replace("&", "&amp;");
+
+            // Apostrophes
+            string = string.replace("'", "\\'");
+
+            // Unescaped @ signs
+            string = string.replace("@", "\\" + "@");
+
+            // Ellipses
+            string = string.replace("...", "&#8230;");
+
+            // Check if this is an HTML String
+            if (string.contains("<html>") || string.contains("<HTML>")) {
+                // Don't format the greater than and less than symbols
+                string = string.replace("<html>", "<![CDATA[");
+                string = string.replace("</html>", "]]>");
+                string = string.replace("<HTML>", "<![CDATA[");
+                string = string.replace("</HTML>", "]]>");
+            } else {
+                // Format the greater then and less than symbol otherwise
+                // Greater than
+                string = string.replace(">", "&gt;");
+
+                // Less than
+                string = string.replace("<", "&lt;");
+            }
+
+            // Add the XML tag
+            return "    <string name=\"" + key + "\">" + string + "</string>";
+        } else if (platform.equalsIgnoreCase(IOS)) {
+            // Replace %s format specifiers with %@
+            string = string.replace("%s", "%@");
+            string = string.replace("$s", "$@");
+
+            // Remove <html> </html>tags
+            string = string.replace("<html>", "");
+            string = string.replace("</html>", "");
+            string = string.replace("<HTML>", "");
+            string = string.replace("</HTML>", "");
+
+            return "\"" + key + "\" = \"" + string + "\";";
+        } else {
+            // Remove <html> </html>tags
+            string = string.replace("<html>", "");
+            string = string.replace("</html>", "");
+            string = string.replace("<HTML>", "");
+            string = string.replace("</HTML>", "");
+
+            return "    \"" + key + "\": \"" + string + "\"" + (lastString ? "" : ",");
+        }
+    }
+
+    /**
+     * @param platform Current platform
+     * @return String to include as the footer of the Strings file, null if none
+     */
+    public static String getFooter(String platform) {
+        if (platform.equalsIgnoreCase(ANDROID)) {
+            return RESOURCES_CLOSER;
+        } else if (platform.equalsIgnoreCase(IOS)) {
+            return null;
+        } else {
+            return "}";
+        }
     }
 }
