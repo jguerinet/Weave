@@ -18,50 +18,48 @@
 package com.guerinet.stringparser;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * One String with all of the translations
  * @author Julien Guerinet
  * @since 1.0.0
  */
-public class LanguageString extends BaseString {
+class LanguageString extends BaseString {
+
     /**
-     * A HashMap of translations, with the key being the language Id and the value being the String
+     * Map of translations, with the key being the language Id and the value being the String
      */
-    private final HashMap<String, String> translations;
+    private final Map<String, String> translations;
 
     /**
      * Default Constructor
      *
-     * @param key        The String key
+     * @param key        String key
      * @param lineNumber Line number in the CSV that this String was on
      */
-    public LanguageString(String key, int lineNumber) {
+    LanguageString(String key, int lineNumber) {
         super(key, lineNumber);
-        this.translations = new HashMap<>();
+        translations = new HashMap<>();
     }
 
     /* GETTERS */
 
     /**
-     * Get the String in a given language
-     *
-     * @param id The language Id
-     * @return The String in that language
+     * @param id Language Id
+     * @return String in that language
      */
-    public String getString(String id) {
-        return this.translations.get(id);
+    String getString(String id) {
+        return translations.get(id);
     }
 
     /* SETTERS */
 
     /**
-     * Add a translation
-     *
-     * @param id     The language Id
-     * @param string The String
+     * @param id     Language Id
+     * @param string String
      */
-    public void addTranslation(String id, String string) {
-        this.translations.put(id, string);
+    void addTranslation(String id, String string) {
+        translations.put(id, string);
     }
 }
