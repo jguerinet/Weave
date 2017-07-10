@@ -243,6 +243,7 @@ public class StringParser {
 
             System.out.println("Wrote " + language.getId() + " to file: " + language.getPath());
 
+            writer.flush();
             writer.close();
         }
 
@@ -480,6 +481,9 @@ public class StringParser {
                 e.printStackTrace();
             }
         }
+
+        // Header
+        write(writer, getFooter(platform));
     }
 
     /**
