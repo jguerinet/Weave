@@ -101,13 +101,13 @@ public class StringParser {
     private static final String HEADER_KEY = "###";
 
     public static void main(String[] args) throws IOException {
-        // Keep a list of all of the languages the Strings are in
+        // List of all of the languages the Strings are in
         List<Language> languages = new ArrayList<>();
-        // The list of language Strings
-        List<BaseString> strings = new ArrayList<>();
-        // Url
-        String url = null;
-        // Platform this is for (null is not chosen)
+
+        // List of Urls to get the Strings from
+        List<String> urls = new ArrayList<>();
+
+        // Platform this is for (null if not chosen)
         String platform = null;
 
         // Read from the config file
@@ -127,15 +127,19 @@ public class StringParser {
         while ((line = configReader.readLine()) != null) {
             if (line.startsWith(URL)) {
                 // Get the URL
-                url = line.replace(URL, "").trim();
+                String url = line.replace(URL, "").trim();
+
+                if (!url.isEmpty()) {
+                    urls.add(url);
+                }
             } else if (line.startsWith(PLATFORM)) {
                 // Get the platform: Remove the header
                 String platformString = line.replace(PLATFORM, "").trim();
-                if (platformString.equalsIgnoreCase("android")) {
+                if (platformString.equalsIgnoreCase(ANDROID)) {
                     platform = ANDROID;
-                } else if (platformString.equalsIgnoreCase("ios")) {
+                } else if (platformString.equalsIgnoreCase(IOS)) {
                     platform = IOS;
-                } else if (platformString.equalsIgnoreCase("web")) {
+                } else if (platformString.equalsIgnoreCase(WEB)) {
                     platform = WEB;
                 } else {
                     // Not recognized
@@ -160,8 +164,8 @@ public class StringParser {
         configReader.close();
 
         // Make sure everything is set
-        if (url == null || url.isEmpty()) {
-            System.out.println("Error: URL Cannot be null");
+        if (urls.isEmpty()) {
+            System.out.println("Error: There must be at least one non-null Url");
             System.exit(-1);
         } else if (platform == null) {
             System.out.println("Error: You need to input a platform");
@@ -179,6 +183,83 @@ public class StringParser {
             }
         }
 
+        // List of language Strings
+        List<BaseString> strings = new ArrayList<>();
+
+        for (String url : urls) {
+            // Go through the Urls and download all of the Strings
+            List<BaseString> urlStrings = downloadStrings(url, languages);
+
+            if (urlStrings == null) {
+                // Don't continue if there's an error downloading the Strings
+                return;
+            }
+
+            strings.addAll(urlStrings);
+        }
+
+        // Check if there are any errors with the keys
+        for (int i = 0; i < strings.size(); i ++) {
+            BaseString string1 = strings.get(i);
+
+            // Skip headers for the checks
+            if (!(string1 instanceof LanguageString)) {
+                continue;
+            }
+
+            // Check if there are any spaces in the keys
+            if (string1.getKey().contains(" ")) {
+                System.out.println("Error: Line " + string1.getLineNumber() +
+                        " contains a space in its key.");
+                System.exit(-1);
+            }
+
+            if (Pattern.matches("[^A-Za-z0-9_]", string1.getKey())) {
+                System.out.println("Error: Line " + string1.getLineNumber() +
+                        " contains some illegal characters.");
+                System.exit(-1);
+            }
+
+            // Check if there are any duplicates
+            for (int j = i + 1; j < strings.size(); j ++) {
+                BaseString string2 = strings.get(j);
+
+                // If the keys are the same and it's not a header, show an error and stop
+                if (string1.getKey().equals(string2.getKey())) {
+                    System.out.println("Error: Lines " + string1.getLineNumber() + " and " +
+                            string2.getLineNumber() + " have the same key.");
+                    System.exit(-1);
+                }
+            }
+        }
+
+        // Go through each language, and write the file
+        PrintWriter writer;
+        for (Language language : languages) {
+            // Set up the writer for the given language, enforcing UTF-8
+            writer = new PrintWriter(language.getPath(), "UTF-8");
+
+            processStrings(writer, language, platform, strings);
+
+            System.out.println("Wrote " + language.getId() + " to file: " + language.getPath());
+
+            writer.close();
+        }
+
+        // Exit message
+        System.out.println("Strings parsing complete");
+    }
+
+    /**
+     * Connects to the given Url and downloads the Strings in the right format
+     *
+     * @param url       Url to connect to
+     * @param languages Supported languages
+     * @return List of Strings that were downloaded, null if there was an error
+     * @throws IOException Thrown if there was any errors parsing the Strings
+     */
+    private static List<BaseString> downloadStrings(String url, List<Language> languages)
+            throws IOException {
         // Connect to the URL
         System.out.println("Connecting to " + url);
         Request request = new Request.Builder()
@@ -193,7 +274,7 @@ public class StringParser {
             // Catch the exception here to be able to continue a build even if we are not connected
             System.out.println("IOException while connecting to the URL");
             System.out.println("Error Message: " + e.getMessage());
-            return;
+            return null;
         }
 
         int responseCode = response.code();
@@ -201,12 +282,12 @@ public class StringParser {
 
         if (responseCode != 200) {
             System.out.println("Error: Response Message: " + response.message());
-            return;
+            return null;
         }
 
         // Set up the CSV reader
-        CsvListReader reader = new CsvListReader(new InputStreamReader(
-                response.body().byteStream(), "UTF-8"), CsvPreference.EXCEL_PREFERENCE);
+        CsvListReader reader = new CsvListReader(new InputStreamReader(response.body().byteStream(),
+                "UTF-8"), CsvPreference.EXCEL_PREFERENCE);
 
         // Keep track of which columns hold the keys and the platform
         int keyColumn = -1;
@@ -254,6 +335,9 @@ public class StringParser {
                 System.exit(-1);
             }
         }
+
+        // Create the list of Strings
+        List<BaseString> strings = new ArrayList<>();
 
         // Make a CellProcessor with the right length
         final CellProcessor[] processors = new CellProcessor[header.length];
@@ -333,59 +417,8 @@ public class StringParser {
         // Close the CSV reader
         reader.close();
 
-        // Check if there are any errors with the keys
-        for (int i = 0; i < strings.size(); i ++) {
-            BaseString string1 = strings.get(i);
-
-            // Skip headers for the checks
-            if (!(string1 instanceof LanguageString)) {
-                continue;
-            }
-
-            // Check if there are any spaces in the keys
-            if (string1.getKey().contains(" ")) {
-                System.out.println("Error: Line " + string1.getLineNumber() +
-                        " contains a space in its key.");
-                System.exit(-1);
-            }
-
-            if (Pattern.matches("[^A-Za-z0-9_]", string1.getKey())) {
-                System.out.println("Error: Line " + string1.getLineNumber() +
-                        " contains some illegal characters.");
-                System.exit(-1);
-            }
-
-            // Check if there are any duplicates
-            for (int j = i + 1; j < strings.size(); j ++) {
-                BaseString string2 = strings.get(j);
-
-                // If the keys are the same and it's not a header, show an error and stop
-                if (string1.getKey().equals(string2.getKey())) {
-                    System.out.println("Error: Lines " + string1.getLineNumber() + " and " +
-                            string2.getLineNumber() + " have the same key.");
-                    System.exit(-1);
-                }
-            }
-        }
-
-        // Go through each language, and write the file
-        PrintWriter writer;
-        for (Language language : languages) {
-            // Set up the writer for the given language, enforcing UTF-8
-            writer = new PrintWriter(language.getPath(), "UTF-8");
-
-            processStrings(writer, language, platform, strings);
-
-            System.out.println("Wrote " + language.getId() + " to file: " + language.getPath());
-
-            writer.close();
-        }
-
-        // Exit message
-        System.out.println("Strings parsing complete");
+        return strings;
     }
-
-    /* HELPERS */
 
     /**
      * Processes the Strings and writes them to a given file
