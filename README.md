@@ -29,12 +29,13 @@ like this for multiple: %1$s, %2$s...
 
 ## Contributors
 * [Julien Guerinet](https://github.com/jguerinet)
-* [Yulric Sequeira](https://github.com/yulric)  
+* [Yulric Sequeira](https://github.com/yulric)
+* [Andrew Faulkner](https://github.com/andfaulkner)
 
 ## Version History
 See the [Change Log](CHANGELOG.md).
 
-##Copyright 
+## Copyright 
     Copyright 2013-2017 Julien Guerinet
 
     Licensed under the Apache License, Version 2.0 (the "License");
