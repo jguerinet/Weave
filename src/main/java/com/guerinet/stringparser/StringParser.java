@@ -297,11 +297,14 @@ public class StringParser {
 
             // Go through the languages, add each translation
             boolean allNull = true;
+            boolean oneNull = false;
             for (Language language : languages) {
                 String currentLanguage = (String) currentLine.get(language.getColumnIndex());
 
                 if (currentLanguage != null) {
                     allNull = false;
+                } else {
+                    oneNull = true;
                 }
 
                 languageString.addTranslation(language.getId(), currentLanguage);
@@ -318,6 +321,10 @@ public class StringParser {
                 System.out.println("Warning: Line " + lineNumber + " has no translations so it " +
                         "will not be parsed.");
             } else {
+                if (oneNull) {
+                    System.out.println("Warning: Line " + lineNumber + " is missing at least one " +
+                            "translation");
+                }
                 strings.add(languageString);
             }
 
