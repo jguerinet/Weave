@@ -2,6 +2,6 @@
 2. Rename it config.txt
 3. Fill out the info below
 
-URL: CSV_URL_HERE
+URL: CSV_NAME_HERE, CSV_URL_HERE
 Platform: Android/iOS/Web
 Language: LANGUAGE_ID_HERE, LANGUAGE_PATH_HERE
