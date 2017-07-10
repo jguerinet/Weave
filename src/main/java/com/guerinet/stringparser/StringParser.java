@@ -290,7 +290,7 @@ public class StringParser {
 
         Response response;
         try {
-            response = new OkHttpClient().newCall(request).execute();
+            response = new OkHttpClient().setCache(null).newCall(request).execute();
         } catch (IOException e) {
             // Catch the exception here to be able to continue a build even if we are not connected
             System.out.println("IOException while connecting to the URL");
@@ -351,7 +351,7 @@ public class StringParser {
         // Make sure that all languages have an index
         for (Language language : languages) {
             if (language.getColumnIndex() == -1) {
-                System.out.println("Error: " + language.getId() +
+                System.out.println("Error: " + language.getId() + " in " + urlName +
                         " does not have any translations.");
                 System.exit(-1);
             }
