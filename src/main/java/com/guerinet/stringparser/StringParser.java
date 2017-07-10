@@ -208,6 +208,9 @@ public class StringParser {
             strings.addAll(urlStrings);
         }
 
+        // Define the key checker pattern to make sure no illegal characters exist within the keys
+        Pattern keyChecker = Pattern.compile("[^A-Za-z0-9_]");
+
         // Check if there are any errors with the keys
         for (int i = 0; i < strings.size(); i ++) {
             BaseString string1 = strings.get(i);
@@ -223,7 +226,7 @@ public class StringParser {
                 System.exit(-1);
             }
 
-            if (Pattern.matches("[^A-Za-z0-9_]", string1.getKey())) {
+            if (keyChecker.matcher(string1.getKey()).find()) {
                 System.out.println("Error: " + getLog(string1) +
                         " contains some illegal characters.");
                 System.exit(-1);
