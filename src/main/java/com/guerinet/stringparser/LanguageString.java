@@ -17,7 +17,9 @@
 
 package com.guerinet.stringparser;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,6 +35,11 @@ class LanguageString extends BaseString {
     private final Map<String, String> translations;
 
     /**
+     * List of platforms this String is for. If this is empty, this is for all platforms
+     */
+    private final List<String> platforms;
+
+    /**
      * Default Constructor
      *
      * @param key        String key
@@ -41,6 +48,7 @@ class LanguageString extends BaseString {
     LanguageString(String key, int lineNumber) {
         super(key, lineNumber);
         translations = new HashMap<>();
+        platforms = new ArrayList<>();
     }
 
     /* GETTERS */
@@ -53,6 +61,14 @@ class LanguageString extends BaseString {
         return translations.get(id);
     }
 
+    /**
+     * @param platform Current platform
+     * @return True if this String is for the current platform, false otherwise
+     */
+    boolean isForPlatform(String platform) {
+        return platforms.isEmpty() || platforms.contains(platform.toLowerCase());
+    }
+
     /* SETTERS */
 
     /**
@@ -61,5 +77,16 @@ class LanguageString extends BaseString {
      */
     void addTranslation(String id, String string) {
         translations.put(id, string);
+    }
+
+    /**
+     * @param platformCsv List of platforms in Csv format
+     */
+    void addPlatforms(String platformCsv) {
+        if (!platformCsv.isEmpty()) {
+            for (String platform : platformCsv.split(",")) {
+                platforms.add(platform.trim().toLowerCase());
+            }
+        }
     }
 }
