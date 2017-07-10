@@ -40,41 +40,51 @@ import java.util.List;
  * @since 1.0.0
  */
 public class StringParser {
+
     /* PLATFORM CONSTANTS */
+
     private static final int ANDROID = 0;
     private static final int IOS = 1;
-    private static final int WEB = 3;
+    private static final int WEB = 2;
+
     /* FILE STRINGS */
+
     /**
-     * The URL in the file
+     * Url of the Csv file in the config file
      */
     private static final String URL = "URL:";
+
     /**
-     * The platform in the file
+     * Platform in the config file
      */
     private static final String PLATFORM = "Platform:";
+
     /**
-     * Languages in the file
+     * One language in the config file
      */
-    private static final String LANGUAGE= "Language:";
+    private static final String LANGUAGE = "Language:";
 
     /* ANDROID STRINGS */
+
     /**
      * Android XML Opener
      */
     private static final String XML_OPENER = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
+
     /**
      * Android Resources Opener
      */
     private static final String RESOURCES_OPENER = "<resources>";
+
     /**
      * Android Resources Closer
      */
     private static final String RESOURCES_CLOSER = "</resources>";
 
     /* OTHER */
+
     /**
-     * The key used for the header in the Strings document
+     * Key used for the header in the Strings document
      */
     private static final String HEADER_KEY = "###";
 
