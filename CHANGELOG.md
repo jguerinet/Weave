@@ -1,5 +1,11 @@
 # Change Log
 
+## Version 4.0.2 (2017-07-13)
+* Switched to using an instance variable
+* Broke up the main method into smaller functional methods
+* Made all functions and variables protected 
+* Set up project to be published to JitPack
+
 ## Version 4.0.1 (2017-07-13)
 * Fixed bug where null header cells would cause the app to crash
 
