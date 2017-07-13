@@ -88,37 +88,49 @@ public class StringParser {
     /**
      * List of languages we are writing to
      */
-    public static List<Language> languages;
+    protected List<Language> languages;
 
     /**
      * List of Urls we are downloading from
      */
-    public static Map<String, String> urls;
+    protected Map<String, String> urls;
 
     /**
      * Platform we are downloading for
      */
-    public static String platform;
+    protected String platform;
 
     /**
      * List of Strings to write
      */
-    public static List<BaseString> strings;
+    protected List<BaseString> strings;
 
     public static void main(String[] args) throws IOException {
-        setup();
-        readFromConfigFile();
-        verifyConfigInfo();
-        downloadAllStrings();
-        verifyKeys();
-        writeStrings();
-        System.out.println("Strings parsing complete");
+        new StringParser().run();
+    }
+
+    /**
+     * Runs the {@link StringParser}
+     */
+    public void run() {
+        try {
+            setup();
+            readFromConfigFile();
+            verifyConfigInfo();
+            downloadAllStrings();
+            verifyKeys();
+            writeStrings();
+            System.out.println("Strings parsing complete");
+        } catch (IOException e) {
+            System.out.println("Error downloading Strings: ");
+            e.printStackTrace();
+        }
     }
 
     /**
      * Sets up the variables
      */
-    public static void setup() {
+    protected void setup() {
         // List of all of the languages the Strings are in
         languages = new ArrayList<>();
 
@@ -137,7 +149,7 @@ public class StringParser {
      *
      * @throws IOException Thrown if there was an error opening or reading the config file
      */
-    public static void readFromConfigFile() throws IOException {
+    protected void readFromConfigFile() throws IOException {
         BufferedReader configReader = null;
         try {
             configReader = new BufferedReader(new FileReader("../config.txt"));
@@ -202,7 +214,7 @@ public class StringParser {
     /**
      * Verifies that all of the config info is present
      */
-    public static void verifyConfigInfo() {
+    protected void verifyConfigInfo() {
         // Make sure everything is set
         if (urls.isEmpty()) {
             System.out.println("Error: There must be at least one non-null Url");
@@ -229,7 +241,7 @@ public class StringParser {
      *
      * @throws IOException Thrown if there is any error downloading the Strings
      */
-    public static void downloadAllStrings() throws IOException {
+    protected void downloadAllStrings() throws IOException {
         for (String urlKey : urls.keySet()) {
             // Go through the Urls and download all of the Strings
             List<BaseString> urlStrings = downloadStrings(urlKey, urls.get(urlKey));
@@ -250,7 +262,7 @@ public class StringParser {
      * @return List of Strings that were downloaded, null if there was an error
      * @throws IOException Thrown if there was any errors downloading the Strings
      */
-    private static List<BaseString> downloadStrings(String urlName, String url) throws IOException {
+    protected List<BaseString> downloadStrings(String urlName, String url) throws IOException {
         // Connect to the URL
         System.out.println("Connecting to " + url);
         Request request = new Request.Builder()
@@ -419,7 +431,7 @@ public class StringParser {
     /**
      * Verifies that the keys are valid
      */
-    public static void verifyKeys() {
+    protected void verifyKeys() {
         // Define the key checker pattern to make sure no illegal characters exist within the keys
         Pattern keyChecker = Pattern.compile("[^A-Za-z0-9_]");
 
@@ -463,7 +475,7 @@ public class StringParser {
      *
      * @throws IOException Thrown if any error happens
      */
-    public static void writeStrings() throws IOException {
+    protected void writeStrings() throws IOException {
         // Go through each language, and write the file
         PrintWriter writer;
         for (Language language : languages) {
@@ -483,7 +495,7 @@ public class StringParser {
      * @param string String we want to log
      * @return Log message to use to designate the given String
      */
-    private static String getLog(BaseString string) {
+    protected String getLog(BaseString string) {
         return "Line " + string.getLineNumber() + " from " + string.getUrl();
     }
 
@@ -494,7 +506,7 @@ public class StringParser {
      * @param language Language we are writing for
      * @throws FileNotFoundException Thrown if the file does not exist
      */
-    private static void writeLanguageStrings(PrintWriter writer, Language language)
+    protected void writeLanguageStrings(PrintWriter writer, Language language)
             throws FileNotFoundException {
 
         // Header
@@ -554,7 +566,7 @@ public class StringParser {
      * @param writer Writer to use to write the String
      * @param string String to write, null if none
      */
-    private static void write(PrintWriter writer, String string) {
+    protected void write(PrintWriter writer, String string) {
         if (string != null) {
             writer.println(string);
         }
@@ -564,7 +576,7 @@ public class StringParser {
      * @param platform Current platform
      * @return String to use as the header for the Strings file, null if none
      */
-    private static String getHeader(String platform) {
+    protected String getHeader(String platform) {
         if (platform.equalsIgnoreCase(ANDROID)) {
             return "<?xml version=\"1.0\" encoding=\"utf-8\"?> \n <resources>";
         } else if (platform.equalsIgnoreCase(IOS)) {
@@ -579,7 +591,7 @@ public class StringParser {
      * @param comment  Comment String
      * @return String to include in the Strings file as a comment, null if none
      */
-    private static String getComment(String platform, String comment) {
+    protected String getComment(String platform, String comment) {
         if (platform.equalsIgnoreCase(ANDROID)) {
             return "\n    <!-- " + comment + " -->";
         } else if (platform.equalsIgnoreCase(IOS)) {
@@ -596,7 +608,7 @@ public class StringParser {
      * @param lastString True if this is the last String, false otherwise
      * @return String to include in the Strings file for the given platform, null if none
      */
-    private static String getProcessedString(String platform, String key, String string,
+    protected String getProcessedString(String platform, String key, String string,
             boolean lastString) {
         if (platform.equalsIgnoreCase(ANDROID)) {
             // Ampersands
@@ -656,7 +668,7 @@ public class StringParser {
      * @param platform Current platform
      * @return String to include as the footer of the Strings file, null if none
      */
-    private static String getFooter(String platform) {
+    protected String getFooter(String platform) {
         if (platform.equalsIgnoreCase(ANDROID)) {
             return "</resources>";
         } else if (platform.equalsIgnoreCase(IOS)) {
