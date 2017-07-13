@@ -78,41 +78,66 @@ public class StringParser {
      */
     private static final String PLATFORMS = "platforms";
 
-    /* ANDROID STRINGS */
-
-    /**
-     * Android XML Opener
-     */
-    private static final String XML_OPENER = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
-
-    /**
-     * Android Resources Opener
-     */
-    private static final String RESOURCES_OPENER = "<resources>";
-
-    /**
-     * Android Resources Closer
-     */
-    private static final String RESOURCES_CLOSER = "</resources>";
-
-    /* OTHER */
-
     /**
      * Key used for the header in the Strings document
      */
     private static final String HEADER_KEY = "###";
 
+    /* INSTANCE VARIABLES */
+
+    /**
+     * List of languages we are writing to
+     */
+    public static List<Language> languages;
+
+    /**
+     * List of Urls we are downloading from
+     */
+    public static Map<String, String> urls;
+
+    /**
+     * Platform we are downloading for
+     */
+    public static String platform;
+
+    /**
+     * List of Strings to write
+     */
+    public static List<BaseString> strings;
+
     public static void main(String[] args) throws IOException {
+        setup();
+        readFromConfigFile();
+        verifyConfigInfo();
+        downloadAllStrings();
+        verifyKeys();
+        writeStrings();
+        System.out.println("Strings parsing complete");
+    }
+
+    /**
+     * Sets up the variables
+     */
+    public static void setup() {
         // List of all of the languages the Strings are in
-        List<Language> languages = new ArrayList<>();
+        languages = new ArrayList<>();
 
         // List of Urls to get the Strings from
-        Map<String, String> urls = new HashMap<>();
+        urls = new HashMap<>();
 
         // Platform this is for (null if not chosen)
-        String platform = null;
+        platform = null;
 
-        // Read from the config file
+        // List of Strings to write
+        strings = new ArrayList<>();
+    }
+
+    /**
+     * Reads and parses the various pieces of info from the config file
+     *
+     * @throws IOException Thrown if there was an error opening or reading the config file
+     */
+    public static void readFromConfigFile() throws IOException {
         BufferedReader configReader = null;
         try {
             configReader = new BufferedReader(new FileReader("../config.txt"));
@@ -163,7 +188,7 @@ public class StringParser {
 
                 if (languageInfo.length < 2) {
                     System.out.println("Error: The following format has too few " +
-                        "arguments for a language: " + languageString);
+                            "arguments for a language: " + languageString);
                     System.exit(-1);
                 }
 
@@ -172,7 +197,12 @@ public class StringParser {
             }
         }
         configReader.close();
+    }
 
+    /**
+     * Verifies that all of the config info is present
+     */
+    public static void verifyConfigInfo() {
         // Make sure everything is set
         if (urls.isEmpty()) {
             System.out.println("Error: There must be at least one non-null Url");
@@ -192,13 +222,17 @@ public class StringParser {
                 System.exit(-1);
             }
         }
+    }
 
-        // List of language Strings
-        List<BaseString> strings = new ArrayList<>();
-
+    /**
+     * Downloads all of the Strings from all of the Urls
+     *
+     * @throws IOException Thrown if there is any error downloading the Strings
+     */
+    public static void downloadAllStrings() throws IOException {
         for (String urlKey : urls.keySet()) {
             // Go through the Urls and download all of the Strings
-            List<BaseString> urlStrings = downloadStrings(urlKey, urls.get(urlKey), languages);
+            List<BaseString> urlStrings = downloadStrings(urlKey, urls.get(urlKey));
 
             if (urlStrings == null) {
                 // Don't continue if there's an error downloading the Strings
@@ -207,80 +241,16 @@ public class StringParser {
 
             strings.addAll(urlStrings);
         }
-
-        // Define the key checker pattern to make sure no illegal characters exist within the keys
-        Pattern keyChecker = Pattern.compile("[^A-Za-z0-9_]");
-
-        // Check if there are any errors with the keys
-        for (int i = 0; i < strings.size(); i ++) {
-            BaseString string1 = strings.get(i);
-
-            // Skip headers for the checks
-            if (!(string1 instanceof LanguageString)) {
-                continue;
-            }
-
-            // Check if there are any spaces in the keys
-            if (string1.getKey().contains(" ")) {
-                System.out.println("Error: " + getLog(string1) + " contains a space in its key.");
-                System.exit(-1);
-            }
-
-            if (keyChecker.matcher(string1.getKey()).find()) {
-                System.out.println("Error: " + getLog(string1) +
-                        " contains some illegal characters.");
-                System.exit(-1);
-            }
-
-            // Check if there are any duplicates
-            for (int j = i + 1; j < strings.size(); j ++) {
-                BaseString string2 = strings.get(j);
-
-                // If the keys are the same and it's not a header, show an error and stop
-                if (string1.getKey().equals(string2.getKey())) {
-                    System.out.println("Error: " + getLog(string1) + " and " + getLog(string2) +
-                            " have the same key.");
-                    System.exit(-1);
-                }
-            }
-        }
-
-        // Go through each language, and write the file
-        PrintWriter writer;
-        for (Language language : languages) {
-            // Set up the writer for the given language, enforcing UTF-8
-            writer = new PrintWriter(language.getPath(), "UTF-8");
-
-            processStrings(writer, language, platform, strings);
-
-            System.out.println("Wrote " + language.getId() + " to file: " + language.getPath());
-
-            writer.flush();
-            writer.close();
-        }
-
-        // Exit message
-        System.out.println("Strings parsing complete");
-    }
-
-    /**
-     * @param string String we want to log
-     * @return Log message to use to designate the given String
-     */
-    private static String getLog(BaseString string) {
-        return "Line " + string.getLineNumber() + " from " + string.getUrl();
     }
 
     /**
      * Connects to the given Url and downloads the Strings in the right format
      *
      * @param url       Url to connect to
-     * @param languages Supported languages
      * @return List of Strings that were downloaded, null if there was an error
-     * @throws IOException Thrown if there was any errors parsing the Strings
+     * @throws IOException Thrown if there was any errors downloading the Strings
      */
-    private static List<BaseString> downloadStrings(String urlName, String url,
-            List<Language> languages) throws IOException {
+    private static List<BaseString> downloadStrings(String urlName, String url) throws IOException {
         // Connect to the URL
         System.out.println("Connecting to " + url);
         Request request = new Request.Builder()
@@ -447,16 +417,85 @@ public class StringParser {
     }
 
     /**
+     * Verifies that the keys are valid
+     */
+    public static void verifyKeys() {
+        // Define the key checker pattern to make sure no illegal characters exist within the keys
+        Pattern keyChecker = Pattern.compile("[^A-Za-z0-9_]");
+
+        // Check if there are any errors with the keys
+        for (int i = 0; i < strings.size(); i ++) {
+            BaseString string1 = strings.get(i);
+
+            // Skip headers for the checks
+            if (!(string1 instanceof LanguageString)) {
+                continue;
+            }
+
+            // Check if there are any spaces in the keys
+            if (string1.getKey().contains(" ")) {
+                System.out.println("Error: " + getLog(string1) + " contains a space in its key.");
+                System.exit(-1);
+            }
+
+            if (keyChecker.matcher(string1.getKey()).find()) {
+                System.out.println("Error: " + getLog(string1) +
+                        " contains some illegal characters.");
+                System.exit(-1);
+            }
+
+            // Check if there are any duplicates
+            for (int j = i + 1; j < strings.size(); j ++) {
+                BaseString string2 = strings.get(j);
+
+                // If the keys are the same and it's not a header, show an error and stop
+                if (string1.getKey().equals(string2.getKey())) {
+                    System.out.println("Error: " + getLog(string1) + " and " + getLog(string2) +
+                            " have the same key.");
+                    System.exit(-1);
+                }
+            }
+        }
+    }
+
+    /**
+     * Writes all of the Strings for the different languages
+     *
+     * @throws IOException Thrown if any error happens
+     */
+    public static void writeStrings() throws IOException {
+        // Go through each language, and write the file
+        PrintWriter writer;
+        for (Language language : languages) {
+            // Set up the writer for the given language, enforcing UTF-8
+            writer = new PrintWriter(language.getPath(), "UTF-8");
+
+            writeLanguageStrings(writer, language);
+
+            System.out.println("Wrote " + language.getId() + " to file: " + language.getPath());
+
+            writer.flush();
+            writer.close();
+        }
+    }
+
+    /**
+     * @param string String we want to log
+     * @return Log message to use to designate the given String
+     */
+    private static String getLog(BaseString string) {
+        return "Line " + string.getLineNumber() + " from " + string.getUrl();
+    }
+
+    /**
      * Processes the Strings and writes them to a given file
      *
      * @param writer   Writer to use to write the Strings to the given file
      * @param language Language we are writing for
-     * @param platform Current platform
-     * @param strings  Strings to add to the file
      * @throws FileNotFoundException Thrown if the file does not exist
      */
-    private static void processStrings(PrintWriter writer, Language language, String platform,
-            List<BaseString> strings) throws FileNotFoundException {
+    private static void writeLanguageStrings(PrintWriter writer, Language language)
+            throws FileNotFoundException {
 
         // Header
         write(writer, getHeader(platform));
@@ -527,7 +566,7 @@ public class StringParser {
      */
     private static String getHeader(String platform) {
         if (platform.equalsIgnoreCase(ANDROID)) {
-            return XML_OPENER + "\n" + RESOURCES_OPENER;
+            return "<?xml version=\"1.0\" encoding=\"utf-8\"?> \n <resources>";
         } else if (platform.equalsIgnoreCase(IOS)) {
             return null;
         } else {
@@ -619,7 +658,7 @@ public class StringParser {
      */
     private static String getFooter(String platform) {
         if (platform.equalsIgnoreCase(ANDROID)) {
-            return RESOURCES_CLOSER;
+            return "</resources>";
         } else if (platform.equalsIgnoreCase(IOS)) {
             return null;
         } else {
