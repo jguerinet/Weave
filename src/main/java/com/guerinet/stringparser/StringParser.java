@@ -320,6 +320,11 @@ public class StringParser {
         for (int i = 0; i < header.length; i ++) {
             String string = header[i];
 
+            if (string == null) {
+                // Disregard null headers
+                continue;
+            }
+
             // Check if the String matches the key key
             if (string.equalsIgnoreCase(KEY)) {
                 keyColumn = i;
