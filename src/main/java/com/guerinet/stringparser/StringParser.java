@@ -105,6 +105,11 @@ public class StringParser {
      */
     protected List<BaseString> strings;
 
+    /**
+     * Writer to the current file we are writing to
+     */
+    protected PrintWriter writer;
+
     public static void main(String[] args) throws IOException {
         new StringParser().run();
     }
@@ -164,51 +169,55 @@ public class StringParser {
 
         String line;
         while ((line = configReader.readLine()) != null) {
-            if (line.startsWith(URL)) {
-                // Get the Url: remove the header and separate the file name from the Url
-                String urlString = line.replace(URL, "").trim();
-                String[] urlInfo = urlString.split(",");
-
-                if (urlInfo.length < 2) {
-                    System.out.println("Error: The following format has too few " +
-                            "arguments for a Url: " + urlString);
-                    System.exit(-1);
-                }
-
-                if (!urlInfo[1].trim().isEmpty()) {
-                    // Save it as a new Url in the Url map
-                    urls.put(urlInfo[0].trim(), urlInfo[1].trim());
-                }
-            } else if (line.startsWith(PLATFORM)) {
-                // Get the platform: Remove the header
-                String platformString = line.replace(PLATFORM, "").trim();
-                if (platformString.equalsIgnoreCase(ANDROID)) {
-                    platform = ANDROID;
-                } else if (platformString.equalsIgnoreCase(IOS)) {
-                    platform = IOS;
-                } else if (platformString.equalsIgnoreCase(WEB)) {
-                    platform = WEB;
-                } else {
-                    // Not recognized
-                    System.out.println("Error: Platform must be either Android, iOS, or Web.");
-                    System.exit(-1);
-                }
-            } else if (line.startsWith(LANGUAGE)) {
-                // Get the languages: remove the header and separate the language Id from the path
-                String languageString = line.replace(LANGUAGE, "").trim();
-                String[] languageInfo = languageString.split(",");
-
-                if (languageInfo.length < 2) {
-                    System.out.println("Error: The following format has too few " +
-                            "arguments for a language: " + languageString);
-                    System.exit(-1);
-                }
-
-                // Save it as a new language in the list of languages
-                languages.add(new Language(languageInfo[0].trim(), languageInfo[1].trim()));
-            }
+            readConfigLine(line);
         }
         configReader.close();
+    }
+
+    protected void readConfigLine(String line) {
+        if (line.startsWith(URL)) {
+            // Get the Url: remove the header and separate the file name from the Url
+            String urlString = line.replace(URL, "").trim();
+            String[] urlInfo = urlString.split(",");
+
+            if (urlInfo.length < 2) {
+                System.out.println("Error: The following format has too few " +
+                        "arguments for a Url: " + urlString);
+                System.exit(-1);
+            }
+
+            if (!urlInfo[1].trim().isEmpty()) {
+                // Save it as a new Url in the Url map
+                urls.put(urlInfo[0].trim(), urlInfo[1].trim());
+            }
+        } else if (line.startsWith(PLATFORM)) {
+            // Get the platform: Remove the header
+            String platformString = line.replace(PLATFORM, "").trim();
+            if (platformString.equalsIgnoreCase(ANDROID)) {
+                platform = ANDROID;
+            } else if (platformString.equalsIgnoreCase(IOS)) {
+                platform = IOS;
+            } else if (platformString.equalsIgnoreCase(WEB)) {
+                platform = WEB;
+            } else {
+                // Not recognized
+                System.out.println("Error: Platform must be either Android, iOS, or Web.");
+                System.exit(-1);
+            }
+        } else if (line.startsWith(LANGUAGE)) {
+            // Get the languages: remove the header and separate the language Id from the path
+            String languageString = line.replace(LANGUAGE, "").trim();
+            String[] languageInfo = languageString.split(",");
+
+            if (languageInfo.length < 2) {
+                System.out.println("Error: The following format has too few " +
+                        "arguments for a language: " + languageString);
+                System.exit(-1);
+            }
+
+            // Save it as a new language in the list of languages
+            languages.add(new Language(languageInfo[0].trim(), languageInfo[1].trim()));
+        }
     }
 
     /**
@@ -477,12 +486,11 @@ public class StringParser {
      */
     protected void writeStrings() throws IOException {
         // Go through each language, and write the file
-        PrintWriter writer;
         for (Language language : languages) {
             // Set up the writer for the given language, enforcing UTF-8
             writer = new PrintWriter(language.getPath(), "UTF-8");
 
-            writeLanguageStrings(writer, language);
+            writeStrings(language);
 
             System.out.println("Wrote " + language.getId() + " to file: " + language.getPath());
 
@@ -492,189 +500,178 @@ public class StringParser {
     }
 
     /**
-     * @param string String we want to log
-     * @return Log message to use to designate the given String
-     */
-    protected String getLog(BaseString string) {
-        return "Line " + string.getLineNumber() + " from " + string.getUrl();
-    }
-
-    /**
      * Processes the Strings and writes them to a given file
      *
-     * @param writer   Writer to use to write the Strings to the given file
      * @param language Language we are writing for
      * @throws FileNotFoundException Thrown if the file does not exist
      */
-    protected void writeLanguageStrings(PrintWriter writer, Language language)
-            throws FileNotFoundException {
-
+    protected void writeStrings(Language language) throws FileNotFoundException {
         // Header
-        write(writer, getHeader(platform));
+        writeHeader();
 
+        // Go through the Strings
         for (int i = 0; i < strings.size(); i ++) {
             BaseString currentString = strings.get(i);
 
             try {
                 if (!(currentString instanceof LanguageString)) {
                     // If we are parsing a header, right the value as a comment
-                    write(writer, getComment(platform, currentString.getKey()));
+                    writeComment(currentString.getKey());
                     continue;
+                } else {
+                    writeString(language, (LanguageString) currentString, i == strings.size() - 1);
                 }
-                // Normal String
-                LanguageString languageString = (LanguageString) currentString;
-
-                // Check that it's for the right platform
-                if (!languageString.isForPlatform(platform)) {
-                    continue;
-                }
-
-                String string = languageString.getString(language.getId());
-
-                // Check if value is or null empty: if it is, continue
-                if (string == null) {
-                    string = "";
-                }
-
-                if (string.isEmpty() && !platform.equalsIgnoreCase(WEB)) {
-                    // Skip over the empty values unless we're on Web
-                    continue;
-                }
-
-                // Unescaped quotations
-                string = string.replace("\"", "\\" + "\"");
-
-                // Copyright
-                string = string.replace("(c)", "\u00A9");
-
-                // New Lines
-                string = string.replace("\n", "");
-
-                write(writer, getProcessedString(platform, languageString.getKey(), string,
-                        i == strings.size() - 1));
             } catch (Exception e) {
                 System.out.println("Error on " + getLog(currentString));
                 e.printStackTrace();
             }
         }
 
-        // Header
-        write(writer, getFooter(platform));
+        // Footer
+        writeFooter();
     }
 
     /**
-     * @param writer Writer to use to write the String
-     * @param string String to write, null if none
+     * Writes the header to the current file
      */
-    protected void write(PrintWriter writer, String string) {
-        if (string != null) {
-            writer.println(string);
+    protected void writeHeader() {
+        switch (platform) {
+            case ANDROID:
+                writer.println("<?xml version=\"1.0\" encoding=\"utf-8\"?> \n <resources>");
+                break;
+            case WEB:
+                writer.println("{");
+                break;
         }
     }
 
     /**
-     * @param platform Current platform
-     * @return String to use as the header for the Strings file, null if none
+     * Writes a comment to the file
+     *
+     * @param comment  Comment String to process
      */
-    protected String getHeader(String platform) {
-        if (platform.equalsIgnoreCase(ANDROID)) {
-            return "<?xml version=\"1.0\" encoding=\"utf-8\"?> \n <resources>";
-        } else if (platform.equalsIgnoreCase(IOS)) {
-            return null;
-        } else {
-            return "{";
+    protected void writeComment(String comment) {
+        switch (platform) {
+            case ANDROID:
+                writer.println("\n    <!-- " + comment + " -->");
+                break;
+            case IOS:
+                writer.println("\n/* " + comment + " */");
         }
     }
 
     /**
-     * @param platform Current platform
-     * @param comment  Comment String
-     * @return String to include in the Strings file as a comment, null if none
+     * Writes a String to the file
+     *
+     * @param language       Current language
+     * @param languageString String to write
+     * @param lastString     True if this is the last String of the file, false otherwise
      */
-    protected String getComment(String platform, String comment) {
-        if (platform.equalsIgnoreCase(ANDROID)) {
-            return "\n    <!-- " + comment + " -->";
-        } else if (platform.equalsIgnoreCase(IOS)) {
-            return "\n/* " + comment + " */";
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * @param platform   Current platform
-     * @param key        String key
-     * @param string     String to process
-     * @param lastString True if this is the last String, false otherwise
-     * @return String to include in the Strings file for the given platform, null if none
-     */
-    protected String getProcessedString(String platform, String key, String string,
+    protected void writeString(Language language, LanguageString languageString,
             boolean lastString) {
-        if (platform.equalsIgnoreCase(ANDROID)) {
-            // Ampersands
-            string = string.replace("&", "&amp;");
+        // Check that it's for the right platform
+        if (!languageString.isForPlatform(platform)) {
+            return;
+        }
 
-            // Apostrophes
-            string = string.replace("'", "\\'");
+        String string = languageString.getString(language.getId());
 
-            // Unescaped @ signs
-            string = string.replace("@", "\\" + "@");
+        // Check if value is or null empty: if it is, continue
+        if (string == null) {
+            string = "";
+        }
 
-            // Ellipses
-            string = string.replace("...", "&#8230;");
+        if (string.trim().isEmpty() && !platform.equalsIgnoreCase(WEB)) {
+            // Skip over the empty values unless we're on Web
+            return;
+        }
 
-            // Check if this is an HTML String
-            if (string.contains("<html>") || string.contains("<HTML>")) {
-                // Don't format the greater than and less than symbols
-                string = string.replace("<html>", "<![CDATA[");
-                string = string.replace("</html>", "]]>");
-                string = string.replace("<HTML>", "<![CDATA[");
-                string = string.replace("</HTML>", "]]>");
-            } else {
-                // Format the greater then and less than symbol otherwise
-                // Greater than
-                string = string.replace(">", "&gt;");
+        // Unescaped quotations
+        string = string.replace("\"", "\\" + "\"");
 
-                // Less than
-                string = string.replace("<", "&lt;");
-            }
+        // Copyright
+        string = string.replace("(c)", "\u00A9");
 
-            // Add the XML tag
-            return "    <string name=\"" + key + "\">" + string + "</string>";
-        } else if (platform.equalsIgnoreCase(IOS)) {
-            // Replace %s format specifiers with %@
-            string = string.replace("%s", "%@");
-            string = string.replace("$s", "$@");
+        // New Lines
+        string = string.replace("\n", "");
 
-            // Remove <html> </html>tags
-            string = string.replace("<html>", "");
-            string = string.replace("</html>", "");
-            string = string.replace("<HTML>", "");
-            string = string.replace("</HTML>", "");
+        String key = languageString.getKey();
+        switch (platform) {
+            case ANDROID:
+                // Ampersands
+                string = string.replace("&", "&amp;");
 
-            return "\"" + key + "\" = \"" + string + "\";";
-        } else {
-            // Remove <html> </html>tags
-            string = string.replace("<html>", "");
-            string = string.replace("</html>", "");
-            string = string.replace("<HTML>", "");
-            string = string.replace("</HTML>", "");
+                // Apostrophes
+                string = string.replace("'", "\\'");
 
-            return "    \"" + key + "\": \"" + string + "\"" + (lastString ? "" : ",");
+                // Unescaped @ signs
+                string = string.replace("@", "\\" + "@");
+
+                // Ellipses
+                string = string.replace("...", "&#8230;");
+
+                // Check if this is an HTML String
+                if (string.contains("<html>") || string.contains("<HTML>")) {
+                    // Don't format the greater than and less than symbols
+                    string = string.replace("<html>", "<![CDATA[");
+                    string = string.replace("</html>", "]]>");
+                    string = string.replace("<HTML>", "<![CDATA[");
+                    string = string.replace("</HTML>", "]]>");
+                } else {
+                    // Format the greater then and less than symbol otherwise
+                    // Greater than
+                    string = string.replace(">", "&gt;");
+
+                    // Less than
+                    string = string.replace("<", "&lt;");
+                }
+
+                // Add the XML tag
+                writer.println("    <string name=\"" + key + "\">" + string + "</string>");
+                break;
+            case IOS:
+                // Replace %s format specifiers with %@
+                string = string.replace("%s", "%@");
+                string = string.replace("$s", "$@");
+
+                // Remove <html> </html>tags
+                string = string.replace("<html>", "");
+                string = string.replace("</html>", "");
+                string = string.replace("<HTML>", "");
+                string = string.replace("</HTML>", "");
+
+                writer.println("\"" + key + "\" = \"" + string + "\";");
+                break;
+            case WEB:
+                // Remove <html> </html>tags
+                string = string.replace("<html>", "");
+                string = string.replace("</html>", "");
+                string = string.replace("<HTML>", "");
+                string = string.replace("</HTML>", "");
+
+                writer.println("    \"" + key + "\": \"" + string + "\"" + (lastString ? "" : ","));
+                break;
         }
     }
 
     /**
-     * @param platform Current platform
-     * @return String to include as the footer of the Strings file, null if none
+     * Writes the footer to the current file
      */
-    protected String getFooter(String platform) {
-        if (platform.equalsIgnoreCase(ANDROID)) {
-            return "</resources>";
-        } else if (platform.equalsIgnoreCase(IOS)) {
-            return null;
-        } else {
-            return "}";
+    protected void writeFooter() {
+        switch (platform) {
+            case ANDROID:
+                writer.println("</resources>");
+                break;
+            case WEB:
+                writer.println("}");
         }
+    }
+
+    /**
+     * @param string String we want to log
+     * @return Log message to use to designate the given String
+     */
+    protected String getLog(BaseString string) {
+        return "Line " + string.getLineNumber() + " from " + string.getUrl();
     }
 }
