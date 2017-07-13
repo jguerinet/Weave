@@ -1,5 +1,9 @@
 # Change Log
 
+## Version 4.0.3 (2017-07-13)
+* Reworked the way Strings were written 
+* Pulled out some more methods for easier overriding
+
 ## Version 4.0.2 (2017-07-13)
 * Switched to using an instance variable
 * Broke up the main method into smaller functional methods
