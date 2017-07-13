@@ -21,7 +21,7 @@ For example, if you put ### General ### (or ### General), it will be parsed as `
 like this for multiple: %1$s, %2$s...
 * Run the jar
 
-[1]:https://github.com/jguerinet/string-parser/releases/download/4.0.0/string-parser-4.0.0.jar
+[1]:https://github.com/jguerinet/string-parser/releases/download/4.0.1/string-parser-4.0.1.jar
 
 ## Gradle Dependencies
 * [OkHttp](http://square.github.io/okhttp/)

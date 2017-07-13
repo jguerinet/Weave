@@ -1,5 +1,8 @@
 # Change Log
 
+## Version 4.0.1 (2017-07-13)
+* Fixed bug where null header cells would cause the app to crash
+
 ## Version 4.0.0 (2017-07-10)
 * Reworked the entire String formatting section to remove redundant code
 * Added support for multiple Csv files from multiple Urls
