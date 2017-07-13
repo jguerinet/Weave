@@ -9,7 +9,7 @@ Please note that it assumes that the file is in UTF-8 and also produces UTF-8 fi
 ## Instructions
 To use this: 
 
-* Download the [jar][1] and the [sample config](sample-config.txt)
+* Download the latest jar from the releases tab and the [sample config](sample-config.txt)
 * Set up your config file (follow the instructions in sample-config.txt)
 * There should be at least one column with the 'key' to represent the String keys 
 * Any columns containing translations in your CSV file must have a header with the 2 character language Id (ex: en, fr)
@@ -20,8 +20,6 @@ For example, if you put ### General ### (or ### General), it will be parsed as `
 * You can add formatted Strings by putting either the normal placeholder (i.e. %s for a String) if there is one argument, or numbering them 
 like this for multiple: %1$s, %2$s...
 * Run the jar
-
-[1]:https://github.com/jguerinet/string-parser/releases/download/4.0.1/string-parser-4.0.1.jar
 
 ## Gradle Dependencies
 * [OkHttp](http://square.github.io/okhttp/)

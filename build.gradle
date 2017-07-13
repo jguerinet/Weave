@@ -31,7 +31,7 @@ apply plugin: 'application'
 apply plugin: 'com.github.ben-manes.versions'
 
 sourceCompatibility = 1.7
-version = '4.0.1'
+version = sp_version
 
 repositories {
     jcenter()
@@ -56,3 +56,5 @@ dependencies {
     compile 'com.squareup.okhttp:okhttp:2.7.5'
     compile 'net.sf.supercsv:super-csv:2.4.0'
 }
+
+apply from: "https://raw.githubusercontent.com/jguerinet/Gradle-Artifact-Scripts/master/java-artifacts.gradle"
