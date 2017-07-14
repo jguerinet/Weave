@@ -1,5 +1,8 @@
 # Change Log
 
+## Version 4.0.4 (2017-07-14)
+* Made a bunch of classes and methods public
+
 ## Version 4.0.3 (2017-07-13)
 * Reworked the way Strings were written 
 * Pulled out some more methods for easier overriding
