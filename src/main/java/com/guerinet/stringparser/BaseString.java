@@ -23,7 +23,7 @@ package com.guerinet.stringparser;
  * @author Julien Guerinet
  * @since 2.6.0
  */
-class BaseString {
+public class BaseString {
 
     /**
      * Key to store the String under, or the header to use
@@ -58,21 +58,21 @@ class BaseString {
     /**
      * @return String Key
      */
-    String getKey() {
+    public String getKey() {
         return key;
     }
 
     /**
      * @return Url of the file this String comes from
      */
-    String getUrl() {
+    public String getUrl() {
         return url;
     }
 
     /**
      * @return Line number in the CSV that this String was on
      */
-    int getLineNumber() {
+    public int getLineNumber() {
         return lineNumber;
     }
 }

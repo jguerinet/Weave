@@ -27,7 +27,7 @@ import java.util.Map;
  * @author Julien Guerinet
  * @since 1.0.0
  */
-class LanguageString extends BaseString {
+public class LanguageString extends BaseString {
 
     /**
      * Map of translations, with the key being the language Id and the value being the String
@@ -58,7 +58,7 @@ class LanguageString extends BaseString {
      * @param id Language Id
      * @return String in that language
      */
-    String getString(String id) {
+    public String getString(String id) {
         return translations.get(id);
     }
 
@@ -66,7 +66,7 @@ class LanguageString extends BaseString {
      * @param platform Current platform
      * @return True if this String is for the current platform, false otherwise
      */
-    boolean isForPlatform(String platform) {
+    public boolean isForPlatform(String platform) {
         return platforms.isEmpty() || platforms.contains(platform.toLowerCase());
     }
 
@@ -76,14 +76,14 @@ class LanguageString extends BaseString {
      * @param id     Language Id
      * @param string String
      */
-    void addTranslation(String id, String string) {
+    public void addTranslation(String id, String string) {
         translations.put(id, string);
     }
 
     /**
      * @param platformCsv List of platforms in Csv format
      */
-    void addPlatforms(String platformCsv) {
+    public void addPlatforms(String platformCsv) {
         if (platformCsv != null && !platformCsv.isEmpty()) {
             for (String platform : platformCsv.split(",")) {
                 platforms.add(platform.trim().toLowerCase());

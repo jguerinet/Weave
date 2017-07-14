@@ -22,7 +22,7 @@ package com.guerinet.stringparser;
  * @author Julien Guerinet
  * @since 2.0.0
  */
-class Language {
+public class Language {
 
     /**
      * Language Id (2 character representation, i.e. 'en')
@@ -45,7 +45,7 @@ class Language {
      * @param id   Language Id
      * @param path Path to the file for the Strings in this language
      */
-    Language(String id, String path) {
+    public Language(String id, String path) {
         this.id = id;
         this.path = path;
         // Column starts out as -1 until we find the right column in the Csv file
@@ -57,21 +57,21 @@ class Language {
     /**
      * @return Language Id
      */
-    String getId() {
+    public String getId() {
         return id;
     }
 
     /**
      * @return Language path
      */
-    String getPath() {
+    public String getPath() {
         return path;
     }
 
     /**
      * @return Column index of this language
      */
-    int getColumnIndex() {
+    public int getColumnIndex() {
         return columnIndex;
     }
 
@@ -80,7 +80,7 @@ class Language {
     /**
      * @param columnIndex Column index of this language
      */
-    void setColumnIndex(int columnIndex) {
+    public void setColumnIndex(int columnIndex) {
         this.columnIndex = columnIndex;
     }
 }
