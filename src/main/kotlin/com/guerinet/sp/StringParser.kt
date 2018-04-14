@@ -263,7 +263,7 @@ class StringParser {
 
             // If there's a platform column , add them
             if (platformColumn != -1) {
-                languageString.addPlatforms(currentLine[platformColumn] as String)
+                languageString.addPlatforms(currentLine[platformColumn] as? String)
             }
 
             // Check if all of the values are null
