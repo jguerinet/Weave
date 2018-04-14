@@ -106,7 +106,14 @@ class StringParser {
             error("You need to add at least one language")
         }
 
-        // Make sure that we have a path per language for Android/iOS
+        // Make sure that we have a title and url per source
+        @Suppress("SENSELESS_COMPARISON")
+        val source = config.sources.find { it.title == null || it.url == null }
+        if (source != null) {
+            error("All sources need both a title and a url")
+        }
+
+        // Make sure that we have a path per language
         @Suppress("SENSELESS_COMPARISON")
         val language = config.languages.find { it.id == null || it.path == null }
         if (language != null) {
@@ -121,14 +128,6 @@ class StringParser {
     @Throws(IOException::class)
     protected fun downloadAllStrings() {
         config.sources
-                .filter {
-                    if (it.url == null || it.title == null) {
-                        println("Skipping source because it has a null title or url")
-                        false
-                    } else {
-                        true
-                    }
-                }
                 .mapNotNull {
                     downloadStrings(it)
                 }
@@ -140,11 +139,6 @@ class StringParser {
      *  format. This will return a list of [BaseString]s, null if there were any errors
      */
     protected fun downloadStrings(source: Source): List<BaseString>? {
-        if (source.title == null) {
-            // This will never happen
-            return null
-        }
-
         // Connect to the URL
         println("Connecting to ${source.url}")
         val request = Request.Builder()

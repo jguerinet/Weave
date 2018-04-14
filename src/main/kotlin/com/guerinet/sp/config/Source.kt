@@ -25,4 +25,4 @@ package com.guerinet.sp.config
  * @param title Name of this source (for logging purposes)
  * @param url   Url to retrieve the Strings from
  */
-class Source(val title: String?, val url: String?)
+class Source(val title: String, val url: String)
