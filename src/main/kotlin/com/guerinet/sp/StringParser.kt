@@ -100,9 +100,7 @@ class StringParser {
      */
     protected fun verifyConfigInfo() {
         // Make sure everything is set
-        if (config.sources.isEmpty()) {
-            error("There must be at least one source")
-        } else if (!listOf(ANDROID, IOS, WEB).contains(config.platform)) {
+        if (!listOf(ANDROID, IOS, WEB).contains(config.platform)) {
             error("You need to input a valid platform (Android, iOS, Web)")
         } else if (config.languages.isEmpty()) {
             error("You need to add at least one language")
@@ -124,6 +122,14 @@ class StringParser {
     @Throws(IOException::class)
     protected fun downloadAllStrings() {
         config.sources
+                .filter {
+                    if (it.url == null || it.title == null) {
+                        println("Skipping source because it has a null title or url")
+                        false
+                    } else {
+                        true
+                    }
+                }
                 .mapNotNull {
                     downloadStrings(it)
                 }
@@ -135,6 +141,11 @@ class StringParser {
      *  format. This will return a list of [BaseString]s, null if there were any errors
      */
     protected fun downloadStrings(source: Source): List<BaseString>? {
+        if (source.title == null) {
+            // This will never happen
+            return null
+        }
+
         // Connect to the URL
         println("Connecting to ${source.url}")
         val request = Request.Builder()
