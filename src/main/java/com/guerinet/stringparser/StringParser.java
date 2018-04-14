@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2017 Julien Guerinet
+ * Copyright 2013-2018 Julien Guerinet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@
 
 package com.guerinet.stringparser;
 
+import com.guerinet.sp.BaseString;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
+
 import org.supercsv.cellprocessor.ift.CellProcessor;
 import org.supercsv.io.CsvListReader;
 import org.supercsv.prefs.CsvPreference;
@@ -110,7 +112,7 @@ public class StringParser {
      */
     protected PrintWriter writer;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         new StringParser().run();
     }
 
@@ -503,9 +505,8 @@ public class StringParser {
      * Processes the Strings and writes them to a given file
      *
      * @param language Language we are writing for
-     * @throws FileNotFoundException Thrown if the file does not exist
      */
-    protected void writeStrings(Language language) throws FileNotFoundException {
+    protected void writeStrings(Language language) {
         // Header
         writeHeader();
 
