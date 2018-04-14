@@ -347,6 +347,12 @@ class StringParser {
      */
     @Throws(IOException::class)
     protected fun writeStrings() {
+        // If there are no Strings to write, no need to continue
+        if (strings.isEmpty()) {
+            println("No Strings to write")
+            return
+        }
+
         // Go through each language, and write the file
         config.languages.forEach {
             // Set up the writer for the given language, enforcing UTF-8
