@@ -15,7 +15,7 @@ modules.xml
 workspace.xml
 .name
 ## We're not committing the test config file
-config.txt
+sp-config.json
 node_modules
 mobile-string-parser.js.map
 mobile-string-parser.js
