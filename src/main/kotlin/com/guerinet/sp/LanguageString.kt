@@ -47,7 +47,8 @@ class LanguageString(key: String, url: String, lineNumber: Int) : BaseString(key
     /**
      * Returns true if this string is for the given [platform], false otherwise
      */
-    fun isForPlatform(platform: String) = platforms.isEmpty() || platforms.contains(platform)
+    fun isForPlatform(platform: String) = platforms.isEmpty() ||
+            platforms.contains(platform.toLowerCase())
 
     /**
      * Adds the given platforms in the [platformCsv] to the list of platforms
