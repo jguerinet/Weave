@@ -18,6 +18,7 @@
 package com.guerinet.stringparser;
 
 import com.guerinet.sp.BaseString;
+import com.guerinet.sp.LanguageString;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;

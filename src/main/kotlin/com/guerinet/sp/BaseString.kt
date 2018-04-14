@@ -44,4 +44,4 @@ package com.guerinet.sp
  *  @param url          Url of the file this String comes from
  *  @param lineNumber   Line number in the CSV that this String was on
  */
-class BaseString(val key: String, val url: String, val lineNumber: Int)
+open class BaseString(val key: String, val url: String, val lineNumber: Int)
