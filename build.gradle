@@ -22,7 +22,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.github.ben-manes:gradle-versions-plugin:0.15.0'
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.17.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -56,9 +56,10 @@ jar {
 }
 
 dependencies {
-    compile 'com.squareup.okhttp:okhttp:2.7.5'
-    compile 'net.sf.supercsv:super-csv:2.4.0'
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation 'com.squareup.moshi:moshi:1.5.0'
+    implementation 'com.squareup.okhttp:okhttp:2.7.5'
+    implementation 'net.sf.supercsv:super-csv:2.4.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 }
 
 compileKotlin {
