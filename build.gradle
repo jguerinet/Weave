@@ -58,6 +58,7 @@ jar {
 dependencies {
     implementation 'com.squareup.moshi:moshi:1.5.0'
     implementation 'com.squareup.okhttp:okhttp:2.7.5'
+    implementation 'com.squareup.okio:okio:1.14.0'
     implementation 'net.sf.supercsv:super-csv:2.4.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 }
