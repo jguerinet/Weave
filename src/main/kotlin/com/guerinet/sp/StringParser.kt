@@ -17,19 +17,20 @@
 
 package com.guerinet.sp
 
+import com.guerinet.sp.config.Config
+import com.guerinet.sp.config.Source
+import com.squareup.moshi.Moshi
 import com.squareup.okhttp.OkHttpClient
 import com.squareup.okhttp.Request
 import com.squareup.okhttp.Response
+import okio.Okio
 import org.supercsv.cellprocessor.ift.CellProcessor
 import org.supercsv.io.CsvListReader
 import org.supercsv.prefs.CsvPreference
-import java.io.BufferedReader
-import java.io.FileNotFoundException
-import java.io.FileReader
+import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
 import java.io.PrintWriter
-import java.util.*
 import java.util.regex.Pattern
 
 /**
@@ -39,44 +40,25 @@ import java.util.regex.Pattern
  */
 class StringParser {
 
-    /* INSTANCE VARIABLES */
+    protected val configAdapter = Moshi.Builder().build().adapter(Config::class.java).lenient()
 
-    /**
-     * List of languages we are writing to
-     */
-    protected var languages: MutableList<Language>
-
-    /**
-     * List of Urls we are downloading from
-     */
-    protected var urls: MutableMap<String, String>
-
-    /**
-     * Platform we are downloading for
-     */
-    protected var platform: String? = null
+    lateinit var config: Config
 
     /**
      * List of Strings to write
      */
-    protected var strings: MutableList<BaseString>
+    protected var strings = mutableListOf<BaseString>()
 
     /**
      * Writer to the current file we are writing to
      */
-    protected var writer: PrintWriter
-
-    @JvmStatic
-    fun main(args: Array<String>) {
-        StringParser().run()
-    }
+    protected lateinit var writer: PrintWriter
 
     /**
      * Runs the [StringParser]
      */
     fun run() {
         try {
-            setup()
             readFromConfigFile()
             verifyConfigInfo()
             downloadAllStrings()
@@ -91,93 +73,26 @@ class StringParser {
     }
 
     /**
-     * Sets up the variables
-     */
-    protected fun setup() {
-        // List of all of the languages the Strings are in
-        languages = ArrayList()
-
-        // List of Urls to get the Strings from
-        urls = HashMap()
-
-        // Platform this is for (null if not chosen)
-        platform = null
-
-        // List of Strings to write
-        strings = ArrayList()
-    }
-
-    /**
      * Reads and parses the various pieces of info from the config file
      *
      * @throws IOException Thrown if there was an error opening or reading the config file
      */
     @Throws(IOException::class)
     protected fun readFromConfigFile() {
-        var configReader: BufferedReader? = null
-        try {
-            configReader = BufferedReader(FileReader("../config.txt"))
-        } catch (e: FileNotFoundException) {
-            try {
-                configReader = BufferedReader(FileReader("config.txt"))
-            } catch (ex: FileNotFoundException) {
-                println("Error: Config file not found")
-                System.exit(-1)
+        // Find the config file
+        var configFile = File(FILE_NAME)
+        if (!configFile.exists()) {
+            // If it's not in the directory, check one up
+            configFile = File("../$FILE_NAME")
+            if (!configFile.exists()) {
+                error("Config File $FILE_NAME not found in current or parent directory")
             }
-
         }
 
-        var line: String
-        while ((line = configReader!!.readLine()) != null) {
-            readConfigLine(line)
-        }
-        configReader!!.close()
-    }
-
-    protected fun readConfigLine(line: String) {
-        if (line.startsWith(URL)) {
-            // Get the Url: remove the header and separate the file name from the Url
-            val urlString = line.replace(URL, "").trim({ it <= ' ' })
-            val urlInfo = urlString.split(",".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray()
-
-            if (urlInfo.size < 2) {
-                println("Error: The following format has too few " +
-                        "arguments for a Url: " + urlString)
-                System.exit(-1)
-            }
-
-            if (!urlInfo[1].trim({ it <= ' ' }).isEmpty()) {
-                // Save it as a new Url in the Url map
-                urls[urlInfo[0].trim({ it <= ' ' })] = urlInfo[1].trim({ it <= ' ' })
-            }
-        } else if (line.startsWith(PLATFORM)) {
-            // Get the platform: Remove the header
-            val platformString = line.replace(PLATFORM, "").trim({ it <= ' ' })
-            if (platformString.equals(ANDROID, ignoreCase = true)) {
-                platform = ANDROID
-            } else if (platformString.equals(IOS, ignoreCase = true)) {
-                platform = IOS
-            } else if (platformString.equals(WEB, ignoreCase = true)) {
-                platform = WEB
-            } else {
-                // Not recognized
-                println("Error: Platform must be either Android, iOS, or Web.")
-                System.exit(-1)
-            }
-        } else if (line.startsWith(LANGUAGE)) {
-            // Get the languages: remove the header and separate the language Id from the path
-            val languageString = line.replace(LANGUAGE, "").trim({ it <= ' ' })
-            val languageInfo = languageString.split(",".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray()
-
-            if (languageInfo.size < 2) {
-                println("Error: The following format has too few " +
-                        "arguments for a language: " + languageString)
-                System.exit(-1)
-            }
-
-            // Save it as a new language in the list of languages
-            languages.add(Language(languageInfo[0].trim({ it <= ' ' }), languageInfo[1].trim({ it <= ' ' })))
-        }
+        // Parse the Config from the file
+        val config = configAdapter.fromJson(Okio.buffer(Okio.source(configFile)))
+                ?: error("Parsed config was null")
+        this.config = config as Config
     }
 
     /**
@@ -185,57 +100,46 @@ class StringParser {
      */
     protected fun verifyConfigInfo() {
         // Make sure everything is set
-        if (urls.isEmpty()) {
-            println("Error: There must be at least one non-null Url")
-            System.exit(-1)
-        } else if (platform == null) {
-            println("Error: You need to input a platform")
-            System.exit(-1)
-        } else if (languages.isEmpty()) {
-            println("Error: You need to add at least one language")
-            System.exit(-1)
+        if (config.sources.isEmpty()) {
+            error("There must be at least one source")
+        } else if (!listOf(ANDROID, IOS, WEB).contains(config.platform)) {
+            error("You need to input a valid platform (Android, iOS, Web)")
+        } else if (config.languages.isEmpty()) {
+            error("You need to add at least one language")
         }
 
-        // Make sure that we have a path per language
-        for (language in languages) {
-            if (language.path == null) {
-                println("Error: Languages need a file path for Android and iOS")
-                System.exit(-1)
+        // Make sure that we have a path per language for Android/iOS
+        if (config.platform != WEB) {
+            val language = config.languages.find { it.path == null }
+            if (language != null) {
+                error("Languages need a file path for Android and iOS")
             }
         }
     }
 
     /**
-     * Downloads all of the Strings from all of the Urls
-     *
-     * @throws IOException Thrown if there is any error downloading the Strings
+     * Downloads all of the Strings from all of the Urls. Throws an [IOException] if there are
+     *  any errors downloading the Strings
      */
     @Throws(IOException::class)
     protected fun downloadAllStrings() {
-        for (urlKey in urls.keys) {
-            // Go through the Urls and download all of the Strings
-            val urlStrings = downloadStrings(urlKey, urls[urlKey])
-                    ?: // Don't continue if there's an error downloading the Strings
-                    return
-
-            strings.addAll(urlStrings)
-        }
+        config.sources
+                .mapNotNull {
+                    downloadStrings(it)
+                }
+                .forEach { strings.addAll(it) }
     }
 
     /**
-     * Connects to the given Url and downloads the Strings in the right format
-     *
-     * @param url       Url to connect to
-     * @return List of Strings that were downloaded, null if there was an error
-     * @throws IOException Thrown if there was any errors downloading the Strings
+     * Uses the given [source] to connect to a Url and download all of the Strings in the right
+     *  format. This will return a list of [BaseString]s, null if there were any errors
      */
-    @Throws(IOException::class)
-    protected fun downloadStrings(urlName: String, url: String): List<BaseString>? {
+    protected fun downloadStrings(source: Source): List<BaseString>? {
         // Connect to the URL
-        println("Connecting to $url")
+        println("Connecting to ${source.url}")
         val request = Request.Builder()
                 .get()
-                .url(url)
+                .url(source.url)
                 .build()
 
         val response: Response
@@ -244,7 +148,7 @@ class StringParser {
         } catch (e: IOException) {
             // Catch the exception here to be able to continue a build even if we are not connected
             println("IOException while connecting to the URL")
-            println("Error Message: " + e.message)
+            println("Error Message: ${e.message}")
             return null
         }
 
@@ -252,7 +156,7 @@ class StringParser {
         println("Response Code: $responseCode")
 
         if (responseCode != 200) {
-            println("Error: Response Message: " + response.message())
+            println("Error: Response Message: ${response.message()}")
             return null
         }
 
@@ -268,11 +172,10 @@ class StringParser {
         val header = reader.getHeader(true)
 
         for (i in header.indices) {
-            val string = header[i]
-                    ?: // Disregard null headers
-                    continue
+            // Disregard null headers
+            val string = header[i] ?: continue
 
-// Check if the String matches the key key
+            // Check if the String matches the key key
             if (string.equals(KEY, ignoreCase = true)) {
                 keyColumn = i
                 continue
@@ -285,62 +188,53 @@ class StringParser {
             }
 
             // Check if the String matches any of the languages parsed
-            for (language in languages) {
-                if (string.trim { it <= ' ' }.equals(language.id, ignoreCase = true)) {
-                    // If we find a match, set the column index for this language
-                    language.columnIndex = i
-                    break
-                }
-            }
+            val language = config.languages.find { string.trim().equals(it.id, ignoreCase = true) }
+            language?.columnIndex = i
         }
 
         // Make sure there is a key column
         if (keyColumn == -1) {
-            println("Error: There must be a column marked 'key' with the String keys")
-            System.exit(-1)
+            error("There must be a column marked 'key' with the String keys")
         }
 
         // Make sure that all languages have an index
-        for (language in languages) {
-            if (language.columnIndex == -1) {
-                println("Error: " + language.id + " in " + urlName +
-                        " does not have any translations.")
-                System.exit(-1)
-            }
+        val language = config.languages.find { it.columnIndex == -1 }
+        if (language != null) {
+            error("Error: ${language.id} in ${source.title} does not have any translations.")
         }
 
         // Create the list of Strings
-        val strings = ArrayList<BaseString>()
+        val strings = mutableListOf<BaseString>()
 
         // Make a CellProcessor with the right length
         val processors = arrayOfNulls<CellProcessor>(header.size)
 
         // Go through each line of the CSV document into a list of objects.
-        var currentLine: List<Any>
+        var currentLine = reader.read(*processors)
+
         // The current line number (start at 2 since 1 is the header)
         var lineNumber = 2
-        while ((currentLine = reader.read(*processors)) != null) {
+
+        while (currentLine != null) {
             // Get the key from the current line
-            var key: String? = currentLine[keyColumn] as String
+            val key = (currentLine[keyColumn] as? String)?.trim()
 
             // Check if there's a key
-            if (key == null || key.trim { it <= ' ' }.isEmpty()) {
-                println("Warning: Line " + lineNumber + " does not have a key and " +
-                        "will not be parsed")
+            if (key == null || key.isBlank()) {
+                println("Warning: Line $lineNumber does not have a key and will not be parsed")
 
                 // Increment the line number
                 lineNumber++
 
-                // Move on to the new String
+                // Next line
+                currentLine = reader.read(*processors)
+
                 continue
             }
 
-            // Trim the key before continuing
-            key = key.trim { it <= ' ' }
-
             // Check if this is a header
             if (key.startsWith(HEADER_KEY)) {
-                strings.add(BaseString(key.replace("###", "").trim { it <= ' ' }, urlName, lineNumber))
+                strings.add(BaseString(key.replace("###", "").trim(), source.title, lineNumber))
 
                 // Increment the line number and continue
                 lineNumber++
@@ -348,21 +242,19 @@ class StringParser {
             }
 
             // Add a new language String
-            val languageString = LanguageString(key, urlName, lineNumber)
+            val languageString = LanguageString(key, source.title, lineNumber)
 
             // Go through the languages, add each translation
             var allNull = true
             var oneNull = false
-            for (language in languages) {
-                val currentLanguage = currentLine[language.columnIndex] as String
-
+            config.languages.forEach {
+                val currentLanguage = currentLine[it.columnIndex] as? String
                 if (currentLanguage != null) {
                     allNull = false
+                    languageString.addTranslation(it.id, currentLanguage)
                 } else {
                     oneNull = true
                 }
-
-                languageString.addTranslation(language.id, currentLanguage)
             }
 
             // If there's a platform column , add them
@@ -373,18 +265,21 @@ class StringParser {
             // Check if all of the values are null
             if (allNull) {
                 // Show a warning message
-                println("Warning: Line " + lineNumber + " from " + urlName +
-                        " has no translations so it will not be parsed.")
+                println("Warning: Line $lineNumber from ${source.title} has no translations " +
+                        "so it will not be parsed.")
             } else {
                 if (oneNull) {
-                    println("Warning: Line " + lineNumber + " from " + urlName +
-                            " is missing at least one translation")
+                    println("Warning: Line $lineNumber from ${source.title} is missing at " +
+                            "least one translation")
                 }
                 strings.add(languageString)
             }
 
             // Increment the line number
             lineNumber++
+
+            // Next line
+            currentLine = reader.read(*processors)
         }
 
         // Close the CSV reader
@@ -400,53 +295,56 @@ class StringParser {
         // Define the key checker pattern to make sure no illegal characters exist within the keys
         val keyChecker = Pattern.compile("[^A-Za-z0-9_]")
 
+        // Get rid of all of the headers
+        val strings = this.strings.mapNotNull { it as? LanguageString }
+
+        val toRemove = mutableListOf<LanguageString>()
+
         // Check if there are any errors with the keys
         for (i in strings.indices) {
-            val string1 = strings[i] as? LanguageString ?: continue
-
-            // Skip headers for the checks
+            val string1 = strings[i]
 
             // Check if there are any spaces in the keys
             if (string1.key.contains(" ")) {
-                println("Error: " + getLog(string1) + " contains a space in its key.")
-                System.exit(-1)
+                error("${getLog(string1)} contains a space in its key.")
             }
 
             if (keyChecker.matcher(string1.key).find()) {
-                println("Error: " + getLog(string1) +
-                        " contains some illegal characters.")
-                System.exit(-1)
+                error("${getLog(string1)} contains some illegal characters.")
             }
 
             // Check if there are any duplicates
             for (j in i + 1 until strings.size) {
                 val string2 = strings[j]
 
-                // If the keys are the same and it's not a header, show an error and stop
+                // If the keys are the same and it's not a header, show a warning and remove
+                //  the older one
                 if (string1.key == string2.key) {
-                    println("Error: " + getLog(string1) + " and " + getLog(string2) +
-                            " have the same key.")
-                    System.exit(-1)
+                    println("Warning: ${getLog(string1)} and ${getLog(string2)} have the same " +
+                            "key. The first one will be overwritten by the second one.")
+                    toRemove.add(string1)
                 }
             }
         }
+
+        // Remove all duplicates
+        this.strings.removeAll(toRemove)
     }
 
     /**
-     * Writes all of the Strings for the different languages
-     *
-     * @throws IOException Thrown if any error happens
+     * Writes all of the Strings for the different languages. Throws an [IOException] if there's
+     *  an error
      */
     @Throws(IOException::class)
     protected fun writeStrings() {
         // Go through each language, and write the file
-        for (language in languages) {
+        config.languages.forEach {
             // Set up the writer for the given language, enforcing UTF-8
-            writer = PrintWriter(language.path, "UTF-8")
+            writer = PrintWriter(it.path, "UTF-8")
 
-            writeStrings(language)
+            writeStrings(it)
 
-            println("Wrote " + language.id + " to file: " + language.path)
+            println("Wrote ${it.id} to file: ${it.path}")
 
             writer.flush()
             writer.close()
@@ -454,31 +352,27 @@ class StringParser {
     }
 
     /**
-     * Processes the Strings and writes them to a given file
-     *
-     * @param language Language we are writing for
+     * Processes the Strings and writes them to a given file for the given [language]
      */
     protected fun writeStrings(language: Language) {
         // Header
         writeHeader()
 
-        // Go through the Strings
-        for (i in strings.indices) {
-            val currentString = strings[i]
+        val last = strings.last()
 
+        // Go through the Strings
+        strings.forEach {
             try {
-                if (currentString !is LanguageString) {
+                if (it !is LanguageString) {
                     // If we are parsing a header, right the value as a comment
-                    writeComment(currentString.key)
-                    continue
+                    writeComment(it.key)
                 } else {
-                    writeString(language, currentString, i == strings.size - 1)
+                    writeString(language, it, last == it)
                 }
             } catch (e: Exception) {
-                println("Error on " + getLog(currentString))
+                println("Error on ${getLog(it)}")
                 e.printStackTrace()
             }
-
         }
 
         // Footer
@@ -489,35 +383,30 @@ class StringParser {
      * Writes the header to the current file
      */
     protected fun writeHeader() {
-        when (platform) {
+        when (config.platform) {
             ANDROID -> writer.println("<?xml version=\"1.0\" encoding=\"utf-8\"?> \n <resources>")
             WEB -> writer.println("{")
         }
     }
 
     /**
-     * Writes a comment to the file
-     *
-     * @param comment  Comment String to process
+     * Writes a [comment] to the file
      */
     protected fun writeComment(comment: String) {
-        when (platform) {
+        when (config.platform) {
             ANDROID -> writer.println("\n    <!-- $comment -->")
             IOS -> writer.println("\n/* $comment */")
         }
     }
 
     /**
-     * Writes a String to the file
-     *
-     * @param language       Current language
-     * @param languageString String to write
-     * @param lastString     True if this is the last String of the file, false otherwise
+     * Writes a [languageString] to the file within the current [language] within the file.
+     *  Depending on the platform and whether this [isLastString], the String differs
      */
     protected fun writeString(language: Language, languageString: LanguageString,
-            lastString: Boolean) {
+            isLastString: Boolean) {
         // Check that it's for the right platform
-        if (!languageString.isForPlatform(platform!!)) {
+        if (!languageString.isForPlatform(config.platform)) {
             return
         }
 
@@ -528,7 +417,7 @@ class StringParser {
             string = ""
         }
 
-        if (string.trim { it <= ' ' }.isEmpty() && !platform!!.equals(WEB, ignoreCase = true)) {
+        if (string.isBlank() && config.platform != WEB) {
             // Skip over the empty values unless we're on Web
             return
         }
@@ -543,7 +432,7 @@ class StringParser {
         string = string.replace("\n", "")
 
         val key = languageString.key
-        when (platform) {
+        when (config.platform) {
             ANDROID -> {
                 // Ampersands
                 string = string.replace("&", "&amp;")
@@ -596,7 +485,7 @@ class StringParser {
                 string = string.replace("<HTML>", "")
                 string = string.replace("</HTML>", "")
 
-                writer.println("    \"" + key + "\": \"" + string + "\"" + if (lastString) "" else ",")
+                writer.println("    \"$key\": \"$string\"${if (isLastString) "" else ","}")
             }
         }
     }
@@ -605,23 +494,30 @@ class StringParser {
      * Writes the footer to the current file
      */
     protected fun writeFooter() {
-        when (platform) {
+        when (config.platform) {
             ANDROID -> writer.println("</resources>")
             WEB -> writer.println("}")
         }
     }
 
     /**
-     * @param string String we want to log
-     * @return Log message to use to designate the given String
+     * Returns the header for a log message for a given [string]
      */
     protected fun getLog(string: BaseString): String {
-        return "Line " + string.lineNumber + " from " + string.url
+        return "Line ${string.lineNumber} from ${string.url}"
+    }
+
+    protected fun error(message: String) {
+        println("Error: $message")
+        System.exit(-1)
     }
 
     companion object {
 
-        /** PLATFORM CONSTANTS */
+        private const val FILE_NAME = "sp-config.json"
+
+        /* PLATFORM CONSTANTS */
+
         private const val ANDROID = "Android"
         private const val IOS = "iOS"
         private const val WEB = "Web"
@@ -642,5 +538,10 @@ class StringParser {
          * Designates a header within the Strings document
          */
         private const val HEADER_KEY = "###"
+
+        @JvmStatic
+        fun main(args: Array<String>) {
+            StringParser().run()
+        }
     }
 }
