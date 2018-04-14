@@ -107,11 +107,10 @@ class StringParser {
         }
 
         // Make sure that we have a path per language for Android/iOS
-        if (config.platform != WEB) {
-            val language = config.languages.find { it.path == null }
-            if (language != null) {
-                error("Languages need a file path for Android and iOS")
-            }
+        @Suppress("SENSELESS_COMPARISON")
+        val language = config.languages.find { it.id == null || it.path == null }
+        if (language != null) {
+            error("All languages need both an Id and a file path")
         }
     }
 
