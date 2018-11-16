@@ -24,19 +24,13 @@ import kotlinx.serialization.Serializable
  * Base parsed Config Json
  * @author Julien Guerinet
  * @since 5.0.0
- *
- * @param platform  Platform we are parsing for (Android, iOS, Web)
- * @param sources   List of sources the Strings are coming from
  */
 @Serializable
 open class BaseConfig {
 
+    /** Platform we are parsing for (Android, iOS, Web) */
     val platform: String = ""
 
+    /** List of [Source]s the Strings are coming from */
     val sources: List<Source> = listOf()
-
-//    /**
-//     * Moshi Constructor
-//     */
-//    constructor() : this("", listOf())
 }

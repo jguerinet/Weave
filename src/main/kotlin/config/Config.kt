@@ -28,10 +28,4 @@ import com.guerinet.sp.Language
  * @param sources   List of sources the Strings are coming from
  * @param languages List of languages we are parsing
  */
-class Config(val platform: String, val sources: List<Source>, val languages: List<Language>) {
-
-    /**
-     * Moshi Constructor
-     */
-    constructor() : this("", listOf(), listOf())
-}
+class Config(val platform: String, val sources: List<Source>, val languages: List<Language>)
