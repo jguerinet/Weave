@@ -38,7 +38,8 @@ import java.util.regex.Pattern
  * @author Julien Guerinet
  * @since 1.0.0
  */
-class StringParser {
+@Suppress("MemberVisibilityCanBePrivate")
+open class StringParser {
 
     protected val configAdapter = Moshi.Builder().build().adapter(Config::class.java).lenient()
 
