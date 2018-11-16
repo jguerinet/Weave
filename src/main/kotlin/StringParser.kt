@@ -69,9 +69,9 @@ open class StringParser {
                 warning("No Strings config found")
             } else {
                 verifyStringConfigInfo(stringsConfig)
-                downloadAllStrings(it)
+                downloadAllStrings(stringsConfig)
                 verifyKeys()
-                writeStrings(it)
+                writeStrings(stringsConfig)
                 println("Strings parsing complete")
             }
 
@@ -109,6 +109,8 @@ open class StringParser {
         config = JSON.parse(Configs.serializer(), Okio.buffer(Okio.source(configFile)).readUtf8())
     }
 
+    /* VERIFICATION */
+
     /**
      * Verifies the info is correct on a [StringsConfig] [config]
      */
@@ -128,6 +130,8 @@ open class StringParser {
         // TODO Add AnalyticsConfig verification
     }
 
+    /* STRING PARSING */
+
     /**
      * Downloads all of the Strings from all of the Urls. Throws an [IOException] if there are
      *  any errors downloading the Strings
@@ -135,9 +139,7 @@ open class StringParser {
     @Throws(IOException::class)
     protected fun downloadAllStrings(config: StringsConfig) {
         config.sources
-            .mapNotNull {
-                downloadStrings(config, it)
-            }
+            .mapNotNull { downloadStrings(config, it) }
             .forEach { strings.addAll(it) }
     }
 
@@ -173,10 +175,7 @@ open class StringParser {
 
         // Set up the CSV reader
         val reader = CsvListReader(
-            InputStreamReader(
-                response.body().byteStream(),
-                "UTF-8"
-            ), CsvPreference.EXCEL_PREFERENCE
+            InputStreamReader(response.body().byteStream(), "UTF-8"), CsvPreference.EXCEL_PREFERENCE
         )
 
         // Keep track of which columns hold the keys and the platform
@@ -280,16 +279,10 @@ open class StringParser {
             // Check if all of the values are null
             if (allNull) {
                 // Show a warning message
-                println(
-                    "Warning: Line $lineNumber from ${source.title} has no translations " +
-                            "so it will not be parsed."
-                )
+                warning("Line $lineNumber from ${source.title} has no translations so it will not be parsed.")
             } else {
                 if (oneNull) {
-                    println(
-                        "Warning: Line $lineNumber from ${source.title} is missing at " +
-                                "least one translation"
-                    )
+                    warning("Warning: Line $lineNumber from ${source.title} is missing at least one translation")
                 }
                 strings.add(languageString)
             }
@@ -339,8 +332,8 @@ open class StringParser {
                 // If the keys are the same and it's not a header, show a warning and remove
                 //  the older one
                 if (string1.key == string2.key) {
-                    println(
-                        "Warning: ${getLog(string1)} and ${getLog(string2)} have the same " +
+                    warning(
+                        "${getLog(string1)} and ${getLog(string2)} have the same " +
                                 "key. The first one will be overwritten by the second one."
                     )
                     toRemove.add(string1)
