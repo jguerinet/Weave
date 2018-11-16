@@ -22,21 +22,13 @@ import config.BaseConfig
 import kotlinx.serialization.Serializable
 
 /**
- * Parsed Config Json
+ * Parsed Config Json for Strings
  * @author Julien Guerinet
  * @since 5.0.0
- *
- * @param platform  Platform we are parsing for (Android, iOS, Web)
- * @param sources   List of sources the Strings are coming from
- * @param languages List of languages we are parsing
  */
 @Serializable
 class StringConfig : BaseConfig() {
 
+    /** List of [Language]s we are parsing */
     val languages: List<Language> = listOf()
-
-//    /**
-//     * Moshi Constructor
-//     */
-//    constructor() : this("", listOf(), listOf())
 }
