@@ -62,12 +62,25 @@ open class StringParser {
     fun run() {
         try {
             readFromConfigFile()
-            verifyStringConfigInfo(config.stringsConfig)
-            verifyAnalyticsConfigInfo(config.analyticsConfig)
-            downloadAllStrings(it)
-            verifyKeys()
-            writeStrings(it)
-            println("Strings parsing complete")
+            val stringsConfig = config.stringsConfig
+            val analyticsConfig = config.analyticsConfig
+
+            if (stringsConfig == null) {
+                warning("No Strings config found")
+            } else {
+                verifyStringConfigInfo(stringsConfig)
+                downloadAllStrings(it)
+                verifyKeys()
+                writeStrings(it)
+                println("Strings parsing complete")
+            }
+
+            if (analyticsConfig == null) {
+                warning("No Analytics config found")
+            } else {
+                verifyAnalyticsConfigInfo(analyticsConfig)
+                // TODO
+            }
         } catch (e: IOException) {
             println("Error running String Parser: ")
             e.printStackTrace()
@@ -99,11 +112,7 @@ open class StringParser {
     /**
      * Verifies the info is correct on a [StringsConfig] [config]
      */
-    protected fun verifyStringConfigInfo(config: StringsConfig?) {
-        if (config == null) {
-            return warning("No String Config found")
-        }
-
+    protected fun verifyStringConfigInfo(config: StringsConfig) {
         // Make sure everything is set
         if (!listOf(ANDROID, IOS, WEB).contains(config.platform)) {
             error("You need to input a valid platform (Android, iOS, Web)")
@@ -115,10 +124,7 @@ open class StringParser {
     /**
      * Verifies that all of the config info is present
      */
-    protected fun verifyAnalyticsConfigInfo(config: AnalyticsConfig?) {
-        if (config == null) {
-            return warning("No Analytics Config found")
-        }
+    protected fun verifyAnalyticsConfigInfo(config: AnalyticsConfig) {
         // TODO Add AnalyticsConfig verification
     }
 
