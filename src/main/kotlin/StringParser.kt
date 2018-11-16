@@ -18,11 +18,13 @@
 package com.guerinet.sp
 
 import com.guerinet.sp.config.Source
-import com.guerinet.sp.config.StringConfig
+import com.guerinet.sp.config.StringsConfig
 import com.squareup.okhttp.OkHttpClient
 import com.squareup.okhttp.Request
 import com.squareup.okhttp.Response
+import config.AnalyticsConfig
 import config.BaseConfig
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JSON
 import okio.Okio
 import org.supercsv.cellprocessor.ift.CellProcessor
@@ -42,7 +44,12 @@ import java.util.regex.Pattern
 @Suppress("MemberVisibilityCanBePrivate")
 open class StringParser {
 
-    protected val configs = mutableListOf<BaseConfig>()
+    protected lateinit var config: Configs
+
+    /**
+     * List of Strings to write
+     */
+    protected var strings = mutableListOf<BaseString>()
 
     /**
      * Writer to the current file we are writing to
@@ -55,18 +62,12 @@ open class StringParser {
     fun run() {
         try {
             readFromConfigFile()
-            verifyConfigInfo()
-            configs.forEach {
-                when (it) {
-                    is StringConfig -> {
-                        downloadAllStrings(it)
-                        verifyKeys()
-                        writeStrings(it)
-                        println("Strings parsing complete")
-                    }
-                    // TODO Add Analytics work
-                }
-            }
+            verifyStringConfigInfo(config.stringsConfig)
+            verifyAnalyticsConfigInfo(config.analyticsConfig)
+            downloadAllStrings(it)
+            verifyKeys()
+            writeStrings(it)
+            println("Strings parsing complete")
         } catch (e: IOException) {
             println("Error running String Parser: ")
             e.printStackTrace()
@@ -92,28 +93,17 @@ open class StringParser {
         }
 
         // Parse the Config from the file
-        val config = JSON.parse(StringConfig.serializer(), Okio.buffer(Okio.source(configFile)).readUtf8())
-
-        // Add the config to the list
-        configs.add(config)
+        config = JSON.parse(Configs.serializer(), Okio.buffer(Okio.source(configFile)).readUtf8())
     }
 
     /**
-     * Verifies that all of the config info is present
+     * Verifies the info is correct on a [StringsConfig] [config]
      */
-    protected fun verifyConfigInfo() {
-        configs.forEach {
-            when (it) {
-                is StringConfig -> verifyStringConfigInfo(it)
-                // TODO Add analytics config checking
-            }
+    protected fun verifyStringConfigInfo(config: StringsConfig?) {
+        if (config == null) {
+            return warning("No String Config found")
         }
-    }
 
-    /**
-     * Verifies the info is correct on a [StringConfig] [config]
-     */
-    protected fun verifyStringConfigInfo(config: StringConfig) {
         // Make sure everything is set
         if (!listOf(ANDROID, IOS, WEB).contains(config.platform)) {
             error("You need to input a valid platform (Android, iOS, Web)")
@@ -123,11 +113,21 @@ open class StringParser {
     }
 
     /**
+     * Verifies that all of the config info is present
+     */
+    protected fun verifyAnalyticsConfigInfo(config: AnalyticsConfig?) {
+        if (config == null) {
+            return warning("No Analytics Config found")
+        }
+        // TODO Add AnalyticsConfig verification
+    }
+
+    /**
      * Downloads all of the Strings from all of the Urls. Throws an [IOException] if there are
      *  any errors downloading the Strings
      */
     @Throws(IOException::class)
-    protected fun downloadAllStrings(config: StringConfig) {
+    protected fun downloadAllStrings(config: StringsConfig) {
         config.sources
             .mapNotNull {
                 downloadStrings(config, it)
@@ -139,7 +139,7 @@ open class StringParser {
      * Uses the given [source] to connect to a Url and download all of the Strings in the right
      *  format. This will return a list of [BaseString]s, null if there were any errors
      */
-    protected fun downloadStrings(config: StringConfig, source: Source): List<BaseString>? {
+    protected fun downloadStrings(config: StringsConfig, source: Source): List<BaseString>? {
         // Connect to the URL
         println("Connecting to ${source.url}")
         val request = Request.Builder()
@@ -351,7 +351,7 @@ open class StringParser {
      *  an error
      */
     @Throws(IOException::class)
-    protected fun writeStrings(config: StringConfig) {
+    protected fun writeStrings(config: StringsConfig) {
         // If there are no Strings to write, no need to continue
         if (strings.isEmpty()) {
             println("No Strings to write")
@@ -375,7 +375,7 @@ open class StringParser {
     /**
      * Processes the Strings and writes them to a given file for the given [language]
      */
-    protected fun writeStrings(config: StringConfig, language: Language) {
+    protected fun writeStrings(config: StringsConfig, language: Language) {
         // Header
         writeHeader(config)
 
@@ -425,7 +425,7 @@ open class StringParser {
      *  Depending on the platform and whether this [isLastString], the String differs
      */
     protected fun writeString(
-        config: StringConfig,
+        config: StringsConfig,
         language: Language,
         languageString: LanguageString,
         isLastString: Boolean
@@ -537,6 +537,8 @@ open class StringParser {
         System.exit(-1)
     }
 
+    protected fun warning(message: String) = println("Warning: $message")
+
     companion object {
 
         private const val FILE_NAME = "sp-config.json"
@@ -570,3 +572,9 @@ open class StringParser {
         }
     }
 }
+
+/**
+ * Convenience mapping to what is read from the config file. It can have a [stringsConfig] and/or an [analyticsConfig]
+ */
+@Serializable
+class Configs(val stringsConfig: StringsConfig? = null, val analyticsConfig: AnalyticsConfig? = null)

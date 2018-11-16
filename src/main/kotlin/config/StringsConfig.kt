@@ -27,7 +27,7 @@ import kotlinx.serialization.Serializable
  * @since 5.0.0
  */
 @Serializable
-class StringConfig : BaseConfig() {
+class StringsConfig : BaseConfig() {
 
     /** List of [Language]s we are parsing */
     val languages: List<Language> = listOf()
