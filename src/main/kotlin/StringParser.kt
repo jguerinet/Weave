@@ -45,11 +45,6 @@ open class StringParser {
     protected val configs = mutableListOf<BaseConfig>()
 
     /**
-     * List of Strings to write
-     */
-    protected var strings = mutableListOf<BaseString>()
-
-    /**
      * Writer to the current file we are writing to
      */
     protected lateinit var writer: PrintWriter
