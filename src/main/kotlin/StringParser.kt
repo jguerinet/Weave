@@ -17,13 +17,12 @@
 
 package com.guerinet.sp
 
-import com.guerinet.sp.config.Config
 import com.guerinet.sp.config.Source
 import com.guerinet.sp.config.StringConfig
-import com.squareup.moshi.Moshi
 import com.squareup.okhttp.OkHttpClient
 import com.squareup.okhttp.Request
 import com.squareup.okhttp.Response
+import config.BaseConfig
 import kotlinx.serialization.json.JSON
 import okio.Okio
 import org.supercsv.cellprocessor.ift.CellProcessor
@@ -43,9 +42,7 @@ import java.util.regex.Pattern
 @Suppress("MemberVisibilityCanBePrivate")
 open class StringParser {
 
-    protected val configAdapter = Moshi.Builder().build().adapter(Config::class.java).lenient()
-
-    lateinit var config: Config
+    protected val configs = mutableListOf<BaseConfig>()
 
     /**
      * List of Strings to write
@@ -64,12 +61,19 @@ open class StringParser {
         try {
             readFromConfigFile()
             verifyConfigInfo()
-            downloadAllStrings()
-            verifyKeys()
-            writeStrings()
-            println("Strings parsing complete")
+            configs.forEach {
+                when (it) {
+                    is StringConfig -> {
+                        downloadAllStrings(it)
+                        verifyKeys()
+                        writeStrings(it)
+                        println("Strings parsing complete")
+                    }
+                    // TODO Add Analytics work
+                }
+            }
         } catch (e: IOException) {
-            println("Error downloading Strings: ")
+            println("Error running String Parser: ")
             e.printStackTrace()
         }
 
@@ -95,34 +99,31 @@ open class StringParser {
         // Parse the Config from the file
         val config = JSON.parse(StringConfig.serializer(), Okio.buffer(Okio.source(configFile)).readUtf8())
 
-//        val config = configAdapter.fromJson(Okio.buffer(Okio.source(configFile)))
-//            ?: error("Parsed config was null")
-        this.config = config as Config
+        // Add the config to the list
+        configs.add(config)
     }
 
     /**
      * Verifies that all of the config info is present
      */
     protected fun verifyConfigInfo() {
+        configs.forEach {
+            when (it) {
+                is StringConfig -> verifyStringConfigInfo(it)
+                // TODO Add analytics config checking
+            }
+        }
+    }
+
+    /**
+     * Verifies the info is correct on a [StringConfig] [config]
+     */
+    protected fun verifyStringConfigInfo(config: StringConfig) {
         // Make sure everything is set
         if (!listOf(ANDROID, IOS, WEB).contains(config.platform)) {
             error("You need to input a valid platform (Android, iOS, Web)")
         } else if (config.languages.isEmpty()) {
             error("You need to add at least one language")
-        }
-
-        // Make sure that we have a title and url per source
-        @Suppress("SENSELESS_COMPARISON")
-        val source = config.sources.find { it.title == null || it.url == null }
-        if (source != null) {
-            error("All sources need both a title and a url")
-        }
-
-        // Make sure that we have a path per language
-        @Suppress("SENSELESS_COMPARISON")
-        val language = config.languages.find { it.id == null || it.path == null }
-        if (language != null) {
-            error("All languages need both an Id and a file path")
         }
     }
 
@@ -131,10 +132,10 @@ open class StringParser {
      *  any errors downloading the Strings
      */
     @Throws(IOException::class)
-    protected fun downloadAllStrings() {
+    protected fun downloadAllStrings(config: StringConfig) {
         config.sources
             .mapNotNull {
-                downloadStrings(it)
+                downloadStrings(config, it)
             }
             .forEach { strings.addAll(it) }
     }
@@ -143,7 +144,7 @@ open class StringParser {
      * Uses the given [source] to connect to a Url and download all of the Strings in the right
      *  format. This will return a list of [BaseString]s, null if there were any errors
      */
-    protected fun downloadStrings(source: Source): List<BaseString>? {
+    protected fun downloadStrings(config: StringConfig, source: Source): List<BaseString>? {
         // Connect to the URL
         println("Connecting to ${source.url}")
         val request = Request.Builder()
@@ -355,7 +356,7 @@ open class StringParser {
      *  an error
      */
     @Throws(IOException::class)
-    protected fun writeStrings() {
+    protected fun writeStrings(config: StringConfig) {
         // If there are no Strings to write, no need to continue
         if (strings.isEmpty()) {
             println("No Strings to write")
@@ -367,7 +368,7 @@ open class StringParser {
             // Set up the writer for the given language, enforcing UTF-8
             writer = PrintWriter(it.path, "UTF-8")
 
-            writeStrings(it)
+            writeStrings(config, it)
 
             println("Wrote ${it.id} to file: ${it.path}")
 
@@ -379,9 +380,9 @@ open class StringParser {
     /**
      * Processes the Strings and writes them to a given file for the given [language]
      */
-    protected fun writeStrings(language: Language) {
+    protected fun writeStrings(config: StringConfig, language: Language) {
         // Header
-        writeHeader()
+        writeHeader(config)
 
         val last = strings.last()
 
@@ -390,9 +391,9 @@ open class StringParser {
             try {
                 if (it !is LanguageString) {
                     // If we are parsing a header, right the value as a comment
-                    writeComment(it.key)
+                    writeComment(config, it.key)
                 } else {
-                    writeString(language, it, last == it)
+                    writeString(config, language, it, last == it)
                 }
             } catch (e: Exception) {
                 println("Error on ${getLog(it)}")
@@ -401,13 +402,13 @@ open class StringParser {
         }
 
         // Footer
-        writeFooter()
+        writeFooter(config)
     }
 
     /**
      * Writes the header to the current file
      */
-    protected fun writeHeader() {
+    protected fun writeHeader(config: BaseConfig) {
         when (config.platform) {
             ANDROID -> writer.println("<?xml version=\"1.0\" encoding=\"utf-8\"?> \n <resources>")
             WEB -> writer.println("{")
@@ -417,7 +418,7 @@ open class StringParser {
     /**
      * Writes a [comment] to the file
      */
-    protected fun writeComment(comment: String) {
+    protected fun writeComment(config: BaseConfig, comment: String) {
         when (config.platform) {
             ANDROID -> writer.println("\n    <!-- $comment -->")
             IOS -> writer.println("\n/* $comment */")
@@ -429,7 +430,9 @@ open class StringParser {
      *  Depending on the platform and whether this [isLastString], the String differs
      */
     protected fun writeString(
-        language: Language, languageString: LanguageString,
+        config: StringConfig,
+        language: Language,
+        languageString: LanguageString,
         isLastString: Boolean
     ) {
         // Check that it's for the right platform
@@ -520,7 +523,7 @@ open class StringParser {
     /**
      * Writes the footer to the current file
      */
-    protected fun writeFooter() {
+    protected fun writeFooter(config: BaseConfig) {
         when (config.platform) {
             ANDROID -> writer.println("</resources>")
             WEB -> writer.println("}")
