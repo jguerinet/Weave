@@ -19,10 +19,12 @@ package com.guerinet.sp
 
 import com.guerinet.sp.config.Config
 import com.guerinet.sp.config.Source
+import com.guerinet.sp.config.StringConfig
 import com.squareup.moshi.Moshi
 import com.squareup.okhttp.OkHttpClient
 import com.squareup.okhttp.Request
 import com.squareup.okhttp.Response
+import kotlinx.serialization.json.JSON
 import okio.Okio
 import org.supercsv.cellprocessor.ift.CellProcessor
 import org.supercsv.io.CsvListReader
@@ -91,8 +93,10 @@ open class StringParser {
         }
 
         // Parse the Config from the file
-        val config = configAdapter.fromJson(Okio.buffer(Okio.source(configFile)))
-            ?: error("Parsed config was null")
+        val config = JSON.parse(StringConfig.serializer(), Okio.buffer(Okio.source(configFile)).readUtf8())
+
+//        val config = configAdapter.fromJson(Okio.buffer(Okio.source(configFile)))
+//            ?: error("Parsed config was null")
         this.config = config as Config
     }
 

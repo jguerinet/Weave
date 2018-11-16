@@ -19,6 +19,7 @@ package com.guerinet.sp.config
 
 import com.guerinet.sp.Language
 import config.BaseConfig
+import kotlinx.serialization.Serializable
 
 /**
  * Parsed Config Json
@@ -29,11 +30,13 @@ import config.BaseConfig
  * @param sources   List of sources the Strings are coming from
  * @param languages List of languages we are parsing
  */
-class StringConfig(platform: String, sources: List<Source>, val languages: List<Language>) :
-    BaseConfig(platform, sources) {
+@Serializable
+class StringConfig : BaseConfig() {
 
-    /**
-     * Moshi Constructor
-     */
-    constructor() : this("", listOf(), listOf())
+    val languages: List<Language> = listOf()
+
+//    /**
+//     * Moshi Constructor
+//     */
+//    constructor() : this("", listOf(), listOf())
 }

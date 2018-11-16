@@ -17,6 +17,8 @@
 
 package com.guerinet.sp
 
+import kotlinx.serialization.Serializable
+
 /**
  * One language that the Strings are in
  * @author Julien Guerinet
@@ -26,4 +28,5 @@ package com.guerinet.sp
  * @param path          Path to the file for the Strings in this language
  * @param columnIndex   Index of the column of this language in the CSV file (starts as -1)
  */
+@Serializable
 class Language(val id: String, val path: String, var columnIndex: Int = -1)

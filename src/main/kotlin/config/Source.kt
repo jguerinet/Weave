@@ -17,6 +17,8 @@
 
 package com.guerinet.sp.config
 
+import kotlinx.serialization.Serializable
+
 /**
  * One source from where the Strings could be coming from
  * @author Julien Guerinet
@@ -25,4 +27,5 @@ package com.guerinet.sp.config
  * @param title Name of this source (for logging purposes)
  * @param url   Url to retrieve the Strings from
  */
+@Serializable
 class Source(val title: String, val url: String)

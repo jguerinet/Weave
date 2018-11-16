@@ -18,6 +18,7 @@
 package config
 
 import com.guerinet.sp.config.Source
+import kotlinx.serialization.Serializable
 
 /**
  * Base parsed Config Json
@@ -27,10 +28,15 @@ import com.guerinet.sp.config.Source
  * @param platform  Platform we are parsing for (Android, iOS, Web)
  * @param sources   List of sources the Strings are coming from
  */
-open class BaseConfig(val platform: String, val sources: List<Source>) {
+@Serializable
+open class BaseConfig {
 
-    /**
-     * Moshi Constructor
-     */
-    constructor() : this("", listOf())
+    val platform: String = ""
+
+    val sources: List<Source> = listOf()
+
+//    /**
+//     * Moshi Constructor
+//     */
+//    constructor() : this("", listOf())
 }
