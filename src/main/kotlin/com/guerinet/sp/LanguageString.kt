@@ -54,5 +54,5 @@ class LanguageString(key: String, url: String, lineNumber: Int) : BaseString(key
      * Adds the given platforms in the [platformCsv] to the list of platforms
      */
     fun addPlatforms(platformCsv: String?) =
-            platformCsv?.split(",")?.forEach { platforms.add(it.trim().toLowerCase()) }
+        platformCsv?.split(",")?.forEach { platforms.add(it.trim().toLowerCase()) }
 }

@@ -91,7 +91,7 @@ class StringParser {
 
         // Parse the Config from the file
         val config = configAdapter.fromJson(Okio.buffer(Okio.source(configFile)))
-                ?: error("Parsed config was null")
+            ?: error("Parsed config was null")
         this.config = config as Config
     }
 
@@ -128,10 +128,10 @@ class StringParser {
     @Throws(IOException::class)
     protected fun downloadAllStrings() {
         config.sources
-                .mapNotNull {
-                    downloadStrings(it)
-                }
-                .forEach { strings.addAll(it) }
+            .mapNotNull {
+                downloadStrings(it)
+            }
+            .forEach { strings.addAll(it) }
     }
 
     /**
@@ -142,9 +142,9 @@ class StringParser {
         // Connect to the URL
         println("Connecting to ${source.url}")
         val request = Request.Builder()
-                .get()
-                .url(source.url)
-                .build()
+            .get()
+            .url(source.url)
+            .build()
 
         val response: Response
         try {
@@ -165,8 +165,12 @@ class StringParser {
         }
 
         // Set up the CSV reader
-        val reader = CsvListReader(InputStreamReader(response.body().byteStream(),
-                "UTF-8"), CsvPreference.EXCEL_PREFERENCE)
+        val reader = CsvListReader(
+            InputStreamReader(
+                response.body().byteStream(),
+                "UTF-8"
+            ), CsvPreference.EXCEL_PREFERENCE
+        )
 
         // Keep track of which columns hold the keys and the platform
         var keyColumn = -1
@@ -269,12 +273,16 @@ class StringParser {
             // Check if all of the values are null
             if (allNull) {
                 // Show a warning message
-                println("Warning: Line $lineNumber from ${source.title} has no translations " +
-                        "so it will not be parsed.")
+                println(
+                    "Warning: Line $lineNumber from ${source.title} has no translations " +
+                            "so it will not be parsed."
+                )
             } else {
                 if (oneNull) {
-                    println("Warning: Line $lineNumber from ${source.title} is missing at " +
-                            "least one translation")
+                    println(
+                        "Warning: Line $lineNumber from ${source.title} is missing at " +
+                                "least one translation"
+                    )
                 }
                 strings.add(languageString)
             }
@@ -324,8 +332,10 @@ class StringParser {
                 // If the keys are the same and it's not a header, show a warning and remove
                 //  the older one
                 if (string1.key == string2.key) {
-                    println("Warning: ${getLog(string1)} and ${getLog(string2)} have the same " +
-                            "key. The first one will be overwritten by the second one.")
+                    println(
+                        "Warning: ${getLog(string1)} and ${getLog(string2)} have the same " +
+                                "key. The first one will be overwritten by the second one."
+                    )
                     toRemove.add(string1)
                 }
             }
@@ -413,8 +423,10 @@ class StringParser {
      * Writes a [languageString] to the file within the current [language] within the file.
      *  Depending on the platform and whether this [isLastString], the String differs
      */
-    protected fun writeString(language: Language, languageString: LanguageString,
-            isLastString: Boolean) {
+    protected fun writeString(
+        language: Language, languageString: LanguageString,
+        isLastString: Boolean
+    ) {
         // Check that it's for the right platform
         if (!languageString.isForPlatform(config.platform)) {
             return
