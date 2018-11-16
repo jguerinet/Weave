@@ -18,6 +18,7 @@
 package com.guerinet.sp.config
 
 import com.guerinet.sp.Language
+import config.BaseConfig
 
 /**
  * Parsed Config Json

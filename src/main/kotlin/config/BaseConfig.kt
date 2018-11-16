@@ -15,7 +15,9 @@
  *
  */
 
-package com.guerinet.sp.config
+package config
+
+import com.guerinet.sp.config.Source
 
 /**
  * Base parsed Config Json
