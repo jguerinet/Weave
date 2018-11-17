@@ -40,13 +40,13 @@ package com.guerinet.sp
  * @since 2.6.0
  *
  * @param key           Key to store the String under, or the header to use
- * @param url           Url of the file this String comes from
+ * @param sourceName    Title of the Source this String comes from
  * @param lineNumber    Line number in the CSV that this String was on
  * @param platformCsv   Nullable Csv String of the list of platforms this is allowed to be on. Defaults to null
  */
 open class BaseString(
     val key: String,
-    val url: String,
+    val sourceName: String,
     val lineNumber: Int,
     platformCsv: String? = null
 ) {

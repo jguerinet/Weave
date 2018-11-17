@@ -314,7 +314,7 @@ open class StringParser {
 
         return parseCsv(source, reader, headers, keyColumn, platformColumn) { lineNumber, key, platforms, line ->
             // Add a new language String
-            val languageString = LanguageString(key, source.title, lineNumber)
+            val languageString = LanguageString(key, source.title, lineNumber, platforms)
 
             // Go through the languages, add each translation
             var allNull = true
@@ -328,9 +328,6 @@ open class StringParser {
                     oneNull = true
                 }
             }
-
-            // Add the optional platforms
-            languageString.addPlatforms(platforms)
 
             // Check if all of the values are null
             if (allNull) {
@@ -603,7 +600,22 @@ open class StringParser {
             error("Tag column with name ${config.tagColumnName} not found")
         }
 
-        return null
+        return parseCsv(source, reader, headers, keyColumn, platformColumn) { lineNumber, key, platforms, line ->
+            val type = line[typeColumn] as? String
+            val tag = line[tagColumn] as? String
+
+            when {
+                type == null -> {
+                    warning("Line $lineNumber has no type and will not be parsed")
+                    null
+                }
+                tag == null -> {
+                    warning("Line $lineNumber has no tag and will not be parsed")
+                    null
+                }
+                else -> AnalyticsString(key, source.title, lineNumber, platforms, type, tag)
+            }
+        }
     }
 
     /* HELPERS */
@@ -611,7 +623,7 @@ open class StringParser {
     /**
      * Returns the header for a log message for a given [string]
      */
-    protected fun getLog(string: BaseString): String = "Line ${string.lineNumber} from ${string.url}"
+    protected fun getLog(string: BaseString): String = "Line ${string.lineNumber} from ${string.sourceName}"
 
     /**
      * Prints an error [message], and terminates the program is [isTerminated] is true (defaults to true)
