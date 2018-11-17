@@ -82,7 +82,7 @@ open class StringParser {
             if (analyticsConfig == null) {
                 warning("No Analytics config found")
             } else {
-                verifyAnalyticsConfigInfo()
+                verifyAnalyticsConfigInfo(analyticsConfig)
                 downloadAllAnalytics(analyticsConfig)
                 verifyKeys()
                 writeAnalytics(analyticsConfig)
@@ -125,19 +125,24 @@ open class StringParser {
     protected fun verifyStringConfigInfo(config: StringsConfig) {
         // Make sure everything is set
         if (!listOf(ANDROID, IOS, WEB).contains(platform)) {
-            error("You need to input a valid platform (Android, iOS, Web)")
+            error("Please provide a valid platform (Android, iOS, Web)")
         } else if (config.languages.isEmpty()) {
-            error("You need to add at least one language")
+            error("Please provide at least one language")
         }
     }
 
     /**
      * Verifies that all of the config info is present
      */
-    protected fun verifyAnalyticsConfigInfo() {
+    protected fun verifyAnalyticsConfigInfo(config: AnalyticsConfig) {
         // Make sure everything is set
         if (!listOf(ANDROID, IOS, WEB).contains(platform)) {
-            error("You need to input a validation platform (Android, iOS, Web")
+            error("Please provide a validation platform (Android, iOS, Web")
+        }
+
+        // Make sure there's a package for Android
+        if (platform == ANDROID && config.packageName == null) {
+            error("Please provide a package name for Android")
         }
     }
 
