@@ -26,6 +26,11 @@ class AnalyticsString(
     key: String,
     url: String,
     lineNumber: Int,
-    val type: String,
+    val type: AnalyticsType,
     val tag: String
 ) : BaseString(key, url, lineNumber)
+
+enum class AnalyticsType {
+    EVENT,
+    SCREEN
+}

@@ -615,7 +615,12 @@ open class StringParser {
         }
 
         return parseCsv(source, reader, headers, keyColumn, platformColumn, config.platform) { lineNumber, key, line ->
-            val type = line[typeColumn] as? String
+            val typeString = line[typeColumn] as? String
+            val type = when {
+                typeString.equals("Event", ignoreCase = true) -> AnalyticsType.EVENT
+                typeString.equals("Screen", ignoreCase = true) -> AnalyticsType.SCREEN
+                else -> null
+            }
             val tag = line[tagColumn] as? String
 
             when {
@@ -657,7 +662,7 @@ open class StringParser {
                 // Sort the Strings into Screens and then Events
                 .sortedBy { it.type }
 
-            val lastEvent = sortedStrings.lastOrNull { it.type.equals("Event", ignoreCase = true) }
+            val lastEvent = sortedStrings.lastOrNull { it.type == AnalyticsType.EVENT }
             val lastScreen = sortedStrings.last()
 
             sortedStrings.forEach {
@@ -700,7 +705,7 @@ open class StringParser {
         isEvent: Boolean,
         isLast: Boolean
     ): Boolean {
-        val isStringEvent = analyticsString.type.equals("Event", ignoreCase = true)
+        val isStringEvent = analyticsString.type == AnalyticsType.EVENT
         val isSwitch = isEvent && !isStringEvent
         val isWeb = config.platform == WEB
         // Capitalize the key for the mobile platforms
