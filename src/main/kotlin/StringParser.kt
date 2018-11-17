@@ -84,7 +84,7 @@ open class StringParser {
                 // TODO
             }
         } catch (e: IOException) {
-            println("Error running String Parser: ")
+            error("StringParser failed")
             e.printStackTrace()
         }
 
@@ -149,7 +149,7 @@ open class StringParser {
         } catch (e: IOException) {
             // Catch the exception here to be able to continue a build even if we are not connected
             println("IOException while connecting to the URL")
-            println("Error Message: ${e.message}")
+            error("Message received: ${e.message}", false)
             return null
         }
 
@@ -157,7 +157,7 @@ open class StringParser {
         println("Response Code: $responseCode")
 
         if (responseCode != 200) {
-            println("Error: Response Message: ${response.message()}")
+            error("Response Message: ${response.message()}", false)
             return null
         }
 
@@ -221,7 +221,7 @@ open class StringParser {
         // Make sure that all languages have an index
         val language = config.languages.find { it.columnIndex == -1 }
         if (language != null) {
-            error("Error: ${language.id} in ${source.title} does not have any translations.")
+            error("${language.id} in ${source.title} does not have any translations.")
         }
 
         // Create the list of Strings
@@ -403,7 +403,7 @@ open class StringParser {
                     writeString(config, language, it, last == it)
                 }
             } catch (e: Exception) {
-                println("Error on ${getLog(it)}")
+                error(getLog(it), false)
                 e.printStackTrace()
             }
         }
@@ -537,9 +537,14 @@ open class StringParser {
      */
     protected fun getLog(string: BaseString): String = "Line ${string.lineNumber} from ${string.url}"
 
-    protected fun error(message: String) {
+    /**
+     * Prints an error [message], and terminates the program is [isTerminated] is true (defaults to true)
+     */
+    protected fun error(message: String, isTerminated: Boolean = true) {
         println("Error: $message")
-        System.exit(-1)
+        if (isTerminated) {
+            System.exit(-1)
+        }
     }
 
     protected fun warning(message: String) = println("Warning: $message")
