@@ -279,6 +279,25 @@ open class StringParser {
         return strings
     }
 
+    /**
+     * Writes all of the Strings. Throws an [IOException] if there's an error
+     */
+    @Throws(IOException::class)
+    protected fun preparePrintWriter(path: String, title: String, write: () -> Unit) {
+        // Set up the writer for the given language, enforcing UTF-8
+        writer = PrintWriter(path, "UTF-8")
+
+        // Write the Strings
+        write()
+
+        // Show the outcome
+        println("Wrote $title to file: $path")
+
+        // Flush and close the writer
+        writer.flush()
+        writer.close()
+    }
+
     /* STRING PARSING */
 
     /**
@@ -401,15 +420,9 @@ open class StringParser {
 
         // Go through each language, and write the file
         config.languages.forEach {
-            // Set up the writer for the given language, enforcing UTF-8
-            writer = PrintWriter(it.path, "UTF-8")
-
-            writeStrings(config, it)
-
-            println("Wrote ${it.id} to file: ${it.path}")
-
-            writer.flush()
-            writer.close()
+            preparePrintWriter(it.path, it.id) {
+                writeStrings(config, it)
+            }
         }
     }
 
@@ -612,6 +625,10 @@ open class StringParser {
                 else -> AnalyticsString(key, source.title, lineNumber, type, tag)
             }
         }
+    }
+
+    protected fun writeAnalytics(config: AnalyticsConfig) {
+        // If there are no Strings to
     }
 
     /* HELPERS */
