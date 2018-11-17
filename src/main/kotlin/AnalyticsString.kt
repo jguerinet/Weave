@@ -26,7 +26,6 @@ class AnalyticsString(
     key: String,
     url: String,
     lineNumber: Int,
-    platformCsv: String?,
     val type: String,
     val tag: String
-) : BaseString(key, url, lineNumber, platformCsv)
+) : BaseString(key, url, lineNumber)

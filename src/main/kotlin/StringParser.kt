@@ -72,7 +72,6 @@ open class StringParser {
                 verifyStringConfigInfo(stringsConfig)
                 downloadAllStrings(stringsConfig)
                 verifyKeys()
-                filterStrings(stringsConfig)
                 writeStrings(stringsConfig)
                 println("Strings parsing complete")
             }
@@ -213,7 +212,8 @@ open class StringParser {
         headers: Array<String?>,
         keyColumn: Int,
         platformColumn: Int,
-        onLine: (lineNumber: Int, key: String, platforms: String?, line: List<Any>) -> BaseString?
+        platform: String,
+        onLine: (lineNumber: Int, key: String, line: List<Any>) -> BaseString?
     ): List<BaseString> {
         // Create the list of Strings
         val strings = mutableListOf<BaseString>()
@@ -253,15 +253,17 @@ open class StringParser {
                 continue
             }
 
-            // If there's a platform column, parse it
-            val platforms = if (platformColumn != -1) {
-                currentLine[platformColumn] as? String
-            } else {
-                null
+            if (platformColumn != -1) {
+                // If there's a platform column, parse it and check that it's for the current platform
+                val platforms = currentLine[platformColumn] as? String
+                if (!isForPlatform(platforms, platform)) {
+                    continue
+                }
             }
 
+
             // Delegate the parsing to the caller, add the resulting BaseString if there is one
-            val baseString = onLine(lineNumber, key, platforms, currentLine)
+            val baseString = onLine(lineNumber, key, currentLine)
             baseString?.apply { strings.add(this) }
 
             // Increment the line number
@@ -314,9 +316,9 @@ open class StringParser {
             error("${language.id} in ${source.title} does not have any translations.")
         }
 
-        return parseCsv(source, reader, headers, keyColumn, platformColumn) { lineNumber, key, platforms, line ->
+        return parseCsv(source, reader, headers, keyColumn, platformColumn, config.platform) { lineNumber, key, line ->
             // Add a new language String
-            val languageString = LanguageString(key, source.title, lineNumber, platforms)
+            val languageString = LanguageString(key, source.title, lineNumber)
 
             // Go through the languages, add each translation
             var allNull = true
@@ -383,15 +385,6 @@ open class StringParser {
 
         // Remove all duplicates
         this.strings.removeAll(toRemove)
-    }
-
-    /**
-     * Filters out the Strings that are not for this platform
-     */
-    protected fun filterStrings(config: StringConfig) {
-        strings = strings
-            .filter { it !is LanguageString || it.isForPlatform(config.platform) }
-            .toMutableList()
     }
 
     /**
@@ -603,7 +596,7 @@ open class StringParser {
             error("Tag column with name ${config.tagColumnName} not found")
         }
 
-        return parseCsv(source, reader, headers, keyColumn, platformColumn) { lineNumber, key, platforms, line ->
+        return parseCsv(source, reader, headers, keyColumn, platformColumn, config.platform) { lineNumber, key, line ->
             val type = line[typeColumn] as? String
             val tag = line[tagColumn] as? String
 
@@ -616,7 +609,7 @@ open class StringParser {
                     warning("Line $lineNumber has no tag and will not be parsed")
                     null
                 }
-                else -> AnalyticsString(key, source.title, lineNumber, platforms, type, tag)
+                else -> AnalyticsString(key, source.title, lineNumber, type, tag)
             }
         }
     }
@@ -636,6 +629,14 @@ open class StringParser {
         if (isTerminated) {
             System.exit(-1)
         }
+    }
+
+    /**
+     * Returns true if this [platformCsv] contains the [platform], false otherwise
+     */
+    protected fun isForPlatform(platformCsv: String?, platform: String): Boolean {
+        val platforms: List<String> = platformCsv?.split(",")?.map { it.trim().toLowerCase() } ?: listOf()
+        return platforms.isEmpty() || platforms.contains(platform.toLowerCase())
     }
 
     protected fun warning(message: String) = println("Warning: $message")

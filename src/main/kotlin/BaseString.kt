@@ -42,19 +42,9 @@ package com.guerinet.sp
  * @param key           Key to store the String under, or the header to use
  * @param sourceName    Title of the Source this String comes from
  * @param lineNumber    Line number in the CSV that this String was on
- * @param platformCsv   Nullable Csv String of the list of platforms this is allowed to be on. Defaults to null
  */
 open class BaseString(
     val key: String,
     val sourceName: String,
-    val lineNumber: Int,
-    platformCsv: String? = null
-) {
-
-    private val platforms: List<String> = platformCsv?.split(",")?.map { it.trim().toLowerCase() } ?: listOf()
-
-    /**
-     * Returns true if this string is for the given [platform], false otherwise
-     */
-    fun isForPlatform(platform: String) = platforms.isEmpty() || platforms.contains(platform.toLowerCase())
-}
+    val lineNumber: Int
+)

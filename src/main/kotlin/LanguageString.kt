@@ -25,9 +25,8 @@ package com.guerinet.sp
 class LanguageString(
     key: String,
     url: String,
-    lineNumber: Int,
-    platformCsv: String?
-) : BaseString(key, url, lineNumber, platformCsv) {
+    lineNumber: Int
+) : BaseString(key, url, lineNumber) {
 
     /**
      * Maps of translations, the keys being the language Id and the values being the String
