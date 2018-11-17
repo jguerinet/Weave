@@ -44,9 +44,9 @@ import java.util.regex.Pattern
 @Suppress("MemberVisibilityCanBePrivate")
 open class StringParser {
 
-    protected lateinit var config: Configs
+    open lateinit var config: Configs
 
-    protected val platform by lazy {
+    open val platform by lazy {
         val platform = Platform.parse(config.platform)
         if (platform == null) {
             error("The platform must be Android, iOS, or Web")
@@ -58,12 +58,7 @@ open class StringParser {
     /**
      * List of Strings to write
      */
-    protected var strings = mutableListOf<BaseString>()
-
-    /**
-     * Writer to the current file we are writing to
-     */
-    protected lateinit var writer: PrintWriter
+    open var strings = mutableListOf<BaseString>()
 
     /**
      * Runs the [StringParser]
@@ -99,7 +94,6 @@ open class StringParser {
             error("StringParser failed")
             e.printStackTrace()
         }
-
     }
 
     /**
@@ -108,7 +102,7 @@ open class StringParser {
      * @throws IOException Thrown if there was an error opening or reading the config file
      */
     @Throws(IOException::class)
-    protected fun readFromConfigFile() {
+    open fun readFromConfigFile() {
         // Find the config file
         var configFile = File(FILE_NAME)
         if (!configFile.exists()) {
@@ -129,7 +123,7 @@ open class StringParser {
     /**
      * Verifies the info is correct on a [StringsConfig] [config]
      */
-    protected fun verifyStringConfigInfo(config: StringsConfig) {
+    open fun verifyStringConfigInfo(config: StringsConfig) {
         // Make sure there's at least one language
         if (config.languages.isEmpty()) {
             error("Please provide at least one language")
@@ -139,7 +133,7 @@ open class StringParser {
     /**
      * Verifies that all of the config info is present
      */
-    protected fun verifyAnalyticsConfigInfo(config: AnalyticsConfig) {
+    open fun verifyAnalyticsConfigInfo(config: AnalyticsConfig) {
         // Make sure there's a package for Android
         if (platform == Platform.ANDROID && config.packageName == null) {
             error("Please provide a package name for Android")
@@ -148,7 +142,7 @@ open class StringParser {
 
     /* DOWNLOAD */
 
-    protected fun downloadCsv(source: Source): CsvListReader? {
+    open fun downloadCsv(source: Source): CsvListReader? {
         // Connect to the URL
         println("Connecting to ${source.url}")
         val request = Request.Builder()
@@ -182,7 +176,7 @@ open class StringParser {
      * Parses the [headers] by letting the caller deal with specific cases with [onColumn], and returning the columns of
      *  the key and platform (-1 if not found)
      */
-    protected fun parseHeaders(
+    open fun parseHeaders(
         headers: Array<String?>,
         onColumn: (index: Int, header: String) -> Unit
     ): Pair<Int, Int> {
@@ -216,7 +210,7 @@ open class StringParser {
      *  [platformColumn], and delegates the parsing to the caller with [onLine]. Parses the headers itself using the
      *  [source]. Returns the list of parsed [BaseString]s
      */
-    protected fun parseCsv(
+    open fun parseCsv(
         source: Source,
         reader: CsvListReader,
         headers: Array<String?>,
@@ -293,12 +287,12 @@ open class StringParser {
      * Writes all of the Strings. Throws an [IOException] if there's an error
      */
     @Throws(IOException::class)
-    protected fun preparePrintWriter(path: String, title: String, write: () -> Unit) {
+    open fun preparePrintWriter(path: String, title: String, write: (PrintWriter) -> Unit) {
         // Set up the writer for the given language, enforcing UTF-8
-        writer = PrintWriter(path, "UTF-8")
+        val writer = PrintWriter(path, "UTF-8")
 
         // Write the Strings
-        write()
+        write(writer)
 
         // Show the outcome
         println("Wrote $title to file: $path")
@@ -315,7 +309,7 @@ open class StringParser {
      *  any errors downloading the Strings
      */
     @Throws(IOException::class)
-    protected fun downloadAllStrings(config: StringsConfig) {
+    open fun downloadAllStrings(config: StringsConfig) {
         strings.clear()
         config.sources
             .mapNotNull { downloadStrings(config, it) }
@@ -326,7 +320,7 @@ open class StringParser {
      * Uses the given [source] to connect to a Url and download all of the Strings in the right
      *  format. This will return a list of [BaseString]s, null if there were any errors
      */
-    protected fun downloadStrings(config: StringsConfig, source: Source): List<BaseString>? {
+    open fun downloadStrings(config: StringsConfig, source: Source): List<BaseString>? {
         val reader = downloadCsv(source) ?: return null
 
         // Get the header
@@ -377,7 +371,7 @@ open class StringParser {
     /**
      * Verifies that the keys are valid
      */
-    protected fun verifyKeys() {
+    open fun verifyKeys() {
         // Define the key checker pattern to make sure no illegal characters exist within the keys
         val keyChecker = Pattern.compile("[^A-Za-z0-9_]")
 
@@ -421,7 +415,7 @@ open class StringParser {
      *  an error
      */
     @Throws(IOException::class)
-    protected fun writeStrings(config: StringsConfig) {
+    open fun writeStrings(config: StringsConfig) {
         // If there are no Strings to write, no need to continue
         if (strings.isEmpty()) {
             println("No Strings to write")
@@ -430,8 +424,8 @@ open class StringParser {
 
         // Go through each language, and write the file
         config.languages.forEach {
-            preparePrintWriter(it.path, it.id) {
-                writeStrings(it)
+            preparePrintWriter(it.path, it.id) { writer ->
+                writeStrings(writer, it)
             }
         }
     }
@@ -439,9 +433,9 @@ open class StringParser {
     /**
      * Processes the Strings and writes them to a given file for the given [language]
      */
-    protected fun writeStrings(language: Language) {
+    open fun writeStrings(writer: PrintWriter, language: Language) {
         // Header
-        writeHeader()
+        writeHeader(writer)
 
         val last = strings.last()
 
@@ -450,9 +444,9 @@ open class StringParser {
             try {
                 if (it !is LanguageString) {
                     // If we are parsing a header, write the value as a comment
-                    writeComment(it.key)
+                    writeComment(writer, it.key)
                 } else {
-                    writeString(language, it, last == it)
+                    writeString(writer, language, it, last == it)
                 }
             } catch (e: Exception) {
                 error(getLog(it), false)
@@ -461,28 +455,32 @@ open class StringParser {
         }
 
         // Footer
-        writeFooter()
+        writeFooter(writer)
     }
 
     /**
      * Writes the header to the current file
      */
-    protected fun writeHeader() {
-        when (platform) {
-            Platform.ANDROID -> writer.println("<?xml version=\"1.0\" encoding=\"utf-8\"?> \n <resources>")
-            Platform.WEB -> writer.println("{")
-            else -> return
+    open fun writeHeader(writer: PrintWriter) {
+        writer.apply {
+            when (platform) {
+                Platform.ANDROID -> println("<?xml version=\"1.0\" encoding=\"utf-8\"?> \n <resources>")
+                Platform.WEB -> println("{")
+                else -> return
+            }
         }
     }
 
     /**
      * Writes a [comment] to the file
      */
-    protected fun writeComment(comment: String) {
-        when (platform) {
-            Platform.ANDROID -> writer.println("\n    <!-- $comment -->")
-            Platform.IOS -> writer.println("\n/* $comment */")
-            else -> return
+    open fun writeComment(writer: PrintWriter, comment: String) {
+        writer.apply {
+            when (platform) {
+                Platform.ANDROID -> println("\n    <!-- $comment -->")
+                Platform.IOS -> println("\n/* $comment */")
+                else -> return
+            }
         }
     }
 
@@ -490,7 +488,8 @@ open class StringParser {
      * Writes a [languageString] to the file within the current [language] within the file.
      *  Depending on the platform and whether this [isLastString], the String differs
      */
-    protected fun writeString(
+    open fun writeString(
+        writer: PrintWriter,
         language: Language,
         languageString: LanguageString,
         isLastString: Boolean
@@ -575,11 +574,13 @@ open class StringParser {
     /**
      * Writes the footer to the current file
      */
-    protected fun writeFooter() {
-        when (platform) {
-            Platform.ANDROID -> writer.println("</resources>")
-            Platform.WEB -> writer.println("}")
-            else -> return
+    open fun writeFooter(writer: PrintWriter) {
+        writer.apply {
+            when (platform) {
+                Platform.ANDROID -> writer.println("</resources>")
+                Platform.WEB -> writer.println("}")
+                else -> return
+            }
         }
     }
 
@@ -590,14 +591,14 @@ open class StringParser {
      *  any errors downloading them
      */
     @Throws(IOException::class)
-    protected fun downloadAllAnalytics(config: AnalyticsConfig) {
+    open fun downloadAllAnalytics(config: AnalyticsConfig) {
         strings.clear()
         config.sources
             .mapNotNull { downloadAnalytics(config, it) }
             .forEach { strings.addAll(it) }
     }
 
-    protected fun downloadAnalytics(config: AnalyticsConfig, source: Source): List<BaseString>? {
+    open fun downloadAnalytics(config: AnalyticsConfig, source: Source): List<BaseString>? {
         val reader = downloadCsv(source) ?: return null
 
         val headers = reader.getHeader(true)
@@ -642,7 +643,7 @@ open class StringParser {
     /**
      * Writes the analytics Strings using the [config] data
      */
-    protected fun writeAnalytics(config: AnalyticsConfig) {
+    open fun writeAnalytics(config: AnalyticsConfig) {
         // If there are no Strings to write, don't continue
         if (strings.isEmpty()) {
             warning("No Analytics Strings to write")
@@ -657,12 +658,12 @@ open class StringParser {
             else -> ""
         }
 
-        preparePrintWriter(config.path, "Analytics") {
+        preparePrintWriter(config.path, "Analytics") { writer ->
             // Keep track of whether we are still in the event section or not
             var isEvent = true
 
             // Header
-            writeAnalyticsHeader(objectName, config.packageName)
+            writeAnalyticsHeader(writer, objectName, config.packageName)
 
             val sortedStrings = strings
                 // Only write the Analytics Strings, since they get pre-sorted so the comments make no sense
@@ -676,7 +677,7 @@ open class StringParser {
 
             sortedStrings.forEach {
                     try {
-                        isEvent = writeAnalyticsString(it, isEvent, lastScreen == it || lastEvent == it)
+                        isEvent = writeAnalyticsString(writer, it, isEvent, lastScreen == it || lastEvent == it)
                     } catch (e: Exception) {
                         error(getLog(it), false)
                         e.printStackTrace()
@@ -684,11 +685,11 @@ open class StringParser {
                 }
 
             // Footer
-            writeAnalyticsFooter()
+            writeAnalyticsFooter(writer)
         }
     }
 
-    protected fun writeAnalyticsHeader(objectName: String, packageName: String?) {
+    open fun writeAnalyticsHeader(writer: PrintWriter, objectName: String, packageName: String?) {
         writer.apply {
             when (platform) {
                 Platform.ANDROID -> {
@@ -715,7 +716,8 @@ open class StringParser {
         }
     }
 
-    protected fun writeAnalyticsString(
+    open fun writeAnalyticsString(
+        writer: PrintWriter,
         analyticsString: AnalyticsString,
         isEvent: Boolean,
         isLast: Boolean
@@ -768,7 +770,7 @@ open class StringParser {
         return isStringEvent
     }
 
-    protected fun writeAnalyticsFooter() {
+    open fun writeAnalyticsFooter(writer: PrintWriter) {
         writer.apply {
             when (platform) {
                 Platform.ANDROID -> {
@@ -792,12 +794,12 @@ open class StringParser {
     /**
      * Returns the header for a log message for a given [string]
      */
-    protected fun getLog(string: BaseString): String = "Line ${string.lineNumber} from ${string.sourceName}"
+    open fun getLog(string: BaseString): String = "Line ${string.lineNumber} from ${string.sourceName}"
 
     /**
      * Prints an error [message], and terminates the program is [isTerminated] is true (defaults to true)
      */
-    protected fun error(message: String, isTerminated: Boolean = true) {
+    open fun error(message: String, isTerminated: Boolean = true) {
         println("Error: $message")
         if (isTerminated) {
             System.exit(-1)
@@ -807,14 +809,14 @@ open class StringParser {
     /**
      * Returns true if this [platformCsv] contains the [platform], false otherwise
      */
-    protected fun isForPlatform(platformCsv: String?): Boolean {
+    open fun isForPlatform(platformCsv: String?): Boolean {
         val platforms = platformCsv
             ?.split(",")
             ?.mapNotNull { Platform.parse(it.trim().toLowerCase()) } ?: listOf()
         return platforms.isEmpty() || platforms.contains(platform)
     }
 
-    protected fun warning(message: String) = println("Warning: $message")
+    open fun warning(message: String) = println("Warning: $message")
 
     companion object {
 
