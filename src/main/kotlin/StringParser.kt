@@ -641,12 +641,20 @@ open class StringParser {
             return
         }
 
+        // Get the object name by taking the last item on the path and removing the right suffix depending on platform
+        val objectName = when (platform) {
+            ANDROID -> config.path.split("/").last().removeSuffix(".kt")
+            IOS -> config.path.split("/").last().removeSuffix(".swift")
+            // No object name on web
+            else -> ""
+        }
+
         preparePrintWriter(config.path, "Analytics") {
             // Keep track of whether we are still in the event section or not
             var isEvent = true
 
             // Header
-            writeAnalyticsHeader()
+            writeAnalyticsHeader(objectName)
 
             val sortedStrings = strings
                 // Only write the Analytics Strings, since they get pre-sorted so the comments make no sense
@@ -672,16 +680,16 @@ open class StringParser {
         }
     }
 
-    protected fun writeAnalyticsHeader() {
+    protected fun writeAnalyticsHeader(objectName: String) {
         writer.apply {
             when (platform) {
                 ANDROID -> {
-                    println("object GA {")
+                    println("object $objectName {")
                     println()
                     println("    object Event {")
                 }
                 IOS -> {
-                    println("class GA {")
+                    println("class $objectName {")
                     println("    enum Event {")
                 }
                 WEB -> {
