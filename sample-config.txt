@@ -1,7 +1,0 @@
-1. Copy this file into the root of your repository. (URL must be to an online CSV file, like a Google Drive sheets doc)
-2. Rename it config.txt
-3. Fill out the info below
-
-URL: CSV_NAME_HERE, CSV_URL_HERE
-Platform: Android/iOS/Web
-Language: LANGUAGE_ID_HERE, LANGUAGE_PATH_HERE

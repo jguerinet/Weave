@@ -52,7 +52,6 @@ build/
 /captures
 
 ## We're not committing the test config file
-config.txt
 weave-config.json
 node_modules
 

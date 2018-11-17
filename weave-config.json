@@ -1,0 +1,29 @@
+{
+    "platform": "Android",
+    "strings": {
+        "sources": [
+            {
+                "title": "Doc1",
+                "url": "https://docs.google.com/spreadsheets/d/1TmJmLe5UfguO-IzqNWZ2wjqf6aDP9RtQHLMsl7YtU30/pub?gid=0&single=true&output=csv"
+            }
+        ],
+        "languages": [
+            {
+                "id": "en",
+                "path": "test.strings"
+            }
+        ]
+    },
+    "analytics": {
+        "sources": [
+            {
+                "title": "EventsDoc",
+                "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vS42rql_y84NVQp-fUDZzTZphTSEg7CAWpXJoCYp8xhsP2pozNZQ62-Fzqj6FLZxfCJRZptm0X3krjt/pub?gid=659538614&single=true&output=csv"
+            }
+        ],
+        "path": "Analytics.kt",
+        "packageName": "ca.ohri",
+        "typeColumnName": "type",
+        "tagColumnName": "tag"
+    }
+}
