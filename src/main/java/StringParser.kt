@@ -15,10 +15,10 @@
  *
  */
 
-package com.guerinet.sp
+package com.guerinet.weave
 
-import com.guerinet.sp.config.Source
-import com.guerinet.sp.config.StringsConfig
+import com.guerinet.weave.config.Source
+import com.guerinet.weave.config.StringsConfig
 import com.squareup.okhttp.OkHttpClient
 import com.squareup.okhttp.Request
 import com.squareup.okhttp.Response

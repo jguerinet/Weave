@@ -15,9 +15,9 @@
  *
  */
 
-package com.guerinet.sp.config
+package com.guerinet.weave.config
 
-import com.guerinet.sp.Language
+import com.guerinet.weave.Language
 import kotlinx.serialization.Serializable
 
 /**

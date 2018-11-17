@@ -15,7 +15,7 @@
  *
  */
 
-package com.guerinet.sp
+package com.guerinet.weave
 
 /*
  * Copyright 2013-2018 Julien Guerinet

@@ -15,7 +15,7 @@
  *
  */
 
-package com.guerinet.sp
+package com.guerinet.weave
 
 /**
  * One String with all of the translations

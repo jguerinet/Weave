@@ -15,7 +15,7 @@
  *
  */
 
-package com.guerinet.sp
+package com.guerinet.weave
 
 /**
  * One Event/Screen Name to use for Analytics

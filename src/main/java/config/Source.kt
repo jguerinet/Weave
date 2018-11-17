@@ -15,7 +15,7 @@
  *
  */
 
-package com.guerinet.sp.config
+package com.guerinet.weave.config
 
 import kotlinx.serialization.Serializable
 
