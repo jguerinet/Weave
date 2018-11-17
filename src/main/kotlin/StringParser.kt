@@ -682,7 +682,10 @@ open class StringParser {
                     println("class GA {")
                     println("    enum Event {")
                 }
-                // TODO Web
+                WEB -> {
+                    println("{")
+                    println("    \"events\": {")
+                }
             }
         }
     }
@@ -693,27 +696,44 @@ open class StringParser {
         isEvent: Boolean
     ): Boolean {
         val isStringEvent = analyticsString.type.equals("Event", ignoreCase = true)
+        val isSwitch = isEvent && !isStringEvent
+        val isWeb = config.platform == WEB
+        // Capitalize the key for the mobile platforms
+        val key = if (isWeb) analyticsString.key else analyticsString.key.toUpperCase()
+        val tag = analyticsString.tag
         writer.apply {
+            // If we've switched, close the Event object to start the screen one
+            if (isSwitch) {
+                print("    }")
+                if (isWeb) {
+                    print(",")
+                }
+                println()
+                println()
+            }
+
             when (config.platform) {
                 ANDROID -> {
-                    if (isEvent && !isStringEvent) {
-                        // If the current string is not an event but the first one was, we've switched to screens
-                        println("    }")
-                        println()
+                    if (isSwitch) {
+                        // Start the Screen object
                         println("    object Screen {")
                     }
-                    println("        const val ${analyticsString.key.toUpperCase()} = \"${analyticsString.tag}\"")
+                    println("        const val $key = \"$tag\"")
                 }
                 IOS -> {
-                    if (isEvent && !isStringEvent) {
-                        // If the current string is not an event but the first one was, we've switched to screens
-                        println("    }")
-                        println()
+                    if (isSwitch) {
+                        // Start the Screen object
                         println("    enum Screen {")
                     }
-                    println("        static let ${analyticsString.key.toUpperCase()} = \"${analyticsString.tag}\"")
+                    println("        static let $key = \"$tag\"")
                 }
-                // TODO Web
+                WEB -> {
+                    if (isSwitch) {
+                        // Start the screen object
+                        println("    \"screens\": {")
+                    }
+                    println("        \"$key\": \"$tag\"")
+                }
             }
         }
         return isStringEvent
@@ -730,7 +750,10 @@ open class StringParser {
                     println("    }")
                     println("}")
                 }
-                // TODO Web
+                WEB -> {
+                    println("    }")
+                    println("}")
+                }
             }
         }
     }
