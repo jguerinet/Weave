@@ -34,7 +34,7 @@ apply plugin: 'com.github.ben-manes.versions'
 apply plugin: 'kotlin'
 apply plugin: 'kotlinx-serialization'
 
-mainClassName = "com.guerinet.weave.StringParser"
+mainClassName = "com.guerinet.weave.Weave"
 sourceCompatibility = 1.8
 version = sp_version
 
@@ -43,16 +43,16 @@ repositories {
     maven { url "https://kotlin.bintray.com/kotlinx" }
 }
 
-//jar {
-//    // Add the sources to the jar
-//    from sourceSets.main.allSource
-//    manifest {
-//        attributes 'Main-Class': 'com.guerinet.weave.Weave'
-//    }
-//    from {
-//        configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-//    }
-//}
+task fatJar(type: Jar) {
+    // Add the sources to the jar
+    from sourceSets.main.allSource
+    manifest {
+        attributes 'Main-Class': 'com.guerinet.weave.Weave'
+    }
+    from {
+        configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
 
 dependencies {
     implementation 'com.squareup.okhttp:okhttp:2.7.5'

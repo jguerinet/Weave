@@ -43,7 +43,7 @@ import java.util.regex.Pattern
  * @since 1.0.0
  */
 @Suppress("MemberVisibilityCanBePrivate")
-open class StringParser {
+open class Weave {
 
     open lateinit var config: Configs
 
@@ -57,9 +57,9 @@ open class StringParser {
     }
 
     /**
-     * Runs the [StringParser]
+     * Weaves the Strings
      */
-    fun run() {
+    fun weave() {
         try {
             readFromConfigFile()
             val stringsConfig = config.strings
@@ -833,7 +833,7 @@ open class StringParser {
 
         @JvmStatic
         fun main(args: Array<String>) {
-            StringParser().run()
+            Weave().weave()
         }
     }
 }
