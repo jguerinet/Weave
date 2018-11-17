@@ -56,11 +56,6 @@ open class StringParser {
     }
 
     /**
-     * List of Strings to write
-     */
-    open var strings = mutableListOf<BaseString>()
-
-    /**
      * Runs the [StringParser]
      */
     fun run() {
@@ -73,9 +68,9 @@ open class StringParser {
                 warning("No Strings config found")
             } else {
                 verifyStringConfigInfo(stringsConfig)
-                downloadAllStrings(stringsConfig)
-                verifyKeys()
-                writeStrings(stringsConfig)
+                val downloadedStrings = downloadAllStrings(stringsConfig)
+                val verifiedStrings = verifyKeys(downloadedStrings)
+                writeStrings(stringsConfig, verifiedStrings)
                 println("Strings parsing complete")
             }
 
@@ -85,9 +80,9 @@ open class StringParser {
                 warning("No Analytics config found")
             } else {
                 verifyAnalyticsConfigInfo(analyticsConfig)
-                downloadAllAnalytics(analyticsConfig)
-                verifyKeys()
-                writeAnalytics(analyticsConfig)
+                val downloadedStrings = downloadAllAnalytics(analyticsConfig)
+                val verifiedStrings = verifyKeys(downloadedStrings)
+                writeAnalytics(analyticsConfig, verifiedStrings)
                 println("Analytics parsing complete")
             }
         } catch (e: IOException) {
@@ -309,12 +304,9 @@ open class StringParser {
      *  any errors downloading the Strings
      */
     @Throws(IOException::class)
-    open fun downloadAllStrings(config: StringsConfig) {
-        strings.clear()
-        config.sources
-            .mapNotNull { downloadStrings(config, it) }
-            .forEach { strings.addAll(it) }
-    }
+    open fun downloadAllStrings(config: StringsConfig): List<BaseString> = config.sources
+        .mapNotNull { downloadStrings(config, it) }
+        .flatten()
 
     /**
      * Uses the given [source] to connect to a Url and download all of the Strings in the right
@@ -371,18 +363,18 @@ open class StringParser {
     /**
      * Verifies that the keys are valid
      */
-    open fun verifyKeys() {
+    open fun verifyKeys(strings: List<BaseString>): List<BaseString> {
         // Define the key checker pattern to make sure no illegal characters exist within the keys
         val keyChecker = Pattern.compile("[^A-Za-z0-9_]")
 
         // Get rid of all of the headers
-        val strings = this.strings.filter { it is LanguageString || it is AnalyticsString }
+        val filteredStrings = strings.filter { it is LanguageString || it is AnalyticsString }
 
         val toRemove = mutableListOf<BaseString>()
 
         // Check if there are any errors with the keys
-        for (i in strings.indices) {
-            val string1 = strings[i]
+        for (i in filteredStrings.indices) {
+            val string1 = filteredStrings[i]
 
             // Check if there are any spaces in the keys
             if (string1.key.contains(" ")) {
@@ -394,8 +386,8 @@ open class StringParser {
             }
 
             // Check if there are any duplicates
-            for (j in i + 1 until strings.size) {
-                val string2 = strings[j]
+            for (j in i + 1 until filteredStrings.size) {
+                val string2 = filteredStrings[j]
 
                 // If the keys are the same and it's not a header, show a warning and remove
                 //  the older one
@@ -407,7 +399,9 @@ open class StringParser {
         }
 
         // Remove all duplicates
-        this.strings.removeAll(toRemove)
+        val newStrings = strings.toMutableList()
+        newStrings.removeAll(toRemove)
+        return newStrings
     }
 
     /**
@@ -415,7 +409,7 @@ open class StringParser {
      *  an error
      */
     @Throws(IOException::class)
-    open fun writeStrings(config: StringsConfig) {
+    open fun writeStrings(config: StringsConfig, strings: List<BaseString>) {
         // If there are no Strings to write, no need to continue
         if (strings.isEmpty()) {
             println("No Strings to write")
@@ -425,7 +419,7 @@ open class StringParser {
         // Go through each language, and write the file
         config.languages.forEach {
             preparePrintWriter(it.path, it.id) { writer ->
-                writeStrings(writer, it)
+                writeStrings(writer, it, strings)
             }
         }
     }
@@ -433,7 +427,7 @@ open class StringParser {
     /**
      * Processes the Strings and writes them to a given file for the given [language]
      */
-    open fun writeStrings(writer: PrintWriter, language: Language) {
+    open fun writeStrings(writer: PrintWriter, language: Language, strings: List<BaseString>) {
         // Header
         writeHeader(writer)
 
@@ -591,12 +585,9 @@ open class StringParser {
      *  any errors downloading them
      */
     @Throws(IOException::class)
-    open fun downloadAllAnalytics(config: AnalyticsConfig) {
-        strings.clear()
-        config.sources
-            .mapNotNull { downloadAnalytics(config, it) }
-            .forEach { strings.addAll(it) }
-    }
+    open fun downloadAllAnalytics(config: AnalyticsConfig): List<BaseString> = config.sources
+        .mapNotNull { downloadAnalytics(config, it) }
+        .flatten()
 
     open fun downloadAnalytics(config: AnalyticsConfig, source: Source): List<BaseString>? {
         val reader = downloadCsv(source) ?: return null
@@ -643,7 +634,7 @@ open class StringParser {
     /**
      * Writes the analytics Strings using the [config] data
      */
-    open fun writeAnalytics(config: AnalyticsConfig) {
+    open fun writeAnalytics(config: AnalyticsConfig, strings: List<BaseString>) {
         // If there are no Strings to write, don't continue
         if (strings.isEmpty()) {
             warning("No Analytics Strings to write")
