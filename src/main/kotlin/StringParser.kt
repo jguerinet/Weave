@@ -657,10 +657,12 @@ open class StringParser {
                 // Sort the Strings into Screens and then Events
                 .sortedBy { it.type }
 
-            val last = sortedStrings.last()
+            val lastEvent = sortedStrings.lastOrNull { it.type.equals("Event", ignoreCase = true) }
+            val lastScreen = sortedStrings.last()
+
             sortedStrings.forEach {
                     try {
-                        isEvent = writeAnalyticsString(config, it, isEvent, last == it)
+                        isEvent = writeAnalyticsString(config, it, isEvent, lastScreen == it || lastEvent == it)
                     } catch (e: Exception) {
                         error(getLog(it), false)
                         e.printStackTrace()
