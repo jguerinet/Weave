@@ -26,11 +26,17 @@ import kotlinx.serialization.Serializable
  * @since 5.0.0
  */
 @Serializable
-open class AnalyticsConfig {
+open class AnalyticsConfig : BaseConfig {
 
     /** Platform we are parsing for (Android, iOS, Web) */
-    val platform: String = ""
+    override val platform: String = ""
 
     /** List of [Source]s the Strings are coming from */
-    val sources: List<Source> = listOf()
+    override val sources: List<Source> = listOf()
+
+    /** Name of the column that holds the type */
+    val typeColumnName: String = ""
+
+    /** Name of the column that holds the tag */
+    val tagColumnName: String = ""
 }
