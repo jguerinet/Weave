@@ -72,6 +72,7 @@ open class StringParser {
                 verifyStringConfigInfo(stringsConfig)
                 downloadAllStrings(stringsConfig)
                 verifyKeys()
+                filterStrings(stringsConfig)
                 writeStrings(stringsConfig)
                 println("Strings parsing complete")
             }
@@ -338,10 +339,7 @@ open class StringParser {
                 // If the keys are the same and it's not a header, show a warning and remove
                 //  the older one
                 if (string1.key == string2.key) {
-                    warning(
-                        "${getLog(string1)} and ${getLog(string2)} have the same " +
-                                "key. The first one will be overwritten by the second one."
-                    )
+                    warning("${getLog(string1)} and ${getLog(string2)} have the same key. The first one will be used")
                     toRemove.add(string1)
                 }
             }
@@ -349,6 +347,15 @@ open class StringParser {
 
         // Remove all duplicates
         this.strings.removeAll(toRemove)
+    }
+
+    /**
+     * Filters out the Strings that are not for this platform
+     */
+    protected fun filterStrings(config: StringConfig) {
+        strings = strings
+            .filter { it !is LanguageString || it.isForPlatform(config.platform) }
+            .toMutableList()
     }
 
     /**
@@ -435,11 +442,6 @@ open class StringParser {
         languageString: LanguageString,
         isLastString: Boolean
     ) {
-        // Check that it's for the right platform
-        if (!languageString.isForPlatform(config.platform)) {
-            return
-        }
-
         var string = languageString.getString(language.id)
 
         // Check if value is or null empty: if it is, continue
@@ -533,9 +535,7 @@ open class StringParser {
     /**
      * Returns the header for a log message for a given [string]
      */
-    protected fun getLog(string: BaseString): String {
-        return "Line ${string.lineNumber} from ${string.url}"
-    }
+    protected fun getLog(string: BaseString): String = "Line ${string.lineNumber} from ${string.url}"
 
     protected fun error(message: String) {
         println("Error: $message")
