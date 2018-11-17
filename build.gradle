@@ -73,4 +73,4 @@ compileTestKotlin {
     }
 }
 
-apply from: "https://raw.githubusercontent.com/jguerinet/Gradle-Artifact-Scripts/master/java-artifacts.gradle"
+apply from: "https://raw.githubusercontent.com/jguerinet/Gradle-Artifact-Scripts/master/kotlin-artifacts.gradle"
