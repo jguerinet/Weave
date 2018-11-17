@@ -2,10 +2,8 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
-      <module name="mobile-string-parser_main" target="1.7" />
-      <module name="mobile-string-parser_test" target="1.7" />
-      <module name="string-parser_main" target="1.6" />
-      <module name="string-parser_test" target="1.6" />
+      <module name="weave_main" target="1.8" />
+      <module name="weave_test" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
