@@ -201,6 +201,81 @@ open class StringParser {
         return Pair(keyColumn, platformColumn)
     }
 
+    /**
+     * Parses the csv from the [reader] using the [headers]. Determines the key and platforms using the [keyColumn] and
+     *  [platformColumn], and delegates the parsing to the caller with [onLine]. Parses the headers itself using the
+     *  [source]. Returns the list of parsed [BaseString]s
+     */
+    protected fun parseCsv(
+        source: Source,
+        reader: CsvListReader,
+        headers: Array<String?>,
+        keyColumn: Int,
+        platformColumn: Int,
+        onLine: (lineNumber: Int, key: String, platforms: String?, line: List<Any>) -> BaseString?
+    ): List<BaseString> {
+        // Create the list of Strings
+        val strings = mutableListOf<BaseString>()
+
+        // Make a CellProcessor with the right length
+        val processors = arrayOfNulls<CellProcessor>(headers.size)
+
+        // Go through each line of the CSV document into a list of objects.
+        var currentLine = reader.read(*processors)
+
+        // The current line number (start at 2 since 1 is the header)
+        var lineNumber = 2
+
+        while (currentLine != null) {
+            // Get the key from the current line
+            val key = (currentLine[keyColumn] as? String)?.trim()
+
+            // Check if there's a key
+            if (key.isNullOrBlank()) {
+                println("Warning: Line $lineNumber does not have a key and will not be parsed")
+
+                // Increment the line number
+                lineNumber++
+
+                // Next line
+                currentLine = reader.read(*processors)
+
+                continue
+            }
+
+            // Check if this is a header
+            if (key.startsWith(HEADER_KEY)) {
+                strings.add(BaseString(key.replace("###", "").trim(), source.title, lineNumber))
+
+                // Increment the line number and continue
+                lineNumber++
+                continue
+            }
+
+            // If there's a platform column, parse it
+            val platforms = if (platformColumn != -1) {
+                currentLine[platformColumn] as? String
+            } else {
+                null
+            }
+
+            // Delegate the parsing to the caller, add the resulting BaseString if there is one
+            val baseString = onLine(lineNumber, key, platforms, currentLine)
+            baseString?.apply { strings.add(this) }
+
+            // Increment the line number
+            lineNumber++
+
+            // Next line
+            currentLine = reader.read(*processors)
+        }
+
+        // Close the CSV reader
+        reader.close()
+
+        return strings
+    }
+
     /* STRING PARSING */
 
     /**
@@ -237,44 +312,7 @@ open class StringParser {
             error("${language.id} in ${source.title} does not have any translations.")
         }
 
-        // Create the list of Strings
-        val strings = mutableListOf<BaseString>()
-
-        // Make a CellProcessor with the right length
-        val processors = arrayOfNulls<CellProcessor>(headers.size)
-
-        // Go through each line of the CSV document into a list of objects.
-        var currentLine = reader.read(*processors)
-
-        // The current line number (start at 2 since 1 is the header)
-        var lineNumber = 2
-
-        while (currentLine != null) {
-            // Get the key from the current line
-            val key = (currentLine[keyColumn] as? String)?.trim()
-
-            // Check if there's a key
-            if (key == null || key.isBlank()) {
-                println("Warning: Line $lineNumber does not have a key and will not be parsed")
-
-                // Increment the line number
-                lineNumber++
-
-                // Next line
-                currentLine = reader.read(*processors)
-
-                continue
-            }
-
-            // Check if this is a header
-            if (key.startsWith(HEADER_KEY)) {
-                strings.add(BaseString(key.replace("###", "").trim(), source.title, lineNumber))
-
-                // Increment the line number and continue
-                lineNumber++
-                continue
-            }
-
+        return parseCsv(source, reader, headers, keyColumn, platformColumn) { lineNumber, key, platforms, line ->
             // Add a new language String
             val languageString = LanguageString(key, source.title, lineNumber)
 
@@ -282,7 +320,7 @@ open class StringParser {
             var allNull = true
             var oneNull = false
             config.languages.forEach {
-                val currentLanguage = currentLine[it.columnIndex] as? String
+                val currentLanguage = line[it.columnIndex] as? String
                 if (currentLanguage != null) {
                     allNull = false
                     languageString.addTranslation(it.id, currentLanguage)
@@ -291,33 +329,19 @@ open class StringParser {
                 }
             }
 
-            // If there's a platform column , add them
-            if (platformColumn != -1) {
-                languageString.addPlatforms(currentLine[platformColumn] as? String)
-            }
+            // Add the optional platforms
+            languageString.addPlatforms(platforms)
 
             // Check if all of the values are null
             if (allNull) {
                 // Show a warning message
                 warning("Line $lineNumber from ${source.title} has no translations so it will not be parsed.")
-            } else {
-                if (oneNull) {
-                    warning("Warning: Line $lineNumber from ${source.title} is missing at least one translation")
-                }
-                strings.add(languageString)
+                return@parseCsv null
+            } else if (oneNull) {
+                warning("Warning: Line $lineNumber from ${source.title} is missing at least one translation")
             }
-
-            // Increment the line number
-            lineNumber++
-
-            // Next line
-            currentLine = reader.read(*processors)
+            languageString
         }
-
-        // Close the CSV reader
-        reader.close()
-
-        return strings
     }
 
     /**
@@ -558,8 +582,26 @@ open class StringParser {
     protected fun downloadAnalytics(config: AnalyticsConfig, source: Source): List<BaseString>? {
         val reader = downloadCsv(source) ?: return null
 
+        val headers = reader.getHeader(true)
+        var typeColumn = -1
+        var tagColumn = -1
+
         // Keep track of which columns hold the keys and the platform
-        var keyColumn = -1
+        val (keyColumn, platformColumn) = parseHeaders(headers) { index, header ->
+            when {
+                header.equals(config.typeColumnName, ignoreCase = true) -> typeColumn = index
+                header.equals(config.tagColumnName, ignoreCase = true) -> tagColumn = index
+            }
+        }
+
+        // Make sure we have the type and tag columns
+        if (typeColumn == -1) {
+            error("Type column with name ${config.typeColumnName} not found")
+        }
+
+        if (tagColumn == -1) {
+            error("Tag column with name ${config.tagColumnName} not found")
+        }
 
         return null
     }
