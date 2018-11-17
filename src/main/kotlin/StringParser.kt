@@ -26,7 +26,8 @@ import config.AnalyticsConfig
 import kotlinx.serialization.Optional
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JSON
-import okio.Okio
+import okio.buffer
+import okio.source
 import org.supercsv.cellprocessor.ift.CellProcessor
 import org.supercsv.io.CsvListReader
 import org.supercsv.prefs.CsvPreference
@@ -109,7 +110,7 @@ open class StringParser {
         }
 
         // Parse the Config from the file
-        val config = JSON.parse(Configs.serializer(), Okio.buffer(Okio.source(configFile)).readUtf8())
+        val config = JSON.parse(Configs.serializer(), configFile.source().buffer().readUtf8())
         this.config = config
     }
 
