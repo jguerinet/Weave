@@ -671,15 +671,19 @@ open class StringParser {
     }
 
     protected fun writeAnalyticsHeader(config: AnalyticsConfig) {
-        when (config.platform) {
-            // TODO Android
-            IOS -> {
-                writer.apply {
+        writer.apply {
+            when (config.platform) {
+                ANDROID -> {
+                    println("object GA {")
+                    println()
+                    println("    object Event {")
+                }
+                IOS -> {
                     println("class GA {")
                     println("    enum Event {")
                 }
+                // TODO Web
             }
-            // TODO Web
         }
     }
 
@@ -689,32 +693,45 @@ open class StringParser {
         isEvent: Boolean
     ): Boolean {
         val isStringEvent = analyticsString.type.equals("Event", ignoreCase = true)
-        when (config.platform) {
-            // TODO Android
-            IOS -> {
-                if (isEvent && !isStringEvent) {
-                    // If the current string is not an event but the first one was, we've switched to screens
-                    writer.apply {
+        writer.apply {
+            when (config.platform) {
+                ANDROID -> {
+                    if (isEvent && !isStringEvent) {
+                        // If the current string is not an event but the first one was, we've switched to screens
+                        println("    }")
+                        println()
+                        println("    object Screen {")
+                    }
+                    println("        const val ${analyticsString.key.toUpperCase()} = \"${analyticsString.tag}\"")
+                }
+                IOS -> {
+                    if (isEvent && !isStringEvent) {
+                        // If the current string is not an event but the first one was, we've switched to screens
                         println("    }")
                         println()
                         println("    enum Screen {")
                     }
+                    println("        static let ${analyticsString.key.toUpperCase()} = \"${analyticsString.tag}\"")
                 }
-                writer.println("        static let ${analyticsString.key.toUpperCase()} = \"${analyticsString.tag}\"")
+                // TODO Web
             }
-            // TODO Web
         }
         return isStringEvent
     }
 
     protected fun writeAnalyticsFooter(config: AnalyticsConfig) {
-        when (config.platform) {
-            // TODO Android
-            IOS -> writer.apply {
-                println("    }")
-                println("}")
+        writer.apply {
+            when (config.platform) {
+                ANDROID -> {
+                    println("    }")
+                    println("}")
+                }
+                IOS -> {
+                    println("    }")
+                    println("}")
+                }
+                // TODO Web
             }
-            // TODO Web
         }
     }
 
