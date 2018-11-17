@@ -18,12 +18,13 @@
 package com.guerinet.sp
 
 import com.guerinet.sp.config.Source
-import com.guerinet.sp.config.StringsConfig
+import com.guerinet.sp.config.StringConfig
 import com.squareup.okhttp.OkHttpClient
 import com.squareup.okhttp.Request
 import com.squareup.okhttp.Response
 import config.AnalyticsConfig
 import config.BaseConfig
+import kotlinx.serialization.Optional
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JSON
 import okio.Okio
@@ -62,8 +63,8 @@ open class StringParser {
     fun run() {
         try {
             readFromConfigFile()
-            val stringsConfig = config.stringsConfig
-            val analyticsConfig = config.analyticsConfig
+            val stringsConfig = config.strings
+            val analyticsConfig: AnalyticsConfig? = null // config.analytics
 
             if (stringsConfig == null) {
                 warning("No Strings config found")
@@ -106,15 +107,16 @@ open class StringParser {
         }
 
         // Parse the Config from the file
-        config = JSON.parse(Configs.serializer(), Okio.buffer(Okio.source(configFile)).readUtf8())
+        val config = JSON.parse(Configs.serializer(), Okio.buffer(Okio.source(configFile)).readUtf8())
+        this.config = config
     }
 
     /* VERIFICATION */
 
     /**
-     * Verifies the info is correct on a [StringsConfig] [config]
+     * Verifies the info is correct on a [StringConfig] [config]
      */
-    protected fun verifyStringConfigInfo(config: StringsConfig) {
+    protected fun verifyStringConfigInfo(config: StringConfig) {
         // Make sure everything is set
         if (!listOf(ANDROID, IOS, WEB).contains(config.platform)) {
             error("You need to input a valid platform (Android, iOS, Web)")
@@ -130,24 +132,9 @@ open class StringParser {
         // TODO Add AnalyticsConfig verification
     }
 
-    /* STRING PARSING */
+    /* DOWNLOAD */
 
-    /**
-     * Downloads all of the Strings from all of the Urls. Throws an [IOException] if there are
-     *  any errors downloading the Strings
-     */
-    @Throws(IOException::class)
-    protected fun downloadAllStrings(config: StringsConfig) {
-        config.sources
-            .mapNotNull { downloadStrings(config, it) }
-            .forEach { strings.addAll(it) }
-    }
-
-    /**
-     * Uses the given [source] to connect to a Url and download all of the Strings in the right
-     *  format. This will return a list of [BaseString]s, null if there were any errors
-     */
-    protected fun downloadStrings(config: StringsConfig, source: Source): List<BaseString>? {
+    protected fun downloadCsv(source: Source): CsvListReader? {
         // Connect to the URL
         println("Connecting to ${source.url}")
         val request = Request.Builder()
@@ -173,10 +160,29 @@ open class StringParser {
             return null
         }
 
-        // Set up the CSV reader
-        val reader = CsvListReader(
-            InputStreamReader(response.body().byteStream(), "UTF-8"), CsvPreference.EXCEL_PREFERENCE
-        )
+        // Set up the CSV reader and return it
+        return CsvListReader(InputStreamReader(response.body().byteStream(), "UTF-8"), CsvPreference.EXCEL_PREFERENCE)
+    }
+
+    /* STRING PARSING */
+
+    /**
+     * Downloads all of the Strings from all of the Urls. Throws an [IOException] if there are
+     *  any errors downloading the Strings
+     */
+    @Throws(IOException::class)
+    protected fun downloadAllStrings(config: StringConfig) {
+        config.sources
+            .mapNotNull { downloadStrings(config, it) }
+            .forEach { strings.addAll(it) }
+    }
+
+    /**
+     * Uses the given [source] to connect to a Url and download all of the Strings in the right
+     *  format. This will return a list of [BaseString]s, null if there were any errors
+     */
+    protected fun downloadStrings(config: StringConfig, source: Source): List<BaseString>? {
+        val reader = downloadCsv(source) ?: return null
 
         // Keep track of which columns hold the keys and the platform
         var keyColumn = -1
@@ -350,7 +356,7 @@ open class StringParser {
      *  an error
      */
     @Throws(IOException::class)
-    protected fun writeStrings(config: StringsConfig) {
+    protected fun writeStrings(config: StringConfig) {
         // If there are no Strings to write, no need to continue
         if (strings.isEmpty()) {
             println("No Strings to write")
@@ -374,7 +380,7 @@ open class StringParser {
     /**
      * Processes the Strings and writes them to a given file for the given [language]
      */
-    protected fun writeStrings(config: StringsConfig, language: Language) {
+    protected fun writeStrings(config: StringConfig, language: Language) {
         // Header
         writeHeader(config)
 
@@ -424,7 +430,7 @@ open class StringParser {
      *  Depending on the platform and whether this [isLastString], the String differs
      */
     protected fun writeString(
-        config: StringsConfig,
+        config: StringConfig,
         language: Language,
         languageString: LanguageString,
         isLastString: Boolean
@@ -573,7 +579,7 @@ open class StringParser {
 }
 
 /**
- * Convenience mapping to what is read from the config file. It can have a [stringsConfig] and/or an [analyticsConfig]
+ * Convenience mapping to what is read from the config file. It can have a [strings] and/or an [analytics]
  */
 @Serializable
-class Configs(val stringsConfig: StringsConfig? = null, val analyticsConfig: AnalyticsConfig? = null)
+class Configs(@Optional val strings: StringConfig? = null, @Optional val analytics: AnalyticsConfig? = null)
