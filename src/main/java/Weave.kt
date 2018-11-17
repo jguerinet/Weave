@@ -45,7 +45,7 @@ import java.util.regex.Pattern
 @Suppress("MemberVisibilityCanBePrivate")
 open class Weave {
 
-    open val config: Configs by lazy { readFromConfigFile() }
+    open val config: Configs by lazy { parseConfigJson() }
 
     open val platform by lazy {
         val platform = Platform.parse(config.platform)
@@ -92,12 +92,12 @@ open class Weave {
     }
 
     /**
-     * Reads and parses the various pieces of info from the config file
+     * Reads and returns the json String from the config file
      *
      * @throws IOException Thrown if there was an error opening or reading the config file
      */
     @Throws(IOException::class)
-    open fun readFromConfigFile(): Configs {
+    open fun readFromConfigFile(): String {
         // Find the config file
         var configFile = File(FILE_NAME)
         if (!configFile.exists()) {
@@ -109,7 +109,15 @@ open class Weave {
         }
 
         // Parse the Config from the file
-        return JSON.parse(Configs.serializer(), configFile.source().buffer().readUtf8())
+        return configFile.source().buffer().readUtf8()
+    }
+
+    /**
+     * Returns the parsed [Configs] from the read json String
+     */
+    open fun parseConfigJson(): Configs {
+        val json = readFromConfigFile()
+        return JSON.parse(Configs.serializer(), json)
     }
 
     /* VERIFICATION */
@@ -810,24 +818,24 @@ open class Weave {
 
     companion object {
 
-        private const val FILE_NAME = "weave-config.json"
+        const val FILE_NAME = "weave-config.json"
 
         /* CSV Strings */
 
         /**
          * Designates which column holds the keys
          */
-        private const val KEY = "key"
+        protected const val KEY = "key"
 
         /**
          * Designates which column holds the platforms
          */
-        private const val PLATFORMS = "platforms"
+        protected const val PLATFORMS = "platforms"
 
         /**
          * Designates a header within the Strings document
          */
-        private const val HEADER_KEY = "###"
+        protected const val HEADER_KEY = "###"
 
         @JvmStatic
         fun main(args: Array<String>) {
