@@ -42,17 +42,17 @@ repositories {
     jcenter()
     maven { url "https://kotlin.bintray.com/kotlinx" }
 }
-//
-//jar {
-//    // Add the sources to the jar
-//    from sourceSets.main.allSource
-//    manifest {
-//        attributes 'Main-Class': 'com.guerinet.sp.StringParser'
-//    }
-//    from {
-//        configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-//    }
-//}
+
+jar {
+    // Add the sources to the jar
+    from sourceSets.main.allSource
+    manifest {
+        attributes 'Main-Class': 'com.guerinet.weave.StringParser'
+    }
+    from {
+        configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
 
 dependencies {
     implementation 'com.squareup.okhttp:okhttp:2.7.5'
