@@ -454,68 +454,63 @@ open class StringParser {
             return
         }
 
-        // Unescaped quotations
-        string = string.replace("\"", "\\" + "\"")
-
-        // Copyright
-        string = string.replace("(c)", "\u00A9")
-
-        // New Lines
-        string = string.replace("\n", "")
+        // Trim
+        string = string
+            .trim()
+            // Unescaped quotations
+            .replace("\"", "\\" + "\"")
+            // Copyright
+            .replace("(c)", "\u00A9")
+            // New Lines
+            .replace("\n", "")
 
         val key = languageString.key
         when (config.platform) {
             ANDROID -> {
-                // Ampersands
-                string = string.replace("&", "&amp;")
-
-                // Apostrophes
-                string = string.replace("'", "\\'")
-
-                // Unescaped @ signs
-                string = string.replace("@", "\\" + "@")
-
-                // Ellipses
-                string = string.replace("...", "&#8230;")
+                string = string
+                    // Ampersands
+                    .replace("&", "&amp;")
+                    // Apostrophes
+                    .replace("'", "\\'")
+                    // Unescaped @ signs
+                    .replace("@", "\\" + "@")
+                    // Ellipses
+                    .replace("...", "&#8230;")
 
                 // Check if this is an HTML String
-                if (string.contains("<html>") || string.contains("<HTML>")) {
+                string = if (string.contains("<html>", ignoreCase = true)) {
                     // Don't format the greater than and less than symbols
-                    string = string.replace("<html>", "<![CDATA[")
-                    string = string.replace("</html>", "]]>")
-                    string = string.replace("<HTML>", "<![CDATA[")
-                    string = string.replace("</HTML>", "]]>")
+                    string
+                        .replace("<html>", "<![CDATA[", ignoreCase = true)
+                        .replace("</html>", "]]>", ignoreCase = true)
                 } else {
                     // Format the greater then and less than symbol otherwise
-                    // Greater than
-                    string = string.replace(">", "&gt;")
-
-                    // Less than
-                    string = string.replace("<", "&lt;")
+                    string
+                        // Greater than
+                        .replace(">", "&gt;")
+                        // Less than
+                        .replace("<", "&lt;")
                 }
 
                 // Add the XML tag
                 writer.println("    <string name=\"$key\">$string</string>")
             }
             IOS -> {
-                // Replace %s format specifiers with %@
-                string = string.replace("%s", "%@")
-                string = string.replace("\$s", "$@")
-
-                // Remove <html> </html>tags
-                string = string.replace("<html>", "")
-                string = string.replace("</html>", "")
-                string = string.replace("<HTML>", "")
-                string = string.replace("</HTML>", "")
+                string = string
+                    // Replace %s format specifiers with %@
+                    .replace("%s", "%@")
+                    .replace("\$s", "$@")
+                    // Remove <html> </html>tags
+                    .replace("<html>", "", ignoreCase = true)
+                    .replace("</html>", "", ignoreCase = true)
 
                 writer.println("\"$key\" = \"$string\";")
             }
             WEB -> {
                 // Remove <html> </html>tags
-                string = string.replace("<html>", "")
-                string = string.replace("</html>", "")
-                string = string.replace("<HTML>", "")
-                string = string.replace("</HTML>", "")
+                string = string
+                    .replace("<html>", "", ignoreCase = true)
+                    .replace("</html>", "", ignoreCase = true)
 
                 writer.println("    \"$key\": \"$string\"${if (isLastString) "" else ","}")
             }
