@@ -168,6 +168,39 @@ open class StringParser {
         return CsvListReader(InputStreamReader(response.body().byteStream(), "UTF-8"), CsvPreference.EXCEL_PREFERENCE)
     }
 
+    /**
+     * Parses the [headers] by letting the caller deal with specific cases with [onColumn], and returning the columns of
+     *  the key and platform (-1 if not found)
+     */
+    protected fun parseHeaders(
+        headers: Array<String?>,
+        onColumn: (index: Int, header: String) -> Unit
+    ): Pair<Int, Int> {
+        // Keep track of which columns hold the keys and the platform
+        var keyColumn = -1
+        var platformColumn = -1
+
+        headers.forEachIndexed { index, s ->
+            when {
+                // Disregard the null headers
+                s == null -> return@forEachIndexed
+                // Note the key column if it matches the key key
+                s.equals(KEY, ignoreCase = true) -> keyColumn = index
+                // Note the platform column if it matches the platform key
+                s.equals(PLATFORMS, ignoreCase = true) -> platformColumn = index
+                // Pass it to the lambda for the caller to do whatever with the result
+                else -> onColumn(index, s)
+            }
+        }
+
+        // Make sure there is a key column
+        if (keyColumn == -1) {
+            error("There must be a column marked 'key' with the String keys")
+        }
+
+        return Pair(keyColumn, platformColumn)
+    }
+
     /* STRING PARSING */
 
     /**
@@ -188,37 +221,14 @@ open class StringParser {
     protected fun downloadStrings(config: StringConfig, source: Source): List<BaseString>? {
         val reader = downloadCsv(source) ?: return null
 
-        // Keep track of which columns hold the keys and the platform
-        var keyColumn = -1
-        var platformColumn = -1
-
         // Get the header
-        val header = reader.getHeader(true)
+        val headers = reader.getHeader(true)
 
-        for (i in header.indices) {
-            // Disregard null headers
-            val string = header[i] ?: continue
-
-            // Check if the String matches the key key
-            if (string.equals(KEY, ignoreCase = true)) {
-                keyColumn = i
-                continue
-            }
-
-            // Check if the String matches the platform key
-            if (string.equals(PLATFORMS, ignoreCase = true)) {
-                platformColumn = i
-                continue
-            }
-
+        // Get the key and platform columns, and map the languages to the right indexes
+        val (keyColumn, platformColumn) = parseHeaders(headers) { index, header ->
             // Check if the String matches any of the languages parsed
-            val language = config.languages.find { string.trim().equals(it.id, ignoreCase = true) }
-            language?.columnIndex = i
-        }
-
-        // Make sure there is a key column
-        if (keyColumn == -1) {
-            error("There must be a column marked 'key' with the String keys")
+            val language = config.languages.find { header.trim().equals(it.id, ignoreCase = true) }
+            language?.columnIndex = index
         }
 
         // Make sure that all languages have an index
@@ -231,7 +241,7 @@ open class StringParser {
         val strings = mutableListOf<BaseString>()
 
         // Make a CellProcessor with the right length
-        val processors = arrayOfNulls<CellProcessor>(header.size)
+        val processors = arrayOfNulls<CellProcessor>(headers.size)
 
         // Go through each line of the CSV document into a list of objects.
         var currentLine = reader.read(*processors)
@@ -531,6 +541,30 @@ open class StringParser {
             WEB -> writer.println("}")
         }
     }
+
+    /* ANALYTICS PARSING */
+
+    /**
+     * Downloads all of the Analytics Strings from all of the Urls. Throws an [IOException] if there are
+     *  any errors downloading them
+     */
+    @Throws(IOException::class)
+    protected fun downloadAllAnalytics(config: AnalyticsConfig) {
+        config.sources
+            .mapNotNull { downloadAnalytics(config, it) }
+            .forEach { strings.addAll(it) }
+    }
+
+    protected fun downloadAnalytics(config: AnalyticsConfig, source: Source): List<BaseString>? {
+        val reader = downloadCsv(source) ?: return null
+
+        // Keep track of which columns hold the keys and the platform
+        var keyColumn = -1
+
+        return null
+    }
+
+    /* HELPERS */
 
     /**
      * Returns the header for a log message for a given [string]
