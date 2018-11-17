@@ -45,7 +45,7 @@ import java.util.regex.Pattern
 @Suppress("MemberVisibilityCanBePrivate")
 open class Weave {
 
-    open lateinit var config: Configs
+    open val config: Configs by lazy { readFromConfigFile() }
 
     open val platform by lazy {
         val platform = Platform.parse(config.platform)
@@ -59,9 +59,8 @@ open class Weave {
     /**
      * Weaves the Strings
      */
-    fun weave() {
+    open fun weave() {
         try {
-            readFromConfigFile()
             val stringsConfig = config.strings
             val analyticsConfig: AnalyticsConfig? = config.analytics
 
@@ -98,7 +97,7 @@ open class Weave {
      * @throws IOException Thrown if there was an error opening or reading the config file
      */
     @Throws(IOException::class)
-    open fun readFromConfigFile() {
+    open fun readFromConfigFile(): Configs {
         // Find the config file
         var configFile = File(FILE_NAME)
         if (!configFile.exists()) {
@@ -110,8 +109,7 @@ open class Weave {
         }
 
         // Parse the Config from the file
-        val config = JSON.parse(Configs.serializer(), configFile.source().buffer().readUtf8())
-        this.config = config
+        return JSON.parse(Configs.serializer(), configFile.source().buffer().readUtf8())
     }
 
     /* VERIFICATION */
@@ -480,16 +478,16 @@ open class Weave {
     }
 
     /**
-     * Writes a [languageString] to the file within the current [language] within the file.
-     *  Depending on the platform and whether this [isLastString], the String differs
+     * Writes a [strand] to the file within the current [language] within the file.
+     *  Depending on the platform and whether this [isLastStrand], the String differs
      */
     open fun writeString(
         writer: PrintWriter,
         language: Language,
-        languageString: LanguageStrand,
-        isLastString: Boolean
+        strand: LanguageStrand,
+        isLastStrand: Boolean
     ) {
-        var string = languageString.getString(language.id)
+        var string = strand.getString(language.id)
 
         // Check if value is or null empty: if it is, continue
         if (string == null) {
@@ -511,7 +509,7 @@ open class Weave {
             // New Lines
             .replace("\n", "")
 
-        val key = languageString.key
+        val key = strand.key
         when (platform) {
             Platform.ANDROID -> {
                 string = string
@@ -561,7 +559,7 @@ open class Weave {
                     .replace("<html>", "", ignoreCase = true)
                     .replace("</html>", "", ignoreCase = true)
 
-                writer.println("    \"$key\": \"$string\"${if (isLastString) "" else ","}")
+                writer.println("    \"$key\": \"$string\"${if (isLastStrand) "" else ","}")
             }
         }
     }
@@ -572,8 +570,8 @@ open class Weave {
     open fun writeFooter(writer: PrintWriter) {
         writer.apply {
             when (platform) {
-                Platform.ANDROID -> writer.println("</resources>")
-                Platform.WEB -> writer.println("}")
+                Platform.ANDROID -> println("</resources>")
+                Platform.WEB -> println("}")
                 else -> return
             }
         }

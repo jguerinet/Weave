@@ -53,7 +53,7 @@ build/
 
 ## We're not committing the test config file
 config.txt
-sp-config.json
+weave-config.json
 node_modules
 
 mobile-string-parser.js.map
