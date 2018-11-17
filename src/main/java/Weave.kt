@@ -69,8 +69,9 @@ open class Weave {
             } else {
                 verifyStringsConfigInfo(stringsConfig)
                 val downloadedStrands = downloadAllStringStrands(stringsConfig)
-                val verifiedStrings = verifyKeys(downloadedStrands)
-                writeStringStrands(stringsConfig, verifiedStrings)
+                val verifiedIds = verifyKeys(downloadedStrands)
+                val verifiedStrands = verifyStringStrands(stringsConfig, verifiedIds)
+                writeStringStrands(stringsConfig, verifiedStrands)
                 println("Strings parsing complete")
             }
 
@@ -343,25 +344,11 @@ open class Weave {
             val languageString = LanguageStrand(key, source.title, lineNumber)
 
             // Go through the languages, add each translation
-            var allNull = true
-            var oneNull = false
             config.languages.forEach {
                 val currentLanguage = line[it.columnIndex] as? String
                 if (currentLanguage != null) {
-                    allNull = false
                     languageString.addTranslation(it.id, currentLanguage)
-                } else {
-                    oneNull = true
                 }
-            }
-
-            // Check if all of the values are null
-            if (allNull) {
-                // Show a warning message
-                warning("Line $lineNumber from ${source.title} has no translations so it will not be parsed.")
-                return@parseCsv null
-            } else if (oneNull) {
-                warning("Warning: Line $lineNumber from ${source.title} is missing at least one translation")
             }
             languageString
         }
@@ -406,9 +393,34 @@ open class Weave {
         }
 
         // Remove all duplicates
-        val newStrings = strands.toMutableList()
-        newStrings.removeAll(toRemove)
-        return newStrings
+        val verifiedStrands = strands.toMutableList()
+        verifiedStrands.removeAll(toRemove)
+        return verifiedStrands
+    }
+
+    /**
+     * Verifies the [strands] by removing those who don't have translations and warning about the others
+     *  that don't have all translations
+     */
+    open fun verifyStringStrands(config: StringsConfig, strands: List<BaseStrand>): List<BaseStrand> {
+        val toRemove = mutableListOf<BaseStrand>()
+        strands
+            .mapNotNull { it as? LanguageStrand }
+            .forEach {
+                val lineNumber = it.lineNumber
+                val sourceName = it.sourceName
+                if (it.translations.isEmpty()) {
+                    // Show a warning message if there are no translations and remove it
+                    warning("Line $lineNumber from $sourceName has no translations so it will not be parsed.")
+                    toRemove.add(it)
+                } else if (it.translations.size != config.languages.size) {
+                    warning("Warning: Line $lineNumber from $sourceName is missing at least one translation")
+                }
+            }
+
+        val verifiedStrands = strands.toMutableList()
+        verifiedStrands.removeAll(toRemove)
+        return verifiedStrands
     }
 
     /**
