@@ -82,6 +82,8 @@ open class StringParser {
                 verifyAnalyticsConfigInfo(analyticsConfig)
                 downloadAllAnalytics(analyticsConfig)
                 verifyKeys()
+                writeAnalytics(analyticsConfig)
+                println("Analytics parsing complete")
             }
         } catch (e: IOException) {
             error("StringParser failed")
@@ -627,8 +629,20 @@ open class StringParser {
         }
     }
 
+    /**
+     * Writes the analytics Strings using the [config] data
+     */
     protected fun writeAnalytics(config: AnalyticsConfig) {
-        // If there are no Strings to
+        // If there are no Strings to write, don't continue
+        if (strings.isEmpty()) {
+            warning("No Analytics Strings to write")
+            return
+        }
+
+        // TODO Retrieve the path from the config
+        preparePrintWriter("testAnalytics.Strings", "Analytics") {
+
+        }
     }
 
     /* HELPERS */
