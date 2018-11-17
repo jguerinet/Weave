@@ -23,7 +23,6 @@ import com.squareup.okhttp.OkHttpClient
 import com.squareup.okhttp.Request
 import com.squareup.okhttp.Response
 import config.AnalyticsConfig
-import config.BaseConfig
 import kotlinx.serialization.Optional
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JSON
@@ -46,6 +45,8 @@ import java.util.regex.Pattern
 open class StringParser {
 
     protected lateinit var config: Configs
+
+    protected val platform by lazy { config.platform }
 
     /**
      * List of Strings to write
@@ -81,10 +82,10 @@ open class StringParser {
             if (analyticsConfig == null) {
                 warning("No Analytics config found")
             } else {
-                verifyAnalyticsConfigInfo(analyticsConfig)
+                verifyAnalyticsConfigInfo()
                 downloadAllAnalytics(analyticsConfig)
                 verifyKeys()
-                writeAnalytics(analyticsConfig)
+                writeAnalytics()
                 println("Analytics parsing complete")
             }
         } catch (e: IOException) {
@@ -123,7 +124,7 @@ open class StringParser {
      */
     protected fun verifyStringConfigInfo(config: StringConfig) {
         // Make sure everything is set
-        if (!listOf(ANDROID, IOS, WEB).contains(config.platform)) {
+        if (!listOf(ANDROID, IOS, WEB).contains(platform)) {
             error("You need to input a valid platform (Android, iOS, Web)")
         } else if (config.languages.isEmpty()) {
             error("You need to add at least one language")
@@ -133,9 +134,9 @@ open class StringParser {
     /**
      * Verifies that all of the config info is present
      */
-    protected fun verifyAnalyticsConfigInfo(config: AnalyticsConfig) {
+    protected fun verifyAnalyticsConfigInfo() {
         // Make sure everything is set
-        if (!listOf(ANDROID, IOS, WEB).contains(config.platform)) {
+        if (!listOf(ANDROID, IOS, WEB).contains(platform)) {
             error("You need to input a validation platform (Android, iOS, Web")
         }
     }
@@ -216,7 +217,6 @@ open class StringParser {
         headers: Array<String?>,
         keyColumn: Int,
         platformColumn: Int,
-        platform: String,
         onLine: (lineNumber: Int, key: String, line: List<Any>) -> BaseString?
     ): List<BaseString> {
         // Create the list of Strings
@@ -340,7 +340,7 @@ open class StringParser {
             error("${language.id} in ${source.title} does not have any translations.")
         }
 
-        return parseCsv(source, reader, headers, keyColumn, platformColumn, config.platform) { lineNumber, key, line ->
+        return parseCsv(source, reader, headers, keyColumn, platformColumn) { lineNumber, key, line ->
             // Add a new language String
             val languageString = LanguageString(key, source.title, lineNumber)
 
@@ -426,7 +426,7 @@ open class StringParser {
         // Go through each language, and write the file
         config.languages.forEach {
             preparePrintWriter(it.path, it.id) {
-                writeStrings(config, it)
+                writeStrings(it)
             }
         }
     }
@@ -434,9 +434,9 @@ open class StringParser {
     /**
      * Processes the Strings and writes them to a given file for the given [language]
      */
-    protected fun writeStrings(config: StringConfig, language: Language) {
+    protected fun writeStrings(language: Language) {
         // Header
-        writeHeader(config)
+        writeHeader()
 
         val last = strings.last()
 
@@ -445,9 +445,9 @@ open class StringParser {
             try {
                 if (it !is LanguageString) {
                     // If we are parsing a header, write the value as a comment
-                    writeComment(config, it.key)
+                    writeComment(it.key)
                 } else {
-                    writeString(config, language, it, last == it)
+                    writeString(language, it, last == it)
                 }
             } catch (e: Exception) {
                 error(getLog(it), false)
@@ -456,14 +456,14 @@ open class StringParser {
         }
 
         // Footer
-        writeFooter(config)
+        writeFooter()
     }
 
     /**
      * Writes the header to the current file
      */
-    protected fun writeHeader(config: BaseConfig) {
-        when (config.platform) {
+    protected fun writeHeader() {
+        when (platform) {
             ANDROID -> writer.println("<?xml version=\"1.0\" encoding=\"utf-8\"?> \n <resources>")
             WEB -> writer.println("{")
         }
@@ -472,8 +472,8 @@ open class StringParser {
     /**
      * Writes a [comment] to the file
      */
-    protected fun writeComment(config: BaseConfig, comment: String) {
-        when (config.platform) {
+    protected fun writeComment(comment: String) {
+        when (platform) {
             ANDROID -> writer.println("\n    <!-- $comment -->")
             IOS -> writer.println("\n/* $comment */")
         }
@@ -484,7 +484,6 @@ open class StringParser {
      *  Depending on the platform and whether this [isLastString], the String differs
      */
     protected fun writeString(
-        config: StringConfig,
         language: Language,
         languageString: LanguageString,
         isLastString: Boolean
@@ -496,7 +495,7 @@ open class StringParser {
             string = ""
         }
 
-        if (string.isBlank() && config.platform != WEB) {
+        if (string.isBlank() && platform != WEB) {
             // Skip over the empty values unless we're on Web
             return
         }
@@ -512,7 +511,7 @@ open class StringParser {
             .replace("\n", "")
 
         val key = languageString.key
-        when (config.platform) {
+        when (platform) {
             ANDROID -> {
                 string = string
                     // Ampersands
@@ -569,8 +568,8 @@ open class StringParser {
     /**
      * Writes the footer to the current file
      */
-    protected fun writeFooter(config: BaseConfig) {
-        when (config.platform) {
+    protected fun writeFooter() {
+        when (platform) {
             ANDROID -> writer.println("</resources>")
             WEB -> writer.println("}")
         }
@@ -614,7 +613,7 @@ open class StringParser {
             error("Tag column with name ${config.tagColumnName} not found")
         }
 
-        return parseCsv(source, reader, headers, keyColumn, platformColumn, config.platform) { lineNumber, key, line ->
+        return parseCsv(source, reader, headers, keyColumn, platformColumn) { lineNumber, key, line ->
             val type = AnalyticsType.parse(line[typeColumn] as? String)
             val tag = line[tagColumn] as? String
 
@@ -635,7 +634,7 @@ open class StringParser {
     /**
      * Writes the analytics Strings using the [config] data
      */
-    protected fun writeAnalytics(config: AnalyticsConfig) {
+    protected fun writeAnalytics() {
         // If there are no Strings to write, don't continue
         if (strings.isEmpty()) {
             warning("No Analytics Strings to write")
@@ -648,7 +647,7 @@ open class StringParser {
             var isEvent = true
 
             // Header
-            writeAnalyticsHeader(config)
+            writeAnalyticsHeader()
 
             val sortedStrings = strings
                 // Only write the Analytics Strings, since they get pre-sorted so the comments make no sense
@@ -662,7 +661,7 @@ open class StringParser {
 
             sortedStrings.forEach {
                     try {
-                        isEvent = writeAnalyticsString(config, it, isEvent, lastScreen == it || lastEvent == it)
+                        isEvent = writeAnalyticsString(it, isEvent, lastScreen == it || lastEvent == it)
                     } catch (e: Exception) {
                         error(getLog(it), false)
                         e.printStackTrace()
@@ -670,13 +669,13 @@ open class StringParser {
                 }
 
             // Footer
-            writeAnalyticsFooter(config)
+            writeAnalyticsFooter()
         }
     }
 
-    protected fun writeAnalyticsHeader(config: AnalyticsConfig) {
+    protected fun writeAnalyticsHeader() {
         writer.apply {
-            when (config.platform) {
+            when (platform) {
                 ANDROID -> {
                     println("object GA {")
                     println()
@@ -695,14 +694,13 @@ open class StringParser {
     }
 
     protected fun writeAnalyticsString(
-        config: AnalyticsConfig,
         analyticsString: AnalyticsString,
         isEvent: Boolean,
         isLast: Boolean
     ): Boolean {
         val isStringEvent = analyticsString.type == AnalyticsType.EVENT
         val isSwitch = isEvent && !isStringEvent
-        val isWeb = config.platform == WEB
+        val isWeb = platform == WEB
         // Capitalize the key for the mobile platforms
         val key = if (isWeb) analyticsString.key else analyticsString.key.toUpperCase()
         val tag = analyticsString.tag
@@ -717,7 +715,7 @@ open class StringParser {
                 println()
             }
 
-            when (config.platform) {
+            when (platform) {
                 ANDROID -> {
                     if (isSwitch) {
                         // Start the Screen object
@@ -748,9 +746,9 @@ open class StringParser {
         return isStringEvent
     }
 
-    protected fun writeAnalyticsFooter(config: AnalyticsConfig) {
+    protected fun writeAnalyticsFooter() {
         writer.apply {
-            when (config.platform) {
+            when (platform) {
                 ANDROID -> {
                     println("    }")
                     println("}")
@@ -829,7 +827,12 @@ open class StringParser {
 }
 
 /**
- * Convenience mapping to what is read from the config file. It can have a [strings] and/or an [analytics]
+ * Convenience mapping to what is read from the config file. It can have a [strings] and/or an [analytics].
+ *  Also contains the [platform] this is for
  */
 @Serializable
-class Configs(@Optional val strings: StringConfig? = null, @Optional val analytics: AnalyticsConfig? = null)
+class Configs(
+    val platform: String,
+    @Optional val strings: StringConfig? = null,
+    @Optional val analytics: AnalyticsConfig? = null
+)

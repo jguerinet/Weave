@@ -18,7 +18,6 @@
 package com.guerinet.sp.config
 
 import com.guerinet.sp.Language
-import config.BaseConfig
 import kotlinx.serialization.Serializable
 
 /**
@@ -27,11 +26,9 @@ import kotlinx.serialization.Serializable
  * @since 5.0.0
  */
 @Serializable
-class StringConfig : BaseConfig {
+class StringConfig {
 
-    override val platform: String = ""
-
-    override val sources: List<Source> = listOf()
+    val sources: List<Source> = listOf()
 
     /** List of [Language]s we are parsing */
     val languages: List<Language> = listOf()
