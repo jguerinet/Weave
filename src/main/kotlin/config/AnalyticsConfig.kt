@@ -18,6 +18,7 @@
 package config
 
 import com.guerinet.sp.config.Source
+import kotlinx.serialization.Optional
 import kotlinx.serialization.Serializable
 
 /**
@@ -33,6 +34,10 @@ class AnalyticsConfig {
 
     /** Path to the file to write to */
     val path: String = ""
+
+    /** Optional package name used on Android */
+    @Optional
+    val packageName: String? = null
 
     /** Name of the column that holds the type */
     val typeColumnName: String = ""
