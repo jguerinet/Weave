@@ -64,7 +64,7 @@ open class StringParser {
         try {
             readFromConfigFile()
             val stringsConfig = config.strings
-            val analyticsConfig: AnalyticsConfig? = null // config.analytics
+            val analyticsConfig: AnalyticsConfig? = config.analytics
 
             if (stringsConfig == null) {
                 warning("No Strings config found")
@@ -130,7 +130,10 @@ open class StringParser {
      * Verifies that all of the config info is present
      */
     protected fun verifyAnalyticsConfigInfo(config: AnalyticsConfig) {
-        // TODO Add AnalyticsConfig verification
+        // Make sure everything is set
+        if (!listOf(ANDROID, IOS, WEB).contains(config.platform)) {
+            error("You need to input a validation platform (Android, iOS, Web")
+        }
     }
 
     /* DOWNLOAD */
