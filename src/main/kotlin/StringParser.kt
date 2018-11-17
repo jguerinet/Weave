@@ -615,12 +615,7 @@ open class StringParser {
         }
 
         return parseCsv(source, reader, headers, keyColumn, platformColumn, config.platform) { lineNumber, key, line ->
-            val typeString = line[typeColumn] as? String
-            val type = when {
-                typeString.equals("Event", ignoreCase = true) -> AnalyticsType.EVENT
-                typeString.equals("Screen", ignoreCase = true) -> AnalyticsType.SCREEN
-                else -> null
-            }
+            val type = AnalyticsType.parse(line[typeColumn] as? String)
             val tag = line[tagColumn] as? String
 
             when {

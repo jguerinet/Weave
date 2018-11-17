@@ -32,5 +32,17 @@ class AnalyticsString(
 
 enum class AnalyticsType {
     EVENT,
-    SCREEN
+    SCREEN;
+
+    companion object {
+
+        /**
+         * Parses the [string] into an [AnalyticsType]. Returns null if none found
+         */
+        fun parse(string: String?) = when {
+            string.equals("Event", ignoreCase = true) -> EVENT
+            string.equals("Screen", ignoreCase = true) -> SCREEN
+            else -> null
+        }
+    }
 }
