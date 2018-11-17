@@ -650,15 +650,17 @@ open class StringParser {
             // Header
             writeAnalyticsHeader(config)
 
-            strings
+            val sortedStrings = strings
                 // Only write the Analytics Strings, since they get pre-sorted so the comments make no sense
                 .mapNotNull { it as? AnalyticsString }
                 .toMutableList()
                 // Sort the Strings into Screens and then Events
                 .sortedBy { it.type }
-                .forEach {
+
+            val last = sortedStrings.last()
+            sortedStrings.forEach {
                     try {
-                        isEvent = writeAnalyticsString(config, it, isEvent)
+                        isEvent = writeAnalyticsString(config, it, isEvent, last == it)
                     } catch (e: Exception) {
                         error(getLog(it), false)
                         e.printStackTrace()
@@ -693,7 +695,8 @@ open class StringParser {
     protected fun writeAnalyticsString(
         config: AnalyticsConfig,
         analyticsString: AnalyticsString,
-        isEvent: Boolean
+        isEvent: Boolean,
+        isLast: Boolean
     ): Boolean {
         val isStringEvent = analyticsString.type.equals("Event", ignoreCase = true)
         val isSwitch = isEvent && !isStringEvent
@@ -732,7 +735,11 @@ open class StringParser {
                         // Start the screen object
                         println("    \"screens\": {")
                     }
-                    println("        \"$key\": \"$tag\"")
+                    print("        \"$key\": \"$tag\"")
+                    if (!isLast) {
+                        print(",")
+                    }
+                    println()
                 }
             }
         }
