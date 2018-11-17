@@ -668,13 +668,13 @@ open class StringParser {
             val lastScreen = sortedStrings.last()
 
             sortedStrings.forEach {
-                    try {
-                        isEvent = writeAnalyticsString(writer, it, isEvent, lastScreen == it || lastEvent == it)
-                    } catch (e: Exception) {
-                        error(getLog(it), false)
-                        e.printStackTrace()
-                    }
+                try {
+                    isEvent = writeAnalyticsString(writer, it, isEvent, lastScreen == it || lastEvent == it)
+                } catch (e: Exception) {
+                    error(getLog(it), false)
+                    e.printStackTrace()
                 }
+            }
 
             // Footer
             writeAnalyticsFooter(writer)
