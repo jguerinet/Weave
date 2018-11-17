@@ -642,23 +642,26 @@ open class StringParser {
 
         // TODO Retrieve the path from the config
         preparePrintWriter("testAnalytics.Strings", "Analytics") {
+            // Keep track of whether we are still in the event section or not
+            var isEvent = true
+
             // Header
             writeAnalyticsHeader(config)
 
-            // Go through the Strings
-            strings.forEach {
-                try {
-                    if (it !is AnalyticsString) {
-                        // If we are parsing a header, write the value as a comment
-                        writeAnalyticsComment(config, it.key)
-                    } else {
-                        writeAnalyticsString(config, it)
+            strings
+                // Only write the Analytics Strings, since they get pre-sorted so the comments make no sense
+                .mapNotNull { it as? AnalyticsString }
+                .toMutableList()
+                // Sort the Strings into Screens and then Events
+                .sortedBy { it.type }
+                .forEach {
+                    try {
+                        isEvent = writeAnalyticsString(config, it, isEvent)
+                    } catch (e: Exception) {
+                        error(getLog(it), false)
+                        e.printStackTrace()
                     }
-                } catch (e: Exception) {
-                    error(getLog(it), false)
-                    e.printStackTrace()
                 }
-            }
 
             // Footer
             writeAnalyticsFooter(config)
@@ -668,27 +671,47 @@ open class StringParser {
     protected fun writeAnalyticsHeader(config: AnalyticsConfig) {
         when (config.platform) {
             // TODO Android
-            // TODO iOS
+            IOS -> {
+                writer.apply {
+                    println("class GA {")
+                    println("    enum Event {")
+                }
+            }
             // TODO Web
         }
     }
 
-    protected fun writeAnalyticsComment(config: AnalyticsConfig, comment: String) {
+    protected fun writeAnalyticsString(
+        config: AnalyticsConfig,
+        analyticsString: AnalyticsString,
+        isEvent: Boolean
+    ): Boolean {
+        val isStringEvent = analyticsString.type.equals("Event", ignoreCase = true)
         when (config.platform) {
             // TODO Android
-            // TODO iOS
+            IOS -> {
+                if (isEvent && !isStringEvent) {
+                    // If the current string is not an event but the first one was, we've switched to screens
+                    writer.apply {
+                        println("    }")
+                        println()
+                        println("    enum Screen {")
+                    }
+                }
+                writer.println("        static let ${analyticsString.key.toUpperCase()} = \"${analyticsString.tag}\"")
+            }
             // TODO Web
         }
-    }
-
-    protected fun writeAnalyticsString(config: AnalyticsConfig, analyticsString: AnalyticsString) {
-        // TODO
+        return isStringEvent
     }
 
     protected fun writeAnalyticsFooter(config: AnalyticsConfig) {
         when (config.platform) {
             // TODO Android
-            // TODO iOS
+            IOS -> writer.apply {
+                println("    }")
+                println("}")
+            }
             // TODO Web
         }
     }
