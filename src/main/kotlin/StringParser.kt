@@ -239,10 +239,7 @@ open class StringParser {
 
                 // Increment the line number
                 lineNumber++
-
-                // Next line
                 currentLine = reader.read(*processors)
-
                 continue
             }
 
@@ -250,8 +247,9 @@ open class StringParser {
             if (key.startsWith(HEADER_KEY)) {
                 strings.add(BaseString(key.replace("###", "").trim(), source.title, lineNumber))
 
-                // Increment the line number and continue
+                // Increment the line number
                 lineNumber++
+                currentLine = reader.read(*processors)
                 continue
             }
 
@@ -259,6 +257,9 @@ open class StringParser {
                 // If there's a platform column, parse it and check that it's for the current platform
                 val platforms = currentLine[platformColumn] as? String
                 if (!isForPlatform(platforms, platform)) {
+                    // Increment the line number
+                    lineNumber++
+                    currentLine = reader.read(*processors)
                     continue
                 }
             }
