@@ -31,20 +31,16 @@ buildscript {
 
 apply plugin: 'application'
 apply plugin: 'com.github.ben-manes.versions'
-apply plugin: 'java'
 apply plugin: 'kotlin'
 apply plugin: 'kotlinx-serialization'
 
+mainClassName = "com.guerinet.sp.StringParser"
 sourceCompatibility = 1.7
 version = sp_version
 
 repositories {
     jcenter()
     maven { url "https://kotlin.bintray.com/kotlinx" }
-}
-
-run {
-    mainClassName = "com.guerinet.sp.StringParser"
 }
 
 jar {
@@ -54,7 +50,7 @@ jar {
         attributes 'Main-Class': 'com.guerinet.sp.StringParser'
     }
     from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
 
