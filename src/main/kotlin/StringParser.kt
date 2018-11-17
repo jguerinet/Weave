@@ -476,6 +476,8 @@ open class StringParser {
                     .replace("@", "\\" + "@")
                     // Ellipses
                     .replace("...", "&#8230;")
+                    // Dashes
+                    .replace("-", "–")
 
                 // Check if this is an HTML String
                 string = if (string.contains("<html>", ignoreCase = true)) {
