@@ -24,14 +24,14 @@ package com.guerinet.weave
  */
 class LanguageStrand(
     key: String,
-    url: String,
+    sourceName: String,
     lineNumber: Int
-) : BaseStrand(key, url, lineNumber) {
+) : BaseStrand(key, sourceName, lineNumber) {
 
     /**
      * Maps of translations, the keys being the language Id and the values being the String
      */
-    private val translations = mutableMapOf<String, String>()
+    val translations = mutableMapOf<String, String>()
 
     /**
      * Returns the String for the given language [id], null if none
