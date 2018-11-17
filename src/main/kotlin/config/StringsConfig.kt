@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  * @since 5.0.0
  */
 @Serializable
-class StringConfig {
+class StringsConfig {
 
     val sources: List<Source> = listOf()
 

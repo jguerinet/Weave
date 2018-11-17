@@ -18,7 +18,7 @@
 package com.guerinet.sp
 
 import com.guerinet.sp.config.Source
-import com.guerinet.sp.config.StringConfig
+import com.guerinet.sp.config.StringsConfig
 import com.squareup.okhttp.OkHttpClient
 import com.squareup.okhttp.Request
 import com.squareup.okhttp.Response
@@ -120,9 +120,9 @@ open class StringParser {
     /* VERIFICATION */
 
     /**
-     * Verifies the info is correct on a [StringConfig] [config]
+     * Verifies the info is correct on a [StringsConfig] [config]
      */
-    protected fun verifyStringConfigInfo(config: StringConfig) {
+    protected fun verifyStringConfigInfo(config: StringsConfig) {
         // Make sure everything is set
         if (!listOf(ANDROID, IOS, WEB).contains(platform)) {
             error("You need to input a valid platform (Android, iOS, Web)")
@@ -310,7 +310,7 @@ open class StringParser {
      *  any errors downloading the Strings
      */
     @Throws(IOException::class)
-    protected fun downloadAllStrings(config: StringConfig) {
+    protected fun downloadAllStrings(config: StringsConfig) {
         strings.clear()
         config.sources
             .mapNotNull { downloadStrings(config, it) }
@@ -321,7 +321,7 @@ open class StringParser {
      * Uses the given [source] to connect to a Url and download all of the Strings in the right
      *  format. This will return a list of [BaseString]s, null if there were any errors
      */
-    protected fun downloadStrings(config: StringConfig, source: Source): List<BaseString>? {
+    protected fun downloadStrings(config: StringsConfig, source: Source): List<BaseString>? {
         val reader = downloadCsv(source) ?: return null
 
         // Get the header
@@ -416,7 +416,7 @@ open class StringParser {
      *  an error
      */
     @Throws(IOException::class)
-    protected fun writeStrings(config: StringConfig) {
+    protected fun writeStrings(config: StringsConfig) {
         // If there are no Strings to write, no need to continue
         if (strings.isEmpty()) {
             println("No Strings to write")
@@ -833,6 +833,6 @@ open class StringParser {
 @Serializable
 class Configs(
     val platform: String,
-    @Optional val strings: StringConfig? = null,
+    @Optional val strings: StringsConfig? = null,
     @Optional val analytics: AnalyticsConfig? = null
 )
