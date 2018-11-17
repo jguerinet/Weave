@@ -46,7 +46,14 @@ open class StringParser {
 
     protected lateinit var config: Configs
 
-    protected val platform by lazy { config.platform }
+    protected val platform by lazy {
+        val platform = Platform.parse(config.platform)
+        if (platform == null) {
+            error("The platform must be Android, iOS, or Web")
+            throw IllegalStateException()
+        }
+        platform
+    }
 
     /**
      * List of Strings to write
@@ -123,10 +130,8 @@ open class StringParser {
      * Verifies the info is correct on a [StringsConfig] [config]
      */
     protected fun verifyStringConfigInfo(config: StringsConfig) {
-        // Make sure everything is set
-        if (!listOf(ANDROID, IOS, WEB).contains(platform)) {
-            error("Please provide a valid platform (Android, iOS, Web)")
-        } else if (config.languages.isEmpty()) {
+        // Make sure there's at least one language
+        if (config.languages.isEmpty()) {
             error("Please provide at least one language")
         }
     }
@@ -135,13 +140,8 @@ open class StringParser {
      * Verifies that all of the config info is present
      */
     protected fun verifyAnalyticsConfigInfo(config: AnalyticsConfig) {
-        // Make sure everything is set
-        if (!listOf(ANDROID, IOS, WEB).contains(platform)) {
-            error("Please provide a validation platform (Android, iOS, Web")
-        }
-
         // Make sure there's a package for Android
-        if (platform == ANDROID && config.packageName == null) {
+        if (platform == Platform.ANDROID && config.packageName == null) {
             error("Please provide a package name for Android")
         }
     }
@@ -263,7 +263,7 @@ open class StringParser {
             if (platformColumn != -1) {
                 // If there's a platform column, parse it and check that it's for the current platform
                 val platforms = currentLine[platformColumn] as? String
-                if (!isForPlatform(platforms, platform)) {
+                if (!isForPlatform(platforms)) {
                     // Increment the line number
                     lineNumber++
                     currentLine = reader.read(*processors)
@@ -469,8 +469,9 @@ open class StringParser {
      */
     protected fun writeHeader() {
         when (platform) {
-            ANDROID -> writer.println("<?xml version=\"1.0\" encoding=\"utf-8\"?> \n <resources>")
-            WEB -> writer.println("{")
+            Platform.ANDROID -> writer.println("<?xml version=\"1.0\" encoding=\"utf-8\"?> \n <resources>")
+            Platform.WEB -> writer.println("{")
+            else -> return
         }
     }
 
@@ -479,8 +480,9 @@ open class StringParser {
      */
     protected fun writeComment(comment: String) {
         when (platform) {
-            ANDROID -> writer.println("\n    <!-- $comment -->")
-            IOS -> writer.println("\n/* $comment */")
+            Platform.ANDROID -> writer.println("\n    <!-- $comment -->")
+            Platform.IOS -> writer.println("\n/* $comment */")
+            else -> return
         }
     }
 
@@ -500,7 +502,7 @@ open class StringParser {
             string = ""
         }
 
-        if (string.isBlank() && platform != WEB) {
+        if (string.isBlank() && platform != Platform.WEB) {
             // Skip over the empty values unless we're on Web
             return
         }
@@ -517,7 +519,7 @@ open class StringParser {
 
         val key = languageString.key
         when (platform) {
-            ANDROID -> {
+            Platform.ANDROID -> {
                 string = string
                     // Ampersands
                     .replace("&", "&amp;")
@@ -548,7 +550,7 @@ open class StringParser {
                 // Add the XML tag
                 writer.println("    <string name=\"$key\">$string</string>")
             }
-            IOS -> {
+            Platform.IOS -> {
                 string = string
                     // Replace %s format specifiers with %@
                     .replace("%s", "%@")
@@ -559,7 +561,7 @@ open class StringParser {
 
                 writer.println("\"$key\" = \"$string\";")
             }
-            WEB -> {
+            Platform.WEB -> {
                 // Remove <html> </html>tags
                 string = string
                     .replace("<html>", "", ignoreCase = true)
@@ -575,8 +577,9 @@ open class StringParser {
      */
     protected fun writeFooter() {
         when (platform) {
-            ANDROID -> writer.println("</resources>")
-            WEB -> writer.println("}")
+            Platform.ANDROID -> writer.println("</resources>")
+            Platform.WEB -> writer.println("}")
+            else -> return
         }
     }
 
@@ -648,8 +651,8 @@ open class StringParser {
 
         // Get the object name by taking the last item on the path and removing the right suffix depending on platform
         val objectName = when (platform) {
-            ANDROID -> config.path.split("/").last().removeSuffix(".kt")
-            IOS -> config.path.split("/").last().removeSuffix(".swift")
+            Platform.ANDROID -> config.path.split("/").last().removeSuffix(".kt")
+            Platform.IOS -> config.path.split("/").last().removeSuffix(".swift")
             // No object name on web
             else -> ""
         }
@@ -688,7 +691,7 @@ open class StringParser {
     protected fun writeAnalyticsHeader(objectName: String, packageName: String?) {
         writer.apply {
             when (platform) {
-                ANDROID -> {
+                Platform.ANDROID -> {
                     println("package $packageName")
                     println()
                     println("/**")
@@ -697,13 +700,13 @@ open class StringParser {
                     println("object $objectName {")
                     println("    object Event {")
                 }
-                IOS -> {
+                Platform.IOS -> {
                     println("//  Constant list of analytics screens and events, auto-generated by the string-parser")
                     println()
                     println("class $objectName {")
                     println("    enum Event {")
                 }
-                WEB -> {
+                Platform.WEB -> {
                     println("{")
                     println("    \"events\": {")
                 }
@@ -718,7 +721,7 @@ open class StringParser {
     ): Boolean {
         val isStringEvent = analyticsString.type == AnalyticsType.EVENT
         val isSwitch = isEvent && !isStringEvent
-        val isWeb = platform == WEB
+        val isWeb = platform == Platform.WEB
         // Capitalize the key for the mobile platforms
         val key = if (isWeb) analyticsString.key else analyticsString.key.toUpperCase()
         val tag = analyticsString.tag
@@ -734,21 +737,21 @@ open class StringParser {
             }
 
             when (platform) {
-                ANDROID -> {
+                Platform.ANDROID -> {
                     if (isSwitch) {
                         // Start the Screen object
                         println("    object Screen {")
                     }
                     println("        const val $key = \"$tag\"")
                 }
-                IOS -> {
+                Platform.IOS -> {
                     if (isSwitch) {
                         // Start the Screen object
                         println("    enum Screen {")
                     }
                     println("        static let $key = \"$tag\"")
                 }
-                WEB -> {
+                Platform.WEB -> {
                     if (isSwitch) {
                         // Start the screen object
                         println("    \"screens\": {")
@@ -767,15 +770,15 @@ open class StringParser {
     protected fun writeAnalyticsFooter() {
         writer.apply {
             when (platform) {
-                ANDROID -> {
+                Platform.ANDROID -> {
                     println("    }")
                     println("}")
                 }
-                IOS -> {
+                Platform.IOS -> {
                     println("    }")
                     println("}")
                 }
-                WEB -> {
+                Platform.WEB -> {
                     println("    }")
                     println("}")
                 }
@@ -803,9 +806,11 @@ open class StringParser {
     /**
      * Returns true if this [platformCsv] contains the [platform], false otherwise
      */
-    protected fun isForPlatform(platformCsv: String?, platform: String): Boolean {
-        val platforms: List<String> = platformCsv?.split(",")?.map { it.trim().toLowerCase() } ?: listOf()
-        return platforms.isEmpty() || platforms.contains(platform.toLowerCase())
+    protected fun isForPlatform(platformCsv: String?): Boolean {
+        val platforms = platformCsv
+            ?.split(",")
+            ?.mapNotNull { Platform.parse(it.trim().toLowerCase()) } ?: listOf()
+        return platforms.isEmpty() || platforms.contains(platform)
     }
 
     protected fun warning(message: String) = println("Warning: $message")
@@ -813,12 +818,6 @@ open class StringParser {
     companion object {
 
         private const val FILE_NAME = "sp-config.json"
-
-        /* PLATFORM CONSTANTS */
-
-        private const val ANDROID = "Android"
-        private const val IOS = "iOS"
-        private const val WEB = "Web"
 
         /* CSV Strings */
 
@@ -854,3 +853,21 @@ class Configs(
     @Optional val strings: StringsConfig? = null,
     @Optional val analytics: AnalyticsConfig? = null
 )
+
+enum class Platform {
+    ANDROID,
+    IOS,
+    WEB;
+
+    companion object {
+        /**
+         * Parses the [string] into a [Platform]. Returns null if none found
+         */
+        internal fun parse(string: String) = when {
+            string.equals("Android", ignoreCase = true) -> ANDROID
+            string.equals("iOS", ignoreCase = true) -> IOS
+            string.equals("Web", ignoreCase = true) -> WEB
+            else -> null
+        }
+    }
+}
