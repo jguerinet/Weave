@@ -441,7 +441,7 @@ open class StringParser {
         strings.forEach {
             try {
                 if (it !is LanguageString) {
-                    // If we are parsing a header, right the value as a comment
+                    // If we are parsing a header, write the value as a comment
                     writeComment(config, it.key)
                 } else {
                     writeString(config, language, it, last == it)
@@ -641,7 +641,54 @@ open class StringParser {
 
         // TODO Retrieve the path from the config
         preparePrintWriter("testAnalytics.Strings", "Analytics") {
+            // Header
+            writeAnalyticsHeader(config)
 
+            // Go through the Strings
+            strings.forEach {
+                try {
+                    if (it !is AnalyticsString) {
+                        // If we are parsing a header, write the value as a comment
+                        writeAnalyticsComment(config, it.key)
+                    } else {
+                        writeAnalyticsString(config, it)
+                    }
+                } catch (e: Exception) {
+                    error(getLog(it), false)
+                    e.printStackTrace()
+                }
+            }
+
+            // Footer
+            writeAnalyticsFooter(config)
+        }
+    }
+
+    protected fun writeAnalyticsHeader(config: AnalyticsConfig) {
+        when (config.platform) {
+            // TODO Android
+            // TODO iOS
+            // TODO Web
+        }
+    }
+
+    protected fun writeAnalyticsComment(config: AnalyticsConfig, comment: String) {
+        when (config.platform) {
+            // TODO Android
+            // TODO iOS
+            // TODO Web
+        }
+    }
+
+    protected fun writeAnalyticsString(config: AnalyticsConfig, analyticsString: AnalyticsString) {
+        // TODO
+    }
+
+    protected fun writeAnalyticsFooter(config: AnalyticsConfig) {
+        when (config.platform) {
+            // TODO Android
+            // TODO iOS
+            // TODO Web
         }
     }
 
