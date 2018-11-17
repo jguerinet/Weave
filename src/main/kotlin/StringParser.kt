@@ -76,6 +76,8 @@ open class StringParser {
                 println("Strings parsing complete")
             }
 
+            println()
+
             if (analyticsConfig == null) {
                 warning("No Analytics config found")
             } else {
