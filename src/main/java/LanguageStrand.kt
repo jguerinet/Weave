@@ -18,31 +18,28 @@
 package com.guerinet.weave
 
 /**
- * One Event/Screen Name to use for Analytics
+ * One String with all of the translations
  * @author Julien Guerinet
- * @since 5.0.0
+ * @since 1.0.0
  */
-class AnalyticsString(
+class LanguageStrand(
     key: String,
     url: String,
-    lineNumber: Int,
-    val type: AnalyticsType,
-    val tag: String
-) : BaseString(key, url, lineNumber)
+    lineNumber: Int
+) : BaseStrand(key, url, lineNumber) {
 
-enum class AnalyticsType {
-    EVENT,
-    SCREEN;
+    /**
+     * Maps of translations, the keys being the language Id and the values being the String
+     */
+    private val translations = mutableMapOf<String, String>()
 
-    companion object {
+    /**
+     * Returns the String for the given language [id], null if none
+     */
+    fun getString(id: String) = translations[id]
 
-        /**
-         * Parses the [string] into an [AnalyticsType]. Returns null if none found
-         */
-        fun parse(string: String?) = when {
-            string.equals("Event", ignoreCase = true) -> EVENT
-            string.equals("Screen", ignoreCase = true) -> SCREEN
-            else -> null
-        }
-    }
+    /**
+     * Adds a [string] translation for the given language [id]
+     */
+    fun addTranslation(id: String, string: String) = translations.put(id, string)
 }

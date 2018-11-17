@@ -204,7 +204,7 @@ open class StringParser {
     /**
      * Parses the csv from the [reader] using the [headers]. Determines the key and platforms using the [keyColumn] and
      *  [platformColumn], and delegates the parsing to the caller with [onLine]. Parses the headers itself using the
-     *  [source]. Returns the list of parsed [BaseString]s
+     *  [source]. Returns the list of parsed [BaseStrand]s
      */
     open fun parseCsv(
         source: Source,
@@ -212,10 +212,10 @@ open class StringParser {
         headers: Array<String?>,
         keyColumn: Int,
         platformColumn: Int,
-        onLine: (lineNumber: Int, key: String, line: List<Any>) -> BaseString?
-    ): List<BaseString> {
+        onLine: (lineNumber: Int, key: String, line: List<Any>) -> BaseStrand?
+    ): List<BaseStrand> {
         // Create the list of Strings
-        val strings = mutableListOf<BaseString>()
+        val strings = mutableListOf<BaseStrand>()
 
         // Make a CellProcessor with the right length
         val processors = arrayOfNulls<CellProcessor>(headers.size)
@@ -242,7 +242,7 @@ open class StringParser {
 
             // Check if this is a header
             if (key.startsWith(HEADER_KEY)) {
-                strings.add(BaseString(key.replace("###", "").trim(), source.title, lineNumber))
+                strings.add(BaseStrand(key.replace("###", "").trim(), source.title, lineNumber))
 
                 // Increment the line number
                 lineNumber++
@@ -262,7 +262,7 @@ open class StringParser {
             }
 
 
-            // Delegate the parsing to the caller, add the resulting BaseString if there is one
+            // Delegate the parsing to the caller, add the resulting BaseStrand if there is one
             val baseString = onLine(lineNumber, key, currentLine)
             baseString?.apply { strings.add(this) }
 
@@ -305,15 +305,15 @@ open class StringParser {
      *  any errors downloading the Strings
      */
     @Throws(IOException::class)
-    open fun downloadAllStrings(config: StringsConfig): List<BaseString> = config.sources
+    open fun downloadAllStrings(config: StringsConfig): List<BaseStrand> = config.sources
         .mapNotNull { downloadStrings(config, it) }
         .flatten()
 
     /**
      * Uses the given [source] to connect to a Url and download all of the Strings in the right
-     *  format. This will return a list of [BaseString]s, null if there were any errors
+     *  format. This will return a list of [BaseStrand]s, null if there were any errors
      */
-    open fun downloadStrings(config: StringsConfig, source: Source): List<BaseString>? {
+    open fun downloadStrings(config: StringsConfig, source: Source): List<BaseStrand>? {
         val reader = downloadCsv(source) ?: return null
 
         // Get the header
@@ -334,7 +334,7 @@ open class StringParser {
 
         return parseCsv(source, reader, headers, keyColumn, platformColumn) { lineNumber, key, line ->
             // Add a new language String
-            val languageString = LanguageString(key, source.title, lineNumber)
+            val languageString = LanguageStrand(key, source.title, lineNumber)
 
             // Go through the languages, add each translation
             var allNull = true
@@ -364,14 +364,14 @@ open class StringParser {
     /**
      * Verifies that the keys are valid
      */
-    open fun verifyKeys(strings: List<BaseString>): List<BaseString> {
+    open fun verifyKeys(strands: List<BaseStrand>): List<BaseStrand> {
         // Define the key checker pattern to make sure no illegal characters exist within the keys
         val keyChecker = Pattern.compile("[^A-Za-z0-9_]")
 
         // Get rid of all of the headers
-        val filteredStrings = strings.filter { it is LanguageString || it is AnalyticsString }
+        val filteredStrings = strands.filter { it is LanguageStrand || it is AnalyticsStrand }
 
-        val toRemove = mutableListOf<BaseString>()
+        val toRemove = mutableListOf<BaseStrand>()
 
         // Check if there are any errors with the keys
         for (i in filteredStrings.indices) {
@@ -400,7 +400,7 @@ open class StringParser {
         }
 
         // Remove all duplicates
-        val newStrings = strings.toMutableList()
+        val newStrings = strands.toMutableList()
         newStrings.removeAll(toRemove)
         return newStrings
     }
@@ -410,9 +410,9 @@ open class StringParser {
      *  an error
      */
     @Throws(IOException::class)
-    open fun writeStrings(config: StringsConfig, strings: List<BaseString>) {
+    open fun writeStrings(config: StringsConfig, strands: List<BaseStrand>) {
         // If there are no Strings to write, no need to continue
-        if (strings.isEmpty()) {
+        if (strands.isEmpty()) {
             println("No Strings to write")
             return
         }
@@ -420,7 +420,7 @@ open class StringParser {
         // Go through each language, and write the file
         config.languages.forEach {
             preparePrintWriter(it.path, it.id) { writer ->
-                writeStrings(writer, it, strings)
+                writeStrings(writer, it, strands)
             }
         }
     }
@@ -428,16 +428,16 @@ open class StringParser {
     /**
      * Processes the Strings and writes them to a given file for the given [language]
      */
-    open fun writeStrings(writer: PrintWriter, language: Language, strings: List<BaseString>) {
+    open fun writeStrings(writer: PrintWriter, language: Language, strands: List<BaseStrand>) {
         // Header
         writeHeader(writer)
 
-        val last = strings.last()
+        val last = strands.last()
 
         // Go through the Strings
-        strings.forEach {
+        strands.forEach {
             try {
-                if (it !is LanguageString) {
+                if (it !is LanguageStrand) {
                     // If we are parsing a header, write the value as a comment
                     writeComment(writer, it.key)
                 } else {
@@ -486,7 +486,7 @@ open class StringParser {
     open fun writeString(
         writer: PrintWriter,
         language: Language,
-        languageString: LanguageString,
+        languageString: LanguageStrand,
         isLastString: Boolean
     ) {
         var string = languageString.getString(language.id)
@@ -586,11 +586,11 @@ open class StringParser {
      *  any errors downloading them
      */
     @Throws(IOException::class)
-    open fun downloadAllAnalytics(config: AnalyticsConfig): List<BaseString> = config.sources
+    open fun downloadAllAnalytics(config: AnalyticsConfig): List<BaseStrand> = config.sources
         .mapNotNull { downloadAnalytics(config, it) }
         .flatten()
 
-    open fun downloadAnalytics(config: AnalyticsConfig, source: Source): List<BaseString>? {
+    open fun downloadAnalytics(config: AnalyticsConfig, source: Source): List<BaseStrand>? {
         val reader = downloadCsv(source) ?: return null
 
         val headers = reader.getHeader(true)
@@ -627,7 +627,7 @@ open class StringParser {
                     warning("Line $lineNumber has no tag and will not be parsed")
                     null
                 }
-                else -> AnalyticsString(key, source.title, lineNumber, type, tag)
+                else -> AnalyticsStrand(key, source.title, lineNumber, type, tag)
             }
         }
     }
@@ -635,9 +635,9 @@ open class StringParser {
     /**
      * Writes the analytics Strings using the [config] data
      */
-    open fun writeAnalytics(config: AnalyticsConfig, strings: List<BaseString>) {
+    open fun writeAnalytics(config: AnalyticsConfig, strands: List<BaseStrand>) {
         // If there are no Strings to write, don't continue
-        if (strings.isEmpty()) {
+        if (strands.isEmpty()) {
             warning("No Analytics Strings to write")
             return
         }
@@ -657,9 +657,9 @@ open class StringParser {
             // Header
             writeAnalyticsHeader(writer, objectName, config.packageName)
 
-            val sortedStrings = strings
+            val sortedStrings = strands
                 // Only write the Analytics Strings, since they get pre-sorted so the comments make no sense
-                .mapNotNull { it as? AnalyticsString }
+                .mapNotNull { it as? AnalyticsStrand }
                 .toMutableList()
                 // Sort the Strings into Screens and then Events
                 .sortedBy { it.type }
@@ -710,7 +710,7 @@ open class StringParser {
 
     open fun writeAnalyticsString(
         writer: PrintWriter,
-        analyticsString: AnalyticsString,
+        analyticsString: AnalyticsStrand,
         isEvent: Boolean,
         isLast: Boolean
     ): Boolean {
@@ -784,9 +784,9 @@ open class StringParser {
     /* HELPERS */
 
     /**
-     * Returns the header for a log message for a given [string]
+     * Returns the header for a log message for a given [strand]
      */
-    open fun getLog(string: BaseString): String = "Line ${string.lineNumber} from ${string.sourceName}"
+    open fun getLog(strand: BaseStrand): String = "Line ${strand.lineNumber} from ${strand.sourceName}"
 
     /**
      * Prints an error [message], and terminates the program is [isTerminated] is true (defaults to true)
