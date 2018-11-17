@@ -375,9 +375,9 @@ open class StringParser {
         val keyChecker = Pattern.compile("[^A-Za-z0-9_]")
 
         // Get rid of all of the headers
-        val strings = this.strings.mapNotNull { it as? LanguageString }
+        val strings = this.strings.filter { it is LanguageString || it is AnalyticsString }
 
-        val toRemove = mutableListOf<LanguageString>()
+        val toRemove = mutableListOf<BaseString>()
 
         // Check if there are any errors with the keys
         for (i in strings.indices) {
@@ -399,7 +399,7 @@ open class StringParser {
                 // If the keys are the same and it's not a header, show a warning and remove
                 //  the older one
                 if (string1.key == string2.key) {
-                    warning("${getLog(string1)} and ${getLog(string2)} have the same key. The first one will be used")
+                    warning("${getLog(string1)} and ${getLog(string2)} have the same key. The second one will be used")
                     toRemove.add(string1)
                 }
             }
