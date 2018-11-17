@@ -31,6 +31,9 @@ class AnalyticsConfig {
     /** List of [Source]s the Strings are coming from */
     val sources: List<Source> = listOf()
 
+    /** Path to the file to write to */
+    val path: String = ""
+
     /** Name of the column that holds the type */
     val typeColumnName: String = ""
 

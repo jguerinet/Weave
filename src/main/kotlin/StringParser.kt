@@ -85,7 +85,7 @@ open class StringParser {
                 verifyAnalyticsConfigInfo()
                 downloadAllAnalytics(analyticsConfig)
                 verifyKeys()
-                writeAnalytics()
+                writeAnalytics(analyticsConfig)
                 println("Analytics parsing complete")
             }
         } catch (e: IOException) {
@@ -634,15 +634,14 @@ open class StringParser {
     /**
      * Writes the analytics Strings using the [config] data
      */
-    protected fun writeAnalytics() {
+    protected fun writeAnalytics(config: AnalyticsConfig) {
         // If there are no Strings to write, don't continue
         if (strings.isEmpty()) {
             warning("No Analytics Strings to write")
             return
         }
 
-        // TODO Retrieve the path from the config
-        preparePrintWriter("testAnalytics.Strings", "Analytics") {
+        preparePrintWriter(config.path, "Analytics") {
             // Keep track of whether we are still in the event section or not
             var isEvent = true
 
