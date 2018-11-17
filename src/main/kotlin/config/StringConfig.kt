@@ -29,10 +29,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 class StringConfig : BaseConfig {
 
-    /** List of [Language]s we are parsing */
-    val languages: List<Language> = listOf()
-
     override val platform: String = ""
 
     override val sources: List<Source> = listOf()
+
+    /** List of [Language]s we are parsing */
+    val languages: List<Language> = listOf()
 }

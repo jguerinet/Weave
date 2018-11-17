@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
  * @since 5.0.0
  */
 @Serializable
-open class AnalyticsConfig : BaseConfig {
+class AnalyticsConfig : BaseConfig {
 
     /** Platform we are parsing for (Android, iOS, Web) */
     override val platform: String = ""
