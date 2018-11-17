@@ -29,4 +29,11 @@ import kotlinx.serialization.Serializable
  * @param columnIndex   Index of the column of this language in the CSV file (starts as -1)
  */
 @Serializable
-class Language(val id: String, val path: String, var columnIndex: Int = -1)
+class Language(val id: String, val path: String, var columnIndex: Int = -1) {
+
+    companion object {
+
+        /** Dummy [Language]  object to use when we do not care about the language */
+        val EMPTY = Language("en", "", 0)
+    }
+}
