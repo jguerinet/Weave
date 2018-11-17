@@ -81,7 +81,8 @@ open class StringParser {
                 warning("No Analytics config found")
             } else {
                 verifyAnalyticsConfigInfo(analyticsConfig)
-                // TODO
+                downloadAllAnalytics(analyticsConfig)
+                verifyKeys()
             }
         } catch (e: IOException) {
             error("StringParser failed")
@@ -284,6 +285,7 @@ open class StringParser {
      */
     @Throws(IOException::class)
     protected fun downloadAllStrings(config: StringConfig) {
+        strings.clear()
         config.sources
             .mapNotNull { downloadStrings(config, it) }
             .forEach { strings.addAll(it) }
@@ -571,6 +573,7 @@ open class StringParser {
      */
     @Throws(IOException::class)
     protected fun downloadAllAnalytics(config: AnalyticsConfig) {
+        strings.clear()
         config.sources
             .mapNotNull { downloadAnalytics(config, it) }
             .forEach { strings.addAll(it) }
