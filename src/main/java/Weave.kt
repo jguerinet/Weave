@@ -68,10 +68,10 @@ open class StringParser {
             if (stringsConfig == null) {
                 warning("No Strings config found")
             } else {
-                verifyStringConfigInfo(stringsConfig)
-                val downloadedStrings = downloadAllStrings(stringsConfig)
-                val verifiedStrings = verifyKeys(downloadedStrings)
-                writeStrings(stringsConfig, verifiedStrings)
+                verifyStringsConfigInfo(stringsConfig)
+                val downloadedStrands = downloadAllStringStrands(stringsConfig)
+                val verifiedStrings = verifyKeys(downloadedStrands)
+                writeStringStrands(stringsConfig, verifiedStrings)
                 println("Strings parsing complete")
             }
 
@@ -81,13 +81,13 @@ open class StringParser {
                 warning("No Analytics config found")
             } else {
                 verifyAnalyticsConfigInfo(analyticsConfig)
-                val downloadedStrings = downloadAllAnalytics(analyticsConfig)
-                val verifiedStrings = verifyKeys(downloadedStrings)
-                writeAnalytics(analyticsConfig, verifiedStrings)
+                val downloadedStrands = downloadAllAnalyticStrands(analyticsConfig)
+                val verifiedStrings = verifyKeys(downloadedStrands)
+                writeAnalyticStrands(analyticsConfig, verifiedStrings)
                 println("Analytics parsing complete")
             }
         } catch (e: IOException) {
-            error("StringParser failed")
+            error("Weaving failed")
             e.printStackTrace()
         }
     }
@@ -119,7 +119,7 @@ open class StringParser {
     /**
      * Verifies the info is correct on a [StringsConfig] [config]
      */
-    open fun verifyStringConfigInfo(config: StringsConfig) {
+    open fun verifyStringsConfigInfo(config: StringsConfig) {
         // Make sure there's at least one language
         if (config.languages.isEmpty()) {
             error("Please provide at least one language")
@@ -305,15 +305,15 @@ open class StringParser {
      *  any errors downloading the Strings
      */
     @Throws(IOException::class)
-    open fun downloadAllStrings(config: StringsConfig): List<BaseStrand> = config.sources
-        .mapNotNull { downloadStrings(config, it) }
+    open fun downloadAllStringStrands(config: StringsConfig): List<BaseStrand> = config.sources
+        .mapNotNull { downloadStrands(config, it) }
         .flatten()
 
     /**
      * Uses the given [source] to connect to a Url and download all of the Strings in the right
      *  format. This will return a list of [BaseStrand]s, null if there were any errors
      */
-    open fun downloadStrings(config: StringsConfig, source: Source): List<BaseStrand>? {
+    open fun downloadStrands(config: StringsConfig, source: Source): List<BaseStrand>? {
         val reader = downloadCsv(source) ?: return null
 
         // Get the header
@@ -410,7 +410,7 @@ open class StringParser {
      *  an error
      */
     @Throws(IOException::class)
-    open fun writeStrings(config: StringsConfig, strands: List<BaseStrand>) {
+    open fun writeStringStrands(config: StringsConfig, strands: List<BaseStrand>) {
         // If there are no Strings to write, no need to continue
         if (strands.isEmpty()) {
             println("No Strings to write")
@@ -420,7 +420,7 @@ open class StringParser {
         // Go through each language, and write the file
         config.languages.forEach {
             preparePrintWriter(it.path, it.id) { writer ->
-                writeStrings(writer, it, strands)
+                writeStrands(writer, it, strands)
             }
         }
     }
@@ -428,7 +428,7 @@ open class StringParser {
     /**
      * Processes the Strings and writes them to a given file for the given [language]
      */
-    open fun writeStrings(writer: PrintWriter, language: Language, strands: List<BaseStrand>) {
+    open fun writeStrands(writer: PrintWriter, language: Language, strands: List<BaseStrand>) {
         // Header
         writeHeader(writer)
 
@@ -582,15 +582,15 @@ open class StringParser {
     /* ANALYTICS PARSING */
 
     /**
-     * Downloads all of the Analytics Strings from all of the Urls. Throws an [IOException] if there are
+     * Downloads all of the [AnalyticsStrand]s from all of the Urls. Throws an [IOException] if there are
      *  any errors downloading them
      */
     @Throws(IOException::class)
-    open fun downloadAllAnalytics(config: AnalyticsConfig): List<BaseStrand> = config.sources
-        .mapNotNull { downloadAnalytics(config, it) }
+    open fun downloadAllAnalyticStrands(config: AnalyticsConfig): List<BaseStrand> = config.sources
+        .mapNotNull { downloadAnalyticStrands(config, it) }
         .flatten()
 
-    open fun downloadAnalytics(config: AnalyticsConfig, source: Source): List<BaseStrand>? {
+    open fun downloadAnalyticStrands(config: AnalyticsConfig, source: Source): List<BaseStrand>? {
         val reader = downloadCsv(source) ?: return null
 
         val headers = reader.getHeader(true)
@@ -635,7 +635,7 @@ open class StringParser {
     /**
      * Writes the analytics Strings using the [config] data
      */
-    open fun writeAnalytics(config: AnalyticsConfig, strands: List<BaseStrand>) {
+    open fun writeAnalyticStrands(config: AnalyticsConfig, strands: List<BaseStrand>) {
         // If there are no Strings to write, don't continue
         if (strands.isEmpty()) {
             warning("No Analytics Strings to write")
@@ -812,7 +812,7 @@ open class StringParser {
 
     companion object {
 
-        private const val FILE_NAME = "sp-config.json"
+        private const val FILE_NAME = "weave-config.json"
 
         /* CSV Strings */
 
