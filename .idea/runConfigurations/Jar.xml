@@ -10,11 +10,11 @@
       </option>
       <option name="taskNames">
         <list>
-          <option value="jar" />
+          <option value="fatJar" />
         </list>
       </option>
       <option name="vmOptions" value="" />
     </ExternalSystemSettings>
-    <method />
+    <method v="2" />
   </configuration>
 </component>
