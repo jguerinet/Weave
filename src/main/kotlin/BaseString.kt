@@ -35,13 +35,26 @@ package com.guerinet.sp
  */
 
 /**
- * Basic String information. Will be used for headers (key will be a comment) and subclasses for the
- *  actual Strings
- *  @author Julien Guerinet
- *  @since 2.6.0
+ * Basic String information. Super class for al types of Strings
+ * @author Julien Guerinet
+ * @since 2.6.0
  *
- *  @param key          Key to store the String under, or the header to use
- *  @param url          Url of the file this String comes from
- *  @param lineNumber   Line number in the CSV that this String was on
+ * @param key           Key to store the String under, or the header to use
+ * @param url           Url of the file this String comes from
+ * @param lineNumber    Line number in the CSV that this String was on
+ * @param platformCsv   Nullable Csv String of the list of platforms this is allowed to be on. Defaults to null
  */
-open class BaseString(val key: String, val url: String, val lineNumber: Int)
+open class BaseString(
+    val key: String,
+    val url: String,
+    val lineNumber: Int,
+    platformCsv: String? = null
+) {
+
+    private val platforms: List<String> = platformCsv?.split(",")?.map { it.trim().toLowerCase() } ?: listOf()
+
+    /**
+     * Returns true if this string is for the given [platform], false otherwise
+     */
+    fun isForPlatform(platform: String) = platforms.isEmpty() || platforms.contains(platform.toLowerCase())
+}

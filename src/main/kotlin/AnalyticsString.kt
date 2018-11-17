@@ -18,29 +18,15 @@
 package com.guerinet.sp
 
 /**
- * One String with all of the translations
+ * One Event/Screen Name to use for Analytics
  * @author Julien Guerinet
- * @since 1.0.0
+ * @since 5.0.0
  */
-class LanguageString(
+class AnalyticsString(
     key: String,
     url: String,
     lineNumber: Int,
-    platformCsv: String?
-) : BaseString(key, url, lineNumber, platformCsv) {
-
-    /**
-     * Maps of translations, the keys being the language Id and the values being the String
-     */
-    private val translations = mutableMapOf<String, String>()
-
-    /**
-     * Returns the String for the given language [id], null if none
-     */
-    fun getString(id: String) = translations[id]
-
-    /**
-     * Adds a [string] translation for the given language [id]
-     */
-    fun addTranslation(id: String, string: String) = translations.put(id, string)
-}
+    platformCsv: String?,
+    val type: String,
+    val tag: String
+) : BaseString(key, url, lineNumber, platformCsv)
