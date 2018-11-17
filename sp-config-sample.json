@@ -1,0 +1,29 @@
+{
+    "platform": "",
+    "strings": {
+        "sources": [
+            {
+                "title": "",
+                "url": ""
+            }
+        ],
+        "languages": [
+            {
+                "id": "",
+                "path": ""
+            }
+        ]
+    },
+    "analytics": {
+        "sources": [
+            {
+                "title": "",
+                "url": ""
+            }
+        ],
+        "path": "",
+        "packageName": "",
+        "typeColumnName": "",
+        "tagColumnName": ""
+    }
+}
