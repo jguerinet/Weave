@@ -24,12 +24,9 @@ import kotlinx.serialization.Serializable
  * Parsed Config Json for Strings
  * @author Julien Guerinet
  * @since 5.0.0
+ *
+ * @param sources   List of [Source]s to read from
+ * @param languages List of [Language]s we are parsing
  */
 @Serializable
-class StringsConfig {
-
-    val sources: List<Source> = listOf()
-
-    /** List of [Language]s we are parsing */
-    val languages: List<Language> = listOf()
-}
+class StringsConfig(val sources: List<Source> = listOf(), val languages: List<Language> = listOf())
