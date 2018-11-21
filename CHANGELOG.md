@@ -1,5 +1,9 @@
 # Change Log
 
+## Version 5.1.3 (2018-11-21)
+
+-   Fixed header parsing so that you can use the Id column for other values
+
 ## Version 5.1.2 (2018-11-21)
 
 -   Switched the `AnalyticsConfig` to be a constructor based class 
