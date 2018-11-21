@@ -1,5 +1,11 @@
 # Change Log
 
+## Version 5.1.0 (2018-11-21)
+
+-   Made the Analytics parsing part of Weave much more flexible. Categories can now be anything, and are optional
+-   Added a way to override the key column name, the platforms column name, and the header symbol
+-   Made Json parsing lenient, which means you can have extra fields within your config
+
 ## Version 5.0.0 (2018-11-17)
 
 -   Library is now in Kotlin 
