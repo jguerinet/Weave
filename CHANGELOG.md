@@ -1,5 +1,9 @@
 # Change Log
 
+## Version 5.1.1 (2018-11-21)
+
+-   Fix `AnalyticsConfig` package
+
 ## Version 5.1.0 (2018-11-21)
 
 -   Made the Analytics parsing part of Weave much more flexible. Categories can now be anything, and are optional
