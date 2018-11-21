@@ -56,6 +56,12 @@ open class Weave {
         platform
     }
 
+    open val idKey by lazy { config.idKey }
+
+    open val headerKey by lazy { config.headerKey }
+
+    open val platformsKey by lazy { config.platformsKey }
+
     /**
      * Weaves the Strings
      */
@@ -192,9 +198,9 @@ open class Weave {
                 // Disregard the null headers
                 s == null -> return@forEachIndexed
                 // Note the key column if it matches the key key
-                s.equals(KEY, ignoreCase = true) -> keyColumn = index
+                s.equals(idKey, ignoreCase = true) -> keyColumn = index
                 // Note the platform column if it matches the platform key
-                s.equals(PLATFORMS, ignoreCase = true) -> platformColumn = index
+                s.equals(platformsKey, ignoreCase = true) -> platformColumn = index
                 // Pass it to the lambda for the caller to do whatever with the result
                 else -> onColumn(index, s)
             }
@@ -248,7 +254,7 @@ open class Weave {
             }
 
             // Check if this is a header
-            if (key.startsWith(HEADER_KEY)) {
+            if (key.startsWith(headerKey)) {
                 strings.add(BaseStrand(key.replace("###", "").trim(), source.title, lineNumber))
 
                 // Increment the line number
@@ -832,23 +838,6 @@ open class Weave {
 
         const val FILE_NAME = "weave-config.json"
 
-        /* CSV Strings */
-
-        /**
-         * Designates which column holds the keys
-         */
-        protected const val KEY = "key"
-
-        /**
-         * Designates which column holds the platforms
-         */
-        protected const val PLATFORMS = "platforms"
-
-        /**
-         * Designates a header within the Strings document
-         */
-        protected const val HEADER_KEY = "###"
-
         @JvmStatic
         fun main(args: Array<String>) {
             Weave().weave()
@@ -863,6 +852,9 @@ open class Weave {
 @Serializable
 class Configs(
     val platform: String,
+    @Optional val headerKey: String = "###",
+    @Optional val idKey: String = "id",
+    @Optional val platformsKey: String = "platforms",
     @Optional val strings: StringsConfig? = null,
     @Optional val analytics: AnalyticsConfig? = null
 )
