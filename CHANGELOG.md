@@ -1,8 +1,12 @@
 # Change Log
 
+## Version 5.1.2 (2018-11-21)
+
+-   Switched the `AnalyticsConfig` to be a constructor based class 
+
 ## Version 5.1.1 (2018-11-21)
 
--   Fix `AnalyticsConfig` package
+-   Fixed `AnalyticsConfig` package
 
 ## Version 5.1.0 (2018-11-21)
 
