@@ -17,12 +17,12 @@
 
 package com.guerinet.weave
 
+import com.guerinet.weave.config.AnalyticsConfig
 import com.guerinet.weave.config.Source
 import com.guerinet.weave.config.StringsConfig
 import com.squareup.okhttp.OkHttpClient
 import com.squareup.okhttp.Request
 import com.squareup.okhttp.Response
-import config.AnalyticsConfig
 import kotlinx.serialization.Optional
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JSON
