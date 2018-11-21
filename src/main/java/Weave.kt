@@ -124,7 +124,7 @@ open class Weave {
      */
     open fun parseConfigJson(): Configs {
         val json = readFromConfigFile()
-        return JSON.parse(Configs.serializer(), json)
+        return JSON.nonstrict.parse(Configs.serializer(), json)
     }
 
     /* VERIFICATION */
