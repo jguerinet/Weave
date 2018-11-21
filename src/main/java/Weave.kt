@@ -56,11 +56,11 @@ open class Weave {
         platform
     }
 
-    open val idKey by lazy { config.idKey }
+    open val idKey by lazy { config.keyColumnName }
 
-    open val headerKey by lazy { config.headerKey }
+    open val headerKey by lazy { config.headerColumnName }
 
-    open val platformsKey by lazy { config.platformsKey }
+    open val platformsKey by lazy { config.platformsColumnName }
 
     /**
      * Weaves the Strings
@@ -852,9 +852,9 @@ open class Weave {
 @Serializable
 class Configs(
     val platform: String,
-    @Optional val headerKey: String = "###",
-    @Optional val idKey: String = "id",
-    @Optional val platformsKey: String = "platforms",
+    @Optional val headerColumnName: String = "###",
+    @Optional val keyColumnName: String = "key",
+    @Optional val platformsColumnName: String = "platforms",
     @Optional val strings: StringsConfig? = null,
     @Optional val analytics: AnalyticsConfig? = null
 )
