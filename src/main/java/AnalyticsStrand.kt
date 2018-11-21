@@ -26,23 +26,6 @@ class AnalyticsStrand(
     key: String,
     url: String,
     lineNumber: Int,
-    val type: AnalyticsType,
+    val type: String,
     val tag: String
 ) : BaseStrand(key, url, lineNumber)
-
-enum class AnalyticsType {
-    EVENT,
-    SCREEN;
-
-    companion object {
-
-        /**
-         * Parses the [string] into an [AnalyticsType]. Returns null if none found
-         */
-        fun parse(string: String?) = when {
-            string.equals("Event", ignoreCase = true) -> EVENT
-            string.equals("Screen", ignoreCase = true) -> SCREEN
-            else -> null
-        }
-    }
-}
