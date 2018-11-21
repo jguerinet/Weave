@@ -24,27 +24,20 @@ import kotlinx.serialization.Serializable
  * Base parsed Config Json
  * @author Julien Guerinet
  * @since 5.0.0
+ *
+ * @param sources           List of [Source]s the Strings are coming from
+ * @param path              Path to the file to write to
+ * @param packageName       Optional package name used on Android
+ * @param typeColumnName    Name of the column that holds the type
+ * @param tagColumnName     Name of the column that holds the tag
+ * @param types             Types that we should parse these into. Will typically be "Events" and "Screens"
  */
 @Serializable
-class AnalyticsConfig {
-
-    /** List of [Source]s the Strings are coming from */
-    val sources: List<Source> = listOf()
-
-    /** Path to the file to write to */
-    val path: String = ""
-
-    /** Optional package name used on Android */
-    @Optional
-    val packageName: String? = null
-
-    /** Name of the column that holds the type */
-    @Optional
-    val typeColumnName: String = ""
-
-    /** Name of the column that holds the tag */
-    val tagColumnName: String = ""
-
-    /** Types that we should parse these into. Will typically be "Events" and "Screens" */
+class AnalyticsConfig(
+    val sources: List<Source> = listOf(),
+    val path: String = "",
+    @Optional val packageName: String? = null,
+    @Optional val typeColumnName: String = "",
+    val tagColumnName: String = "",
     val types: List<String> = listOf()
-}
+)
