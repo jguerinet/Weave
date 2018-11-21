@@ -639,7 +639,7 @@ open class Weave {
         }
 
         return parseCsv(source, reader, headers, keyColumn, platformColumn) { lineNumber, key, line ->
-            val type = AnalyticsType.parse(line[typeColumn] as? String)
+            val type = line[typeColumn] as? String
             val tag = line[tagColumn] as? String
 
             when {
@@ -651,7 +651,7 @@ open class Weave {
                     warning("Line $lineNumber has no tag and will not be parsed")
                     null
                 }
-                else -> AnalyticsStrand(key, source.title, lineNumber, type, tag)
+                else -> AnalyticsStrand(key, source.title, lineNumber, type.trim(), tag.trim())
             }
         }
     }
