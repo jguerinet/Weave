@@ -40,6 +40,7 @@ class AnalyticsConfig {
     val packageName: String? = null
 
     /** Name of the column that holds the type */
+    @Optional
     val typeColumnName: String = ""
 
     /** Name of the column that holds the tag */

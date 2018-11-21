@@ -629,11 +629,7 @@ open class Weave {
             }
         }
 
-        // Make sure we have the type and tag columns
-        if (typeColumn == -1) {
-            error("Type column with name ${config.typeColumnName} not found")
-        }
-
+        // Make sure we have the tag column
         if (tagColumn == -1) {
             error("Tag column with name ${config.tagColumnName} not found")
         }
