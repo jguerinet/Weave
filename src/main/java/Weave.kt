@@ -196,16 +196,20 @@ open class Weave {
         var platformColumn = -1
 
         headers.forEachIndexed { index, s ->
-            when {
+            if (s == null) {
                 // Disregard the null headers
-                s == null -> return@forEachIndexed
+                return@forEachIndexed
+            }
+
+            when {
                 // Note the key column if it matches the key key
                 s.equals(idKey, ignoreCase = true) -> keyColumn = index
                 // Note the platform column if it matches the platform key
                 s.equals(platformsKey, ignoreCase = true) -> platformColumn = index
-                // Pass it to the lambda for the caller to do whatever with the result
-                else -> onColumn(index, s)
             }
+
+            // Pass it to the lambda for the caller to do whatever with the result
+            onColumn(index, s)
         }
 
         // Make sure there is a key column
