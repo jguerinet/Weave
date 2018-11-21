@@ -44,4 +44,7 @@ class AnalyticsConfig {
 
     /** Name of the column that holds the tag */
     val tagColumnName: String = ""
+
+    /** Types that we should parse these into. Will typically be "Events" and "Screens" */
+    val types: List<String> = listOf()
 }
