@@ -642,16 +642,12 @@ open class Weave {
             val type = line[typeColumn] as? String
             val tag = line[tagColumn] as? String
 
-            when {
-                type == null -> {
-                    warning("Line $lineNumber has no type and will not be parsed")
-                    null
-                }
-                tag == null -> {
+            when (tag) {
+                null -> {
                     warning("Line $lineNumber has no tag and will not be parsed")
                     null
                 }
-                else -> AnalyticsStrand(key, source.title, lineNumber, type.trim(), tag.trim())
+                else -> AnalyticsStrand(key, source.title, lineNumber, type.orEmpty().trim(), tag.trim())
             }
         }
     }
