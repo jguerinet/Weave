@@ -1,5 +1,9 @@
 # Change Log
 
+## Version 5.2.0 (2018-12-03)
+
+-   Changed the duplicate verification for `AnalyticsStrand`s such that it needs to be the same key **and** the same type for it to be considered a duplicate
+
 ## Version 5.1.0 (2018-11-21)
 
 -   Made the Analytics parsing part of Weave much more flexible. Categories can now be anything, and are optional
