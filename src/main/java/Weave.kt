@@ -370,21 +370,19 @@ open class Weave {
         val keyChecker = Pattern.compile("[^A-Za-z0-9_]")
 
         // Get rid of all of the headers
-        val filteredStrings = strands.filter { it is LanguageStrand || it is AnalyticsStrand }
+        val filteredStrands = strands.filter { it is LanguageStrand || it is AnalyticsStrand }
 
         val toRemove = mutableListOf<BaseStrand>()
 
         // Check if there are any errors with the keys
-        for (i in filteredStrings.indices) {
-            val string1 = filteredStrings[i]
-
+        filteredStrands.forEach {
             // Check if there are any spaces in the keys
-            if (string1.key.contains(" ")) {
-                error("${getLog(string1)} contains a space in its key.")
+            if (it.key.contains(" ")) {
+                error("${getLog(it)} contains a space in its key.")
             }
 
-            if (keyChecker.matcher(string1.key).find()) {
-                error("${getLog(string1)} contains some illegal characters.")
+            if (keyChecker.matcher(it.key).find()) {
+                error("${getLog(it)} contains some illegal characters.")
             }
         }
 
