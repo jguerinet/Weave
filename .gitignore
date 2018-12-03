@@ -39,6 +39,7 @@ out/
 build_file_checksums.ser
 *.iml
 misc.xml
+.name
 
 ## Gradle
 .gradle
