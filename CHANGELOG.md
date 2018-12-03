@@ -1,5 +1,9 @@
 # Change Log
 
+## Version 5.2.0 (2018-12-03)
+
+-   Changed the duplicate verification for `AnalyticsStrand`s such that it needs to be the same key **and** the same type for it to be considered a duplicate
+
 ## Version 5.1.3 (2018-11-21)
 
 -   Fixed header parsing so that you can use the Id column for other values

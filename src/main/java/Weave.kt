@@ -90,8 +90,9 @@ open class Weave {
             } else {
                 verifyAnalyticsConfigInfo(analyticsConfig)
                 val downloadedStrands = downloadAllAnalyticStrands(analyticsConfig)
-                val verifiedStrings = verifyKeys(downloadedStrands)
-                writeAnalyticStrands(analyticsConfig, verifiedStrings)
+                val verifiedIds = verifyKeys(downloadedStrands)
+                val verifiedStrands = verifyAnalyticsStrands(verifiedIds)
+                writeAnalyticStrands(analyticsConfig, verifiedStrands)
                 println("Analytics parsing complete")
             }
         } catch (e: IOException) {
@@ -374,33 +375,19 @@ open class Weave {
         val keyChecker = Pattern.compile("[^A-Za-z0-9_]")
 
         // Get rid of all of the headers
-        val filteredStrings = strands.filter { it is LanguageStrand || it is AnalyticsStrand }
+        val filteredStrands = strands.filter { it is LanguageStrand || it is AnalyticsStrand }
 
         val toRemove = mutableListOf<BaseStrand>()
 
         // Check if there are any errors with the keys
-        for (i in filteredStrings.indices) {
-            val string1 = filteredStrings[i]
-
+        filteredStrands.forEach {
             // Check if there are any spaces in the keys
-            if (string1.key.contains(" ")) {
-                error("${getLog(string1)} contains a space in its key.")
+            if (it.key.contains(" ")) {
+                error("${getLog(it)} contains a space in its key.")
             }
 
-            if (keyChecker.matcher(string1.key).find()) {
-                error("${getLog(string1)} contains some illegal characters.")
-            }
-
-            // Check if there are any duplicates
-            for (j in i + 1 until filteredStrings.size) {
-                val string2 = filteredStrings[j]
-
-                // If the keys are the same and it's not a header, show a warning and remove
-                //  the older one
-                if (string1.key == string2.key) {
-                    warning("${getLog(string1)} and ${getLog(string2)} have the same key. The second one will be used")
-                    toRemove.add(string1)
-                }
+            if (keyChecker.matcher(it.key).find()) {
+                error("${getLog(it)} contains some illegal characters.")
             }
         }
 
@@ -415,9 +402,29 @@ open class Weave {
      *  that don't have all translations
      */
     open fun verifyStringStrands(config: StringsConfig, strands: List<BaseStrand>): List<BaseStrand> {
+        val stringStrands = strands.mapNotNull { it as? LanguageStrand }
         val toRemove = mutableListOf<BaseStrand>()
-        strands
-            .mapNotNull { it as? LanguageStrand }
+
+        // Check if there are any duplicates
+        for (i in stringStrands.indices) {
+            val strand1 = stringStrands[i]
+
+            for (j in i + 1 until stringStrands.size) {
+                val strand2 = stringStrands[j]
+
+                // If the keys are the same and it's not a header, show a warning and remove the older one
+                if (strand1.key == strand2.key) {
+                    warning("${getLog(strand1)} and ${getLog(strand2)} have the same key. The second one will be used")
+                    toRemove.add(strand1)
+                }
+            }
+        }
+
+        val verifiedStrands = strands.toMutableList()
+        verifiedStrands.removeAll(toRemove)
+        toRemove.clear()
+
+        stringStrands
             .forEach {
                 val lineNumber = it.lineNumber
                 val sourceName = it.sourceName
@@ -430,7 +437,6 @@ open class Weave {
                 }
             }
 
-        val verifiedStrands = strands.toMutableList()
         verifiedStrands.removeAll(toRemove)
         return verifiedStrands
     }
@@ -656,6 +662,36 @@ open class Weave {
                 else -> AnalyticsStrand(key, source.title, lineNumber, type.orEmpty().trim(), tag.trim())
             }
         }
+    }
+
+    /**
+     * Verifies the analytics [strands] by ensuring that there are no duplicates (same type and same key)
+     */
+    open fun verifyAnalyticsStrands(strands: List<BaseStrand>): List<BaseStrand> {
+        val analyticsStrands = strands.mapNotNull { it as? AnalyticsStrand }
+        val toRemove = mutableListOf<BaseStrand>()
+
+        // Check if there are any duplicates
+        for (i in analyticsStrands.indices) {
+            val strand1 = analyticsStrands[i]
+
+            for (j in i + 1 until analyticsStrands.size) {
+                val strand2 = analyticsStrands[j]
+
+                // If the keys are the same and the type is the same, show a warning and remove the older one
+                if (strand1.key == strand2.key && strand1.type == strand2.type) {
+                    warning(
+                        "${getLog(strand1)} and ${getLog(strand2)} have the same key and type. " +
+                                "The second one will be used"
+                    )
+                    toRemove.add(strand1)
+                }
+            }
+        }
+
+        val verifiedStrands = strands.toMutableList()
+        verifiedStrands.removeAll(toRemove)
+        return verifiedStrands
     }
 
     /**
