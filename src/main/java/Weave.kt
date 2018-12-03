@@ -386,18 +386,6 @@ open class Weave {
             if (keyChecker.matcher(string1.key).find()) {
                 error("${getLog(string1)} contains some illegal characters.")
             }
-
-            // Check if there are any duplicates
-            for (j in i + 1 until filteredStrings.size) {
-                val string2 = filteredStrings[j]
-
-                // If the keys are the same and it's not a header, show a warning and remove
-                //  the older one
-                if (string1.key == string2.key) {
-                    warning("${getLog(string1)} and ${getLog(string2)} have the same key. The second one will be used")
-                    toRemove.add(string1)
-                }
-            }
         }
 
         // Remove all duplicates
@@ -412,6 +400,26 @@ open class Weave {
      */
     open fun verifyStringStrands(config: StringsConfig, strands: List<BaseStrand>): List<BaseStrand> {
         val toRemove = mutableListOf<BaseStrand>()
+
+        // Check if there are any duplicates
+        for (i in strands.indices) {
+            val strand1 = strands[i]
+
+            for (j in i + 1 until strands.size) {
+                val strand2 = strands[j]
+
+                // If the keys are the same and it's not a header, show a warning and remove the older one
+                if (strand1.key == strand2.key) {
+                    warning("${getLog(strand1)} and ${getLog(strand2)} have the same key. The second one will be used")
+                    toRemove.add(strand1)
+                }
+            }
+        }
+
+        val verifiedStrands = strands.toMutableList()
+        verifiedStrands.removeAll(toRemove)
+        toRemove.clear()
+
         strands
             .mapNotNull { it as? LanguageStrand }
             .forEach {
@@ -426,7 +434,6 @@ open class Weave {
                 }
             }
 
-        val verifiedStrands = strands.toMutableList()
         verifiedStrands.removeAll(toRemove)
         return verifiedStrands
     }
