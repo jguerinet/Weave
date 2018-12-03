@@ -90,8 +90,9 @@ open class Weave {
             } else {
                 verifyAnalyticsConfigInfo(analyticsConfig)
                 val downloadedStrands = downloadAllAnalyticStrands(analyticsConfig)
-                val verifiedStrings = verifyKeys(downloadedStrands)
-                writeAnalyticStrands(analyticsConfig, verifiedStrings)
+                val verifiedIds = verifyKeys(downloadedStrands)
+                val verifiedStrands = verifyAnalyticsStrands(verifiedIds)
+                writeAnalyticStrands(analyticsConfig, verifiedStrands)
                 println("Analytics parsing complete")
             }
         } catch (e: IOException) {
@@ -397,14 +398,15 @@ open class Weave {
      *  that don't have all translations
      */
     open fun verifyStringStrands(config: StringsConfig, strands: List<BaseStrand>): List<BaseStrand> {
+        val stringStrands = strands.mapNotNull { it as? LanguageStrand }
         val toRemove = mutableListOf<BaseStrand>()
 
         // Check if there are any duplicates
-        for (i in strands.indices) {
-            val strand1 = strands[i]
+        for (i in stringStrands.indices) {
+            val strand1 = stringStrands[i]
 
-            for (j in i + 1 until strands.size) {
-                val strand2 = strands[j]
+            for (j in i + 1 until stringStrands.size) {
+                val strand2 = stringStrands[j]
 
                 // If the keys are the same and it's not a header, show a warning and remove the older one
                 if (strand1.key == strand2.key) {
@@ -418,8 +420,7 @@ open class Weave {
         verifiedStrands.removeAll(toRemove)
         toRemove.clear()
 
-        strands
-            .mapNotNull { it as? LanguageStrand }
+        stringStrands
             .forEach {
                 val lineNumber = it.lineNumber
                 val sourceName = it.sourceName
@@ -657,6 +658,36 @@ open class Weave {
                 else -> AnalyticsStrand(key, source.title, lineNumber, type.orEmpty().trim(), tag.trim())
             }
         }
+    }
+
+    /**
+     * Verifies the analytics [strands] by ensuring that there are no duplicates (same type and same key)
+     */
+    open fun verifyAnalyticsStrands(strands: List<BaseStrand>): List<BaseStrand> {
+        val analyticsStrands = strands.mapNotNull { it as? AnalyticsStrand }
+        val toRemove = mutableListOf<BaseStrand>()
+
+        // Check if there are any duplicates
+        for (i in analyticsStrands.indices) {
+            val strand1 = analyticsStrands[i]
+
+            for (j in i + 1 until analyticsStrands.size) {
+                val strand2 = analyticsStrands[j]
+
+                // If the keys are the same and the type is the same, show a warning and remove the older one
+                if (strand1.key == strand2.key && strand1.type == strand2.type) {
+                    warning(
+                        "${getLog(strand1)} and ${getLog(strand2)} have the same key and type. " +
+                                "The second one will be used"
+                    )
+                    toRemove.add(strand1)
+                }
+            }
+        }
+
+        val verifiedStrands = strands.toMutableList()
+        verifiedStrands.removeAll(toRemove)
+        return verifiedStrands
     }
 
     /**
