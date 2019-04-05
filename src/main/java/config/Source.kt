@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 Julien Guerinet
+ * Copyright 2013-2019 Julien Guerinet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @since 5.0.0
  *
  * @param title Name of this source (for logging purposes)
- * @param url   Url to retrieve the Strings from
+ * @param url Url to retrieve the Strings from
  */
 @Serializable
 class Source(val title: String, val url: String)

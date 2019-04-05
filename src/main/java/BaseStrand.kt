@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 Julien Guerinet
+ * Copyright 2013-2019 Julien Guerinet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ package com.guerinet.weave
  * @author Julien Guerinet
  * @since 2.6.0
  *
- * @param key           Key to store the String under, or the header to use
- * @param sourceName    Title of the Source this String comes from
- * @param lineNumber    Line number in the CSV that this String was on
+ * @param key Key to store the String under, or the header to use
+ * @param sourceName Title of the Source this String comes from
+ * @param lineNumber Line number in the CSV that this String was on
  */
 open class BaseStrand(
     val key: String,

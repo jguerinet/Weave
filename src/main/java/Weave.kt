@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 Julien Guerinet
+ * Copyright 2013-2019 Julien Guerinet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import com.squareup.okhttp.Request
 import com.squareup.okhttp.Response
 import kotlinx.serialization.Optional
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JSON
 import okio.buffer
 import okio.source
 import org.supercsv.cellprocessor.ift.CellProcessor
@@ -280,7 +279,6 @@ open class Weave {
                     continue
                 }
             }
-
 
             // Delegate the parsing to the caller, add the resulting BaseStrand if there is one
             val baseString = onLine(lineNumber, key, currentLine)

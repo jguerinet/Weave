@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 Julien Guerinet
+ * Copyright 2013-2019 Julien Guerinet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,12 @@ import kotlinx.serialization.Serializable
  * @author Julien Guerinet
  * @since 5.0.0
  *
- * @param sources           List of [Source]s the Strings are coming from
- * @param path              Path to the file to write to
- * @param packageName       Optional package name used on Android
- * @param typeColumnName    Name of the column that holds the type
- * @param tagColumnName     Name of the column that holds the tag
- * @param types             Types that we should parse these into. Will typically be "Events" and "Screens"
+ * @param sources List of [Source]s the Strings are coming from
+ * @param path Path to the file to write to
+ * @param packageName Optional package name used on Android
+ * @param typeColumnName Name of the column that holds the type
+ * @param tagColumnName Name of the column that holds the tag
+ * @param types Types that we should parse these into. Will typically be "Events" and "Screens"
  */
 @Serializable
 class AnalyticsConfig(

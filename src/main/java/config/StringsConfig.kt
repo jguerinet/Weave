@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 Julien Guerinet
+ * Copyright 2013-2019 Julien Guerinet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
  * @author Julien Guerinet
  * @since 5.0.0
  *
- * @param sources   List of [Source]s to read from
+ * @param sources List of [Source]s to read from
  * @param languages List of [Language]s we are parsing
  */
 @Serializable
