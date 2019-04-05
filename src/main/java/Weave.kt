@@ -25,6 +25,7 @@ import com.squareup.okhttp.Request
 import com.squareup.okhttp.Response
 import kotlinx.serialization.Optional
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import okio.buffer
 import okio.source
 import org.supercsv.cellprocessor.ift.CellProcessor
@@ -126,7 +127,7 @@ open class Weave {
      */
     open fun parseConfigJson(): Configs {
         val json = readFromConfigFile()
-        return JSON.nonstrict.parse(Configs.serializer(), json)
+        return Json.nonstrict.parse(Configs.serializer(), json)
     }
 
     /* VERIFICATION */
