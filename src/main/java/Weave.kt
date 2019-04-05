@@ -735,7 +735,13 @@ open class Weave {
 
             // Write them
             noTypeStrands.forEachIndexed { index, analyticsStrand ->
-                writeAnalyticsString(writer, analyticsStrand, false, index == noTypeStrands.lastIndex)
+                writeAnalyticsString(
+                    writer,
+                    analyticsStrand,
+                    false,
+                    config.tagsAlignColumn,
+                    index == noTypeStrands.lastIndex
+                )
             }
 
             // Go through the types, pull out the appropriate Strings and write them one by one
@@ -758,7 +764,15 @@ open class Weave {
                 val lastStrand = typeStrands.last()
 
                 // Write the Strands
-                typeStrands.forEach { strand -> writeAnalyticsString(writer, strand, true, strand == lastStrand) }
+                typeStrands.forEach { strand ->
+                    writeAnalyticsString(
+                        writer,
+                        strand,
+                        true,
+                        config.tagsAlignColumn,
+                        strand == lastStrand
+                    )
+                }
 
                 writeAnalyticsTypeFooter(writer, index == config.types.lastIndex)
             }
@@ -823,6 +837,7 @@ open class Weave {
         writer: PrintWriter,
         analyticsString: AnalyticsStrand,
         hasType: Boolean,
+        tagsAlignColumn: Int,
         isLast: Boolean
     ) {
         try {
@@ -836,8 +851,27 @@ open class Weave {
                     print("    ")
                 }
 
+                val string = when (platform) {
+                    Platform.ANDROID -> "    const val $key"
+                    Platform.IOS -> "    static let $key"
+                    Platform.WEB -> "    \"$key\": \"$tag\""
+                    else -> throw IllegalArgumentException("Unknown platform: $platform")
+                }
+
+                val space = if (tagsAlignColumn != 0) {
+                    // Find out how many spaces we need to add
+                    tagsAlignColumn - string.length - 1
+                } else {
+                    0
+                }
+
+                var alginmentSpace = ""
+                for (i in 0..space) {
+                    alginmentSpace += " "
+                }
+
                 when (platform) {
-                    Platform.ANDROID -> println("    const val $key = \"$tag\"")
+                    Platform.ANDROID -> println("    $string$alginmentSpace= \"$tag\"")
                     Platform.IOS -> println("    static let $key = \"$tag\"")
                     Platform.WEB -> {
                         print("    \"$key\": \"$tag\"")

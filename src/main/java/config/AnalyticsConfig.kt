@@ -31,6 +31,7 @@ import kotlinx.serialization.Serializable
  * @param typeColumnName Name of the column that holds the type
  * @param tagColumnName Name of the column that holds the tag
  * @param types Types that we should parse these into. Will typically be "Events" and "Screens"
+ * @param tagsTabAlignment Number of tabs to do in order to align the tags. Defaults to 0 (unaligned)
  */
 @Serializable
 class AnalyticsConfig(
@@ -39,5 +40,6 @@ class AnalyticsConfig(
     @Optional val packageName: String? = null,
     @Optional val typeColumnName: String = "",
     val tagColumnName: String = "",
-    val types: List<String> = listOf()
+    val types: List<String> = listOf(),
+    val tagsAlignColumn: Int = 0
 )
