@@ -560,6 +560,8 @@ open class Weave {
                     .replace("...", "&#8230;")
                     // Dashes
                     .replace("-", "–")
+                    // Percentages
+                    .replace(" % ", " %% ")
 
                 // Check if this is an HTML String
                 string = if (string.contains("<html>", ignoreCase = true)) {
@@ -587,6 +589,8 @@ open class Weave {
                     // Remove <html> </html>tags
                     .replace("<html>", "", ignoreCase = true)
                     .replace("</html>", "", ignoreCase = true)
+                    // Percentages
+                    .replace(" % ", " %% ")
 
                 writer.println("\"$key\" = \"$string\";")
             }
