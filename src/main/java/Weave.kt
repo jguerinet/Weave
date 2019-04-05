@@ -524,12 +524,7 @@ open class Weave {
         strand: LanguageStrand,
         isLastStrand: Boolean
     ) {
-        var string = strand.getString(language.id)
-
-        // Check if value is or null empty: if it is, continue
-        if (string == null) {
-            string = ""
-        }
+        var string = strand.getString(language.id) ?: ""
 
         if (string.isBlank() && platform != Platform.WEB) {
             // Skip over the empty values unless we're on Web
@@ -590,7 +585,7 @@ open class Weave {
                     .replace("<html>", "", ignoreCase = true)
                     .replace("</html>", "", ignoreCase = true)
                     // Percentages
-                    .replace(" % ", " %% ")
+                    .replace("%", "%%")
 
                 writer.println("\"$key\" = \"$string\";")
             }
@@ -599,6 +594,14 @@ open class Weave {
                 string = string
                     .replace("<html>", "", ignoreCase = true)
                     .replace("</html>", "", ignoreCase = true)
+                    // If there's just one placeholder, replace it with $1
+                    .replace("%s", "$1")
+
+                // If there are multiple placeholders, keep the formatting
+                //  TODO Find a better way of doing this
+                for (i in 1..10) {
+                    string = string.replace("%$i\$s", "$$i")
+                }
 
                 writer.println("    \"$key\": \"$string\"${if (isLastStrand) "" else ","}")
             }
