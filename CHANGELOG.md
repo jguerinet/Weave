@@ -10,7 +10,7 @@
 
 ## Version 5.1.2 (2018-11-21)
 
--   Switched the `AnalyticsConfig` to be a constructor based class 
+-   Switched the `AnalyticsConfig` to be a constructor based class
 
 ## Version 5.1.1 (2018-11-21)
 
@@ -24,11 +24,11 @@
 
 ## Version 5.0.0 (2018-11-17)
 
--   Library is now in Kotlin 
+-   Library is now in Kotlin
 -   Set up Gradle publishing so it can be used as a dependency for custom implementations
 -   Switched to a Json based config
--   Added parsing of Analytic events and screens 
--   Renamed the library 
+-   Added parsing of Analytic events and screens
+-   Renamed the library
 -   Fixed dashes in Android
 
 ## Version 4.0.4 (2017-07-14)
