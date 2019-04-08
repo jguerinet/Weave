@@ -470,7 +470,7 @@ open class Weave {
      */
     open fun writeStrands(writer: PrintWriter, language: Language, strands: List<BaseStrand>) {
         // Header
-        writeHeader(writer)
+        writeHeader(writer, language.id)
 
         val last = strands.last()
 
@@ -494,13 +494,16 @@ open class Weave {
     }
 
     /**
-     * Writes the header to the current file
+     * Writes the header to the current file using the [writer]. Uses the [language] for the Web object name
      */
-    open fun writeHeader(writer: PrintWriter) {
+    open fun writeHeader(writer: PrintWriter, language: String) {
         writer.apply {
             when (platform) {
                 Platform.ANDROID -> println("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<resources>")
-                Platform.WEB -> println("{")
+                Platform.WEB -> {
+                    println("{")
+                    println("    \"en\" : {")
+                }
                 else -> return
             }
         }
@@ -608,7 +611,7 @@ open class Weave {
                     string = string.replace("%$i\$s", "$$i")
                 }
 
-                writer.println("    \"$key\": \"$string\"${if (isLastStrand) "" else ","}")
+                writer.println("        \"$key\": \"$string\"${if (isLastStrand) "" else ","}")
             }
         }
     }
@@ -620,7 +623,10 @@ open class Weave {
         writer.apply {
             when (platform) {
                 Platform.ANDROID -> println("</resources>")
-                Platform.WEB -> println("}")
+                Platform.WEB -> {
+                    println("    }")
+                    println("}")
+                }
                 else -> return
             }
         }
