@@ -499,7 +499,7 @@ open class Weave {
     open fun writeHeader(writer: PrintWriter) {
         writer.apply {
             when (platform) {
-                Platform.ANDROID -> println("<?xml version=\"1.0\" encoding=\"utf-8\"?> \n <resources>")
+                Platform.ANDROID -> println("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<resources>")
                 Platform.WEB -> println("{")
                 else -> return
             }
