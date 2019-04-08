@@ -33,7 +33,9 @@ import kotlinx.serialization.Serializable
  * @param types Types that we should parse these into. Will typically be "Events" and "Screens"
  * @param tagsAlignColumn Number of tabs to do in order to align the tags. Defaults to 0 (unaligned)
  * @param capitalizeVariables True if the variables should be capitalized, false if they should stay the way they are.
- *                              Defaults to false
+ *                              Defaults to true
+ * @param isTopLevelClassCreated True if there should be a top level class created from the file name, false otherwise
+ *                              Defaults to true
  */
 @Serializable
 class AnalyticsConfig(
@@ -44,5 +46,6 @@ class AnalyticsConfig(
     val tagColumnName: String = "",
     val types: List<String> = listOf(),
     val tagsAlignColumn: Int = 0,
-    val capitalizeVariables: Boolean = false
+    val capitalizeVariables: Boolean = true,
+    val isTopLevelClassCreated: Boolean = true
 )
