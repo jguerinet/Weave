@@ -150,6 +150,11 @@ open class Weave {
         if (platform == Platform.ANDROID && config.packageName == null) {
             error("Please provide a package name for Android")
         }
+
+        // Make sure there tagAlign Column is a multiple a 4
+        if (config.tagsAlignColumn % 4 != 0) {
+            error("tagsAlignColumn must be a multiple of 4")
+        }
     }
 
     /* DOWNLOAD */
