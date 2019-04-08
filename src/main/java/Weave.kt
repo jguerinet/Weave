@@ -745,6 +745,7 @@ open class Weave {
                     analyticsStrand,
                     false,
                     config.tagsAlignColumn,
+                    config.capitalizeVariables,
                     index == noTypeStrands.lastIndex
                 )
             }
@@ -775,6 +776,7 @@ open class Weave {
                         strand,
                         true,
                         config.tagsAlignColumn,
+                        config.capitalizeVariables,
                         strand == lastStrand
                     )
                 }
@@ -843,12 +845,17 @@ open class Weave {
         analyticsString: AnalyticsStrand,
         hasType: Boolean,
         tagsAlignColumn: Int,
+        isCapitalized: Boolean,
         isLast: Boolean
     ) {
         try {
             val isWeb = platform == Platform.WEB
-            // Capitalize the key for the mobile platforms
-            val key = if (isWeb) analyticsString.key else analyticsString.key.toUpperCase()
+            // Capitalize the key for the mobile platforms unless isCaptalized is false
+            val key = if (isWeb || !isCapitalized) {
+                analyticsString.key
+            } else {
+                analyticsString.key.toUpperCase()
+            }
             val tag = analyticsString.tag
             writer.apply {
                 if (hasType) {
