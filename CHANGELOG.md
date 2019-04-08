@@ -1,5 +1,15 @@
 # Change Log
 
+## Version 6.0.0 (2019-04-08)
+
+-   For Analytics, added option to specify which column the mobile analytics should align to
+-   For Analytics, added option to not capitalize the variable names on mobile
+-   For Analytics, added option to not have a top level class on mobile
+-   For Strings, added a top level language object for Web
+-   For Strings, fixed spacing bug in Android
+-   For Strings, fixed percentages on iOS and Android
+-   For Strings, fixed formatted Strings on Web
+
 ## Version 5.2.0 (2018-12-03)
 
 -   Changed the duplicate verification for `AnalyticsStrand`s such that it needs to be the same key **and** the same type for it to be considered a duplicate
