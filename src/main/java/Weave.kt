@@ -725,7 +725,7 @@ open class Weave {
 
         preparePrintWriter(config.path, "Analytics") { writer ->
             // Header
-            writeAnalyticsHeader(writer, objectName, config.packageName)
+            writeAnalyticsHeader(writer, objectName, config.packageName, config.isTopLevelClassCreated)
 
             val sortedStrands = strands
                 // Only write the Analytics Strands, since they get pre-sorted so the comments make no sense
@@ -746,6 +746,7 @@ open class Weave {
                     false,
                     config.tagsAlignColumn,
                     config.capitalizeVariables,
+                    config.isTopLevelClassCreated,
                     index == noTypeStrands.lastIndex
                 )
             }
@@ -764,7 +765,7 @@ open class Weave {
                 sortedStrands.removeAll(typeStrands)
 
                 // Write the header
-                writeAnalyticsTypeHeader(writer, type)
+                writeAnalyticsTypeHeader(writer, type, config.isTopLevelClassCreated)
 
                 // Get the last strand
                 val lastStrand = typeStrands.last()
@@ -777,31 +778,40 @@ open class Weave {
                         true,
                         config.tagsAlignColumn,
                         config.capitalizeVariables,
+                        config.isTopLevelClassCreated,
                         strand == lastStrand
                     )
                 }
 
-                writeAnalyticsTypeFooter(writer, index == config.types.lastIndex)
+                writeAnalyticsTypeFooter(writer, config.isTopLevelClassCreated, index == config.types.lastIndex)
             }
 
             // Footer
-            writeAnalyticsFooter(writer)
+            writeAnalyticsFooter(writer, config.isTopLevelClassCreated)
         }
     }
 
-    open fun writeAnalyticsTypeHeader(writer: PrintWriter, typeName: String) {
+    open fun writeAnalyticsTypeHeader(writer: PrintWriter, typeName: String, isTopLevelClassCreated: Boolean) {
         writer.apply {
+            if (platform == Platform.WEB || isTopLevelClassCreated) {
+                // Add spacing for web Analytics or mobile Analytics if the top level class is created
+                print("    ")
+            }
             when (platform) {
-                Platform.ANDROID -> println("    object $typeName {")
-                Platform.IOS -> println("    enum $typeName {")
-                Platform.WEB -> println("    \"${typeName.toLowerCase()}\" : { ")
+                Platform.ANDROID -> println("object $typeName {")
+                Platform.IOS -> println("enum $typeName {")
+                Platform.WEB -> println("\"${typeName.toLowerCase()}\" : { ")
             }
         }
     }
 
-    open fun writeAnalyticsTypeFooter(writer: PrintWriter, isLastType: Boolean) {
+    open fun writeAnalyticsTypeFooter(writer: PrintWriter, isTopLevelClassCreated: Boolean, isLastType: Boolean) {
         writer.apply {
-            print("    }")
+            if (platform == Platform.WEB || isTopLevelClassCreated) {
+                // Add spacing for web Analytics or mobile Analytics if the top level class is created
+                print("    ")
+            }
+            print("}")
 
             if (!isLastType) {
                 when (platform) {
@@ -816,7 +826,10 @@ open class Weave {
         }
     }
 
-    open fun writeAnalyticsHeader(writer: PrintWriter, objectName: String, packageName: String?) {
+    open fun writeAnalyticsHeader(
+        writer: PrintWriter, objectName: String, packageName: String?,
+        isTopLevelClassCreated: Boolean
+    ) {
         writer.apply {
             when (platform) {
                 Platform.ANDROID -> {
@@ -825,13 +838,19 @@ open class Weave {
                     println("/**")
                     println(" * $analyticsHeader")
                     println(" */")
-                    println("object $objectName {")
+                    // Only create the top level class if there should be one
+                    if (isTopLevelClassCreated) {
+                        println("object $objectName {")
+                    }
                     println()
                 }
                 Platform.IOS -> {
                     println("//  $analyticsHeader")
                     println()
-                    println("class $objectName {")
+                    // Only create the top level class if there should be one
+                    if (isTopLevelClassCreated) {
+                        println("class $objectName {")
+                    }
                 }
                 Platform.WEB -> {
                     println("{")
@@ -846,11 +865,12 @@ open class Weave {
         hasType: Boolean,
         tagsAlignColumn: Int,
         isCapitalized: Boolean,
+        isTopLevelClassCreated: Boolean,
         isLast: Boolean
     ) {
         try {
             val isWeb = platform == Platform.WEB
-            // Capitalize the key for the mobile platforms unless isCaptalized is false
+            // Capitalize the key for the mobile platforms unless isCapitalized is false
             val key = if (isWeb || !isCapitalized) {
                 analyticsString.key
             } else {
@@ -858,19 +878,27 @@ open class Weave {
             }
             val tag = analyticsString.tag
             writer.apply {
+                var stringLength = 0
                 if (hasType) {
                     // If there's a type, add more spacing
                     print("    ")
+                    stringLength += 4
+                }
+
+                if (platform == Platform.WEB || isTopLevelClassCreated) {
+                    // If there's a top level class for mobile Analytics, add more spacing
+                    print("    ")
+                    stringLength += 4
                 }
 
                 val string = when (platform) {
-                    Platform.ANDROID -> "    const val $key"
-                    Platform.IOS -> "    static let $key"
+                    Platform.ANDROID -> "const val $key"
+                    Platform.IOS -> "static let $key"
                     Platform.WEB -> ""
                     else -> throw IllegalArgumentException("Unknown platform: $platform")
                 }
 
-                val stringLength = string.length
+                stringLength += string.length
                 val space = if (tagsAlignColumn - stringLength < 0) {
                     // 1 for the normal space between the variable name and the equals sign
                     1
@@ -881,10 +909,10 @@ open class Weave {
                 val alignmentSpace = " ".repeat(space)
 
                 when (platform) {
-                    Platform.ANDROID -> println("    $string$alignmentSpace= \"$tag\"")
-                    Platform.IOS -> println("    static let $key$alignmentSpace= \"$tag\"")
+                    Platform.ANDROID -> println("$string$alignmentSpace= \"$tag\"")
+                    Platform.IOS -> println("static let $key$alignmentSpace= \"$tag\"")
                     Platform.WEB -> {
-                        print("    \"$key\": \"$tag\"")
+                        print("\"$key\": \"$tag\"")
                         if (!isLast) {
                             print(",")
                         }
@@ -898,7 +926,16 @@ open class Weave {
         }
     }
 
-    open fun writeAnalyticsFooter(writer: PrintWriter) = writer.println("}")
+    /**
+     * Writes the footer if the Analytics file using the [writer]. [isTopLevelClassCreated] tells us whether there
+     *  should be a closing bracket on mobile
+     */
+    open fun writeAnalyticsFooter(writer: PrintWriter, isTopLevelClassCreated: Boolean) {
+        if (platform == Platform.WEB || isTopLevelClassCreated) {
+            // Only close the class if we are on web or there was a top level class
+            writer.println("}")
+        }
+    }
 
     /* HELPERS */
 
