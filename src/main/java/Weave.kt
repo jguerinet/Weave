@@ -833,7 +833,9 @@ open class Weave {
     }
 
     open fun writeAnalyticsHeader(
-        writer: PrintWriter, objectName: String, packageName: String?,
+        writer: PrintWriter,
+        objectName: String,
+        packageName: String?,
         isTopLevelClassCreated: Boolean
     ) {
         writer.apply {
