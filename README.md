@@ -12,7 +12,7 @@ Please note that it assumes that the file is in UTF-8 and also produces UTF-8 fi
 
 To use this:
 
--   Download the latest jar from the releases tab and the [sample config](weave-config.json)
+-   Download the latest jar from the releases tab and the [sample config](weave-config-sample.json)
 -   Set up your config file (fill out the fields in the config). The following fields are optional:
     -   `headerColumnName`, which represents the symbol to show that a line is a header, defaults to `###`.
     -   `keyColumnName`, which represents the name of the column where the key is stored, defaults to `key`
@@ -50,7 +50,7 @@ See the [Change Log](CHANGELOG.md).
 
 ## Copyright
 
-    Copyright 2013-2018 Julien Guerinet
+    Copyright 2013-2019 Julien Guerinet
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
