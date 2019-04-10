@@ -21,7 +21,7 @@ import kotlinx.serialization.Optional
 import kotlinx.serialization.Serializable
 
 /**
- * Base parsed Config Json
+ * Config for a list of constants (ex: Analytics)
  * @author Julien Guerinet
  * @since 5.0.0
  *
@@ -38,7 +38,7 @@ import kotlinx.serialization.Serializable
  *                              Defaults to true
  */
 @Serializable
-class AnalyticsConfig(
+class ConstantsConfig(
     val sources: List<Source> = listOf(),
     val path: String = "",
     @Optional val packageName: String? = null,

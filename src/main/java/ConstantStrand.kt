@@ -18,11 +18,11 @@
 package com.guerinet.weave
 
 /**
- * One Event/Screen Name to use for Analytics
+ * One Constant to use for a Constants file
  * @author Julien Guerinet
  * @since 5.0.0
  */
-class AnalyticsStrand(
+class ConstantStrand(
     key: String,
     url: String,
     lineNumber: Int,
