@@ -31,7 +31,6 @@ import kotlinx.serialization.Serializable
  * @param packageName Optional package name used on Android
  * @param typeColumnName Name of the column that holds the type
  * @param tagColumnName Name of the column that holds the tag
- * @param types Types that we should parse these into. Will typically be "Events" and "Screens"
  * @param tagsAlignColumn Number of tabs to do in order to align the tags. Defaults to 0 (unaligned)
  * @param capitalizeVariables True if the variables should be capitalized, false if they should stay the way they are.
  *                              Defaults to true
@@ -46,7 +45,6 @@ class ConstantsConfig(
     @Optional val packageName: String? = null,
     @Optional val typeColumnName: String = "",
     val tagColumnName: String = "",
-    @Optional val types: List<String> = listOf(),
     @Optional val tagsAlignColumn: Int = 0,
     @Optional val capitalizeVariables: Boolean = true,
     @Optional val isTopLevelClassCreated: Boolean = true

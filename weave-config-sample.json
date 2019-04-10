@@ -27,15 +27,12 @@
                 }
             ],
             "path": "",
-            "isTopLevelClassCreated": "Optional boolean, remove if unused",
-            "types": [
-                "Optional List, remove if unused"
-            ],
+            "isTopLevelClassCreated": "Optional boolean, remove if unused (if used, remove quotes)",
             "packageName": "",
             "typeColumnName": "Optional, remove if unused",
             "tagColumnName": "",
-            "tagsAlignColumn": "Optional Int, remove if unused",
-            "capitalizeVariables": "Optional boolean, remove is unused"
+            "tagsAlignColumn": "Optional Int, remove if unused (if used, remove quotes)",
+            "capitalizeVariables": "Optional boolean, remove is unused (if used, remove quotes)"
         }
     ]
 }

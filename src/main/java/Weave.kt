@@ -766,8 +766,11 @@ open class Weave {
                 )
             }
 
+            // Pull out the types from the Strands
+            val types = sortedStrands.map { it.type }.toSet()
+
             // Go through the types, pull out the appropriate Strings and write them one by one
-            config.types.forEachIndexed { index, type ->
+            types.forEachIndexed { index, type ->
                 // Get the Strands for it
                 val typeStrands = sortedStrands.filter { it.type.equals(type, ignoreCase = true) }
 
@@ -798,7 +801,7 @@ open class Weave {
                     )
                 }
 
-                writeConstantsTypeFooter(writer, config.isTopLevelClassCreated, index == config.types.lastIndex)
+                writeConstantsTypeFooter(writer, config.isTopLevelClassCreated, index == types.indexOfLast { true })
             }
 
             // Footer
