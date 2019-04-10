@@ -2,9 +2,10 @@
 
 ## Summary
 
-Weave takes an online CSV file and parses the content to produce the Strings files for an Android or iOS app.
-It can also parse Analytics events and screens to ensure that you are using the same properties cross platform.
-It also parses the Strings for Web in the form of a JSON: an on object with a bunch of key-value pairs, the key being the String key and the value being the translated String for that language.
+Weave takes an online CSV file and parses the content to produce the Strings files for an Android or iOS app. It also parses the Strings for Web in the form of a JSON: an on object with a bunch of key-value pairs, the key being the String key and the value being the translated String for that language.
+
+It can also parse Constants into files that you are using the same properties cross platform (ex: Analytics tags, Regex expressions).
+
 It will also show any warnings or errors that the Strings file might have.
 Please note that it assumes that the file is in UTF-8 and also produces UTF-8 files.
 
@@ -26,11 +27,11 @@ To use this:
     like this for multiple: %1$s, %2$s...
 -   Run the jar
 
-For the analytics:
+For the constants:
 
--   Fill out the same sample config
+-   Fill out the same sample config. You can add as many configs as you want to the `constants` array. 
 -   This will generate an `object` on Android / `class` on iOS / Json object on Web.
-    Within this object, there will be an `Event` and `Screen` `object`/`enum`/object. The key will be used as variable names (capitalized on mobile), and the tag will be the value.
+    Within this object, you can have enums for the different subclasses using the `type` functionality (if not they will be top level constants). The key will be used as variable names (optionally capitalized on mobile), and the tag will be the value.
 
 ## Gradle Dependencies
 
@@ -42,7 +43,6 @@ For the analytics:
 
 -   [Julien Guerinet](https://github.com/jguerinet)
 -   [Yulric Sequeira](https://github.com/yulric)
--   [Andrew Faulkner](https://github.com/andfaulkner)
 
 ## Version History
 
