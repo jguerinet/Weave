@@ -159,6 +159,9 @@ open class Weave {
 
     /* DOWNLOAD */
 
+    /**
+     * Attempts to download the Csv from the [source]. Returns the created [CsvListReader], null if an error occurred
+     */
     open fun downloadCsv(source: Source): CsvListReader? {
         // Connect to the URL
         println("Connecting to ${source.url}")
@@ -643,6 +646,9 @@ open class Weave {
         .mapNotNull { downloadAnalyticStrands(config, it) }
         .flatten()
 
+    /**
+     * Downloads and returns the Analytics strands from the [source] using the [config]
+     */
     open fun downloadAnalyticStrands(config: AnalyticsConfig, source: Source): List<BaseStrand>? {
         val reader = downloadCsv(source) ?: return null
 
@@ -797,6 +803,10 @@ open class Weave {
         }
     }
 
+    /**
+     * Writes the header of an Analytics type using the [writer] and the [typeName]. Uses [isTopLevelClassCreated] to
+     *  format this correctly (indentation and commas on web)
+     */
     open fun writeAnalyticsTypeHeader(writer: PrintWriter, typeName: String, isTopLevelClassCreated: Boolean) {
         writer.apply {
             if (platform == Platform.WEB || isTopLevelClassCreated) {
@@ -811,6 +821,10 @@ open class Weave {
         }
     }
 
+    /**
+     * Writes the footer of an Analytics type using the [writer]. Uses [isTopLevelClassCreated] and [isLastType] to
+     *  format this correctly (indentation and commas on web)
+     */
     open fun writeAnalyticsTypeFooter(writer: PrintWriter, isTopLevelClassCreated: Boolean, isLastType: Boolean) {
         writer.apply {
             if (platform == Platform.WEB || isTopLevelClassCreated) {
@@ -832,6 +846,10 @@ open class Weave {
         }
     }
 
+    /**
+     * Writes the header for the Analytics file, using the [writer]. This will create a new top level object using the
+     *  [objectName] if [isTopLevelClassCreated] is true, and will use the [packageName] in Android
+     */
     open fun writeAnalyticsHeader(
         writer: PrintWriter,
         objectName: String,
@@ -867,6 +885,12 @@ open class Weave {
         }
     }
 
+    /**
+     * Writes one [analyticsString] to the Analytics file using the [writer]. This will nest the String if it [hasType]
+     *  and depending on [isTopLevelClassCreated], determine what column to align this String to depending on
+     *  [tagsAlignColumn], capitalize the key or not depending on [isCapitalized], and add the comma on Web depending
+     *  on [isLast]
+     */
     open fun writeAnalyticsString(
         writer: PrintWriter,
         analyticsString: AnalyticsStrand,
@@ -972,12 +996,18 @@ open class Weave {
         return platforms.isEmpty() || platforms.contains(platform)
     }
 
+    /**
+     * Prints a warning [message]
+     */
     open fun warning(message: String) = println("Warning: $message")
 
     companion object {
 
         const val FILE_NAME = "weave-config.json"
 
+        /**
+         * Main entry function
+         */
         @JvmStatic
         fun main(args: Array<String>) {
             Weave().weave()
@@ -999,6 +1029,9 @@ class Configs(
     @Optional val analytics: AnalyticsConfig? = null
 )
 
+/**
+ * Platform this data is for. This will determine the formatting
+ */
 enum class Platform {
     ANDROID,
     IOS,
