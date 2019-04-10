@@ -21,8 +21,7 @@ To use this:
 -   Any columns containing translations in your CSV file must have a header with the 2 character language Id (ex: en, fr)
 -   You may also add a 'platforms' column and put in a CSV list of the platforms that a particular String should be parsed for. If the column doesn't exist or the platform value is empty for a specific String it will be parsed for all platforms
 -   Keys must be unique, not have spaces, and not be null (the parser will inform of any of these errors when you run it)
--   You can add headers (which will be parsed as comments) in your Strings file by adding or surrounding your header with '###' (or whatever you specify).
-    For example, if you put ### General ### (or ### General), it will be parsed as `/* General */` on iOS and `<!-- General -->` on Android
+-   You can add headers (which will be parsed as comments) in your Strings file by adding or surrounding your header with '###' (or whatever you specify).For example, if you put ### General ### (or ### General), it will be parsed as `/* General */` on iOS and `<!-- General -->` on Android
 -   You can add formatted Strings by putting either the normal placeholder (i.e. %s for a String) if there is one argument, or numbering them
     like this for multiple: %1$s, %2$s...
 -   Run the jar
