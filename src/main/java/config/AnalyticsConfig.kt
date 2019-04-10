@@ -44,7 +44,7 @@ class AnalyticsConfig(
     @Optional val packageName: String? = null,
     @Optional val typeColumnName: String = "",
     val tagColumnName: String = "",
-    val types: List<String> = listOf(),
+    @Optional val types: List<String> = listOf(),
     @Optional val tagsAlignColumn: Int = 0,
     @Optional val capitalizeVariables: Boolean = true,
     @Optional val isTopLevelClassCreated: Boolean = true

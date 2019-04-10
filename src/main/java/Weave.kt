@@ -70,7 +70,7 @@ open class Weave {
     open fun weave() {
         try {
             val stringsConfig = config.strings
-            val analyticsConfig: AnalyticsConfig? = config.analytics
+            val analyticsConfigs: List<AnalyticsConfig>? = config.analytics
 
             if (stringsConfig == null) {
                 warning("No Strings config found")
@@ -85,14 +85,16 @@ open class Weave {
 
             println()
 
-            if (analyticsConfig == null) {
+            if (analyticsConfigs == null) {
                 warning("No Analytics config found")
             } else {
-                verifyAnalyticsConfigInfo(analyticsConfig)
-                val downloadedStrands = downloadAllAnalyticStrands(analyticsConfig)
-                val verifiedIds = verifyKeys(downloadedStrands)
-                val verifiedStrands = verifyAnalyticsStrands(verifiedIds)
-                writeAnalyticStrands(analyticsConfig, verifiedStrands)
+                analyticsConfigs.forEach { analyticsConfig ->
+                    verifyAnalyticsConfigInfo(analyticsConfig)
+                    val downloadedStrands = downloadAllAnalyticStrands(analyticsConfig)
+                    val verifiedIds = verifyKeys(downloadedStrands)
+                    val verifiedStrands = verifyAnalyticsStrands(verifiedIds)
+                    writeAnalyticStrands(analyticsConfig, verifiedStrands)
+                }
                 println("Analytics parsing complete")
             }
         } catch (e: IOException) {
@@ -1030,7 +1032,7 @@ class Configs(
     @Optional val keyColumnName: String = "key",
     @Optional val platformsColumnName: String = "platforms",
     @Optional val strings: StringsConfig? = null,
-    @Optional val analytics: AnalyticsConfig? = null
+    @Optional val analytics: List<AnalyticsConfig>? = null
 )
 
 /**

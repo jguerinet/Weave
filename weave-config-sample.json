@@ -17,20 +17,24 @@
             }
         ]
     },
-    "analytics": {
-        "sources": [
-            {
-                "title": "",
-                "url": ""
-            }
-        ],
-        "path": "",
-        "isTopLevelClassCreated": "Optional boolean, remove if unused",
-        "types": [],
-        "packageName": "",
-        "typeColumnName": "Optional, remove if unused",
-        "tagColumnName": "",
-        "tagsAlignColumn": "Optional Int, remove if unused",
-        "capitalizeVariables": "Optional boolean, remove is unused"
-    }
+    "analytics": [
+        {
+            "sources": [
+                {
+                    "title": "",
+                    "url": ""
+                }
+            ],
+            "path": "",
+            "isTopLevelClassCreated": "Optional boolean, remove if unused",
+            "types": [
+                "Optional List, remove if unused"
+            ],
+            "packageName": "",
+            "typeColumnName": "Optional, remove if unused",
+            "tagColumnName": "",
+            "tagsAlignColumn": "Optional Int, remove if unused",
+            "capitalizeVariables": "Optional boolean, remove is unused"
+        }
+    ]
 }
