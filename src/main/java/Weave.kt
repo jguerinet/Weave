@@ -570,11 +570,11 @@ open class Weave {
                     .replace(" % ", " %% ")
 
                 // Check if this is an HTML String
-                string = if (string.contains("<html>", ignoreCase = true)) {
+                string = if (string.contains(HTML_START_TAG, ignoreCase = true)) {
                     // Don't format the greater than and less than symbols
                     string
-                        .replace("<html>", "<![CDATA[", ignoreCase = true)
-                        .replace("</html>", "]]>", ignoreCase = true)
+                        .replace(HTML_START_TAG, "<![CDATA[", ignoreCase = true)
+                        .replace(HTML_END_TAG, "]]>", ignoreCase = true)
                 } else {
                     // Format the greater then and less than symbol otherwise
                     string
@@ -593,8 +593,8 @@ open class Weave {
                     .replace("%s", "%@")
                     .replace("\$s", "$@")
                     // Remove <html> </html>tags
-                    .replace("<html>", "", ignoreCase = true)
-                    .replace("</html>", "", ignoreCase = true)
+                    .replace(HTML_START_TAG, "", ignoreCase = true)
+                    .replace(HTML_END_TAG, "", ignoreCase = true)
                     // Percentages
                     .replace("%", "%%")
 
@@ -603,8 +603,8 @@ open class Weave {
             Platform.WEB -> {
                 // Remove <html> </html>tags
                 string = string
-                    .replace("<html>", "", ignoreCase = true)
-                    .replace("</html>", "", ignoreCase = true)
+                    .replace(HTML_START_TAG, "", ignoreCase = true)
+                    .replace(HTML_END_TAG, "", ignoreCase = true)
                     // If there's just one placeholder, replace it with $1
                     .replace("%s", "$1")
 
@@ -1004,6 +1004,10 @@ open class Weave {
     companion object {
 
         const val FILE_NAME = "weave-config.json"
+
+        const val HTML_START_TAG = "<html>"
+
+        const val HTML_END_TAG = "</html>"
 
         /**
          * Main entry function
