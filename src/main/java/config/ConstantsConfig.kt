@@ -25,6 +25,7 @@ import kotlinx.serialization.Serializable
  * @author Julien Guerinet
  * @since 5.0.0
  *
+ * @param title Name of this set of Constants, used for debugging
  * @param sources List of [Source]s the Strings are coming from
  * @param path Path to the file to write to
  * @param packageName Optional package name used on Android
@@ -39,6 +40,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 class ConstantsConfig(
+    val title: String,
     val sources: List<Source> = listOf(),
     val path: String = "",
     @Optional val packageName: String? = null,

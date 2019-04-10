@@ -94,8 +94,9 @@ open class Weave {
                     val verifiedIds = verifyKeys(downloadedStrands)
                     val verifiedStrands = verifyConstantsStrands(verifiedIds)
                     writeConstantsStrands(constantsConfig, verifiedStrands)
+                    println("${constantsConfig.title} parsing complete")
+                    println()
                 }
-                println("Constants parsing complete")
             }
         } catch (e: IOException) {
             error("Weaving failed")
@@ -725,7 +726,7 @@ open class Weave {
     open fun writeConstantsStrands(config: ConstantsConfig, strands: List<BaseStrand>) {
         // If there are no Strings to write, don't continue
         if (strands.isEmpty()) {
-            warning("No Constants Strings to write")
+            warning("No ${config.title} Strings to write")
             return
         }
 
@@ -737,7 +738,7 @@ open class Weave {
             else -> ""
         }
 
-        preparePrintWriter(config.path, "Constants") { writer ->
+        preparePrintWriter(config.path, config.title) { writer ->
             // Header
             writeConstantsHeader(writer, objectName, config.packageName, config.isTopLevelClassCreated)
 

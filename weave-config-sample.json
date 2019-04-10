@@ -17,8 +17,9 @@
             }
         ]
     },
-    "analytics": [
+    "constants": [
         {
+            "title": "",
             "sources": [
                 {
                     "title": "",
