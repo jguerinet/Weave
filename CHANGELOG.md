@@ -1,5 +1,13 @@
 # Change Log
 
+## Version 7.0.0 (2019-04-10)
+
+-   Renamed the entire Analytics section to be Constants
+-   Added the capacity to have multiple ConstantsConfigs for different types of Constants
+-   Removed the `types` array in the `ConstantConfig`, the types will be grabbed from the Csv
+-   Fixed bug where some optional fields were required
+-   Added documentation
+
 ## Version 6.0.0 (2019-04-08)
 
 -   For Analytics, added option to specify which column the mobile analytics should align to
