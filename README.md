@@ -29,7 +29,7 @@ To use this:
 
 For the constants:
 
--   Fill out the same sample config. You can add as many configs as you want to the `constants` array. 
+-   Fill out the same sample config. You can add as many configs as you want to the `constants` array.
 -   This will generate an `object` on Android / `class` on iOS / Json object on Web.
     Within this object, you can have enums for the different subclasses using the `type` functionality (if not they will be top level constants). The key will be used as variable names (optionally capitalized on mobile), and the tag will be the value.
 
