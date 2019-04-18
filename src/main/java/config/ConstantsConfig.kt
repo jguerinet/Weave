@@ -60,6 +60,7 @@ class ConstantsConfig(
      * Mode to use for naming the tags
      */
     enum class Mode {
+        NONE,
         CAMEL_CASE,
         PASCAL_CASE,
         SNAKE_CASE;
@@ -69,11 +70,11 @@ class ConstantsConfig(
 
             override val descriptor: SerialDescriptor = StringDescriptor.withName("Mode")
 
-            override fun deserialize(decoder: Decoder): Mode = when (val case = decoder.decodeString().toLowerCase()) {
+            override fun deserialize(decoder: Decoder): Mode = when (decoder.decodeString().toLowerCase()) {
                 "camel", "camelcase" -> CAMEL_CASE
                 "pascal", "pascalcase" -> PASCAL_CASE
                 "snake", "snakecase" -> SNAKE_CASE
-                else -> error("Unknown case: $case")
+                else -> NONE
             }
 
             override fun serialize(encoder: Encoder, obj: Mode) = error("This object should not be serialized")
