@@ -155,8 +155,8 @@ open class Weave {
         }
 
         // Make sure there tagAlign Column is a multiple a 4
-        if (config.tagsAlignColumn % 4 != 0) {
-            error("tagsAlignColumn must be a multiple of 4")
+        if (config.keysAlignColumn % 4 != 0) {
+            error("keysAlignColumn must be a multiple of 4")
         }
     }
 
@@ -759,7 +759,7 @@ open class Weave {
                     writer,
                     constantsStrand,
                     false,
-                    config.tagsAlignColumn,
+                    config.keysAlignColumn,
                     config.capitalizeVariables,
                     config.isTopLevelClassCreated,
                     index == noTypeStrands.lastIndex
@@ -794,7 +794,7 @@ open class Weave {
                         writer,
                         strand,
                         true,
-                        config.tagsAlignColumn,
+                        config.keysAlignColumn,
                         config.capitalizeVariables,
                         config.isTopLevelClassCreated,
                         strand == lastStrand
