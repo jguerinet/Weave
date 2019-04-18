@@ -18,8 +18,15 @@
 package com.guerinet.weave.config
 
 import com.guerinet.weave.config.ConstantsConfig.Mode
+import kotlinx.serialization.Decoder
+import kotlinx.serialization.Encoder
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Optional
+import kotlinx.serialization.SerialDescriptor
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.internal.StringDescriptor
+import kotlinx.serialization.withName
 
 /**
  * Config for a list of constants (ex: Analytics)
@@ -55,6 +62,21 @@ class ConstantsConfig(
     enum class Mode {
         CAMEL_CASE,
         PASCAL_CASE,
-        SNAKE_CASE
+        SNAKE_CASE;
+
+        @Serializer(forClass = Mode::class)
+        companion object : KSerializer<Mode> {
+
+            override val descriptor: SerialDescriptor = StringDescriptor.withName("Mode")
+
+            override fun deserialize(decoder: Decoder): Mode = when (val case = decoder.decodeString().toLowerCase()) {
+                "camel", "camelcase" -> CAMEL_CASE
+                "pascal", "pascalcase" -> PASCAL_CASE
+                "snake", "snakecase" -> SNAKE_CASE
+                else -> error("Unknown case: $case")
+            }
+
+            override fun serialize(encoder: Encoder, obj: Mode) = error("This object should not be serialized")
+        }
     }
 }
