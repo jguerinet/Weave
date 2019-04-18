@@ -901,22 +901,7 @@ open class Weave {
     ) {
         try {
             // Format the String depending on the mode
-            val key = when (config.mode) {
-                ConstantsConfig.Mode.NONE -> constantString.key
-                ConstantsConfig.Mode.CAMEL_CASE -> constantString.key.split(" ")
-                    .mapIndexed { index, s ->
-                        if (index == 0) {
-                            s.toLowerCase()
-                        } else {
-                            s.capitalize()
-                        }
-                    }
-                    .joinToString("")
-                ConstantsConfig.Mode.PASCAL_CASE -> constantString.key.split(" ").joinToString("") { it.toUpperCase() }
-                ConstantsConfig.Mode.SNAKE_CASE -> constantString.key.split(" ").joinToString("_")
-
-            }
-
+            val key = formatString(constantString.key, config.mode)
             val tag = constantString.tag
             writer.apply {
                 var stringLength = 0
@@ -965,6 +950,24 @@ open class Weave {
             error(getLog(constantString), false)
             e.printStackTrace()
         }
+    }
+
+    /**
+     * Formats the [string] based on the [mode]
+     */
+    open fun formatString(string: String, mode: ConstantsConfig.Mode) = when (mode) {
+        ConstantsConfig.Mode.NONE -> string
+        ConstantsConfig.Mode.CAMEL_CASE -> string.split(" ")
+            .mapIndexed { index, s ->
+                if (index == 0) {
+                    s.toLowerCase()
+                } else {
+                    s.capitalize()
+                }
+            }
+            .joinToString("")
+        ConstantsConfig.Mode.PASCAL_CASE -> string.split(" ").joinToString("") { it.toUpperCase() }
+        ConstantsConfig.Mode.SNAKE_CASE -> string.split(" ").joinToString("_")
     }
 
     /**
