@@ -39,7 +39,7 @@ import kotlinx.serialization.withName
  * @param packageName Optional package name used on Android
  * @param typeColumnName Name of the column that holds the type
  * @param valueColumnName Name of the column that holds the key
- * @param keysAlignColumn Number of tabs to do in order to align the keys. Defaults to 0 (unaligned)
+ * @param valuesAlignColumn Number of tabs to do in order to align the keys. Defaults to 0 (unaligned)
  * @param mode [Mode] to name the keys
  * @param isTopLevelClassCreated True if there should be a top level class created from the file name, false otherwise
  *                                  Defaults to true
@@ -53,7 +53,7 @@ class ConstantsConfig(
     @Optional val keyColumnName: String = "key",
     @Optional val typeColumnName: String = "",
     @Optional val valueColumnName: String = "value",
-    @Optional val keysAlignColumn: Int = 0,
+    @Optional val valuesAlignColumn: Int = 0,
     @Optional val mode: Mode = Mode.CAMEL_CASE,
     @Optional val isTopLevelClassCreated: Boolean = true
 ) {

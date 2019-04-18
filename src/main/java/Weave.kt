@@ -155,8 +155,8 @@ open class Weave {
         }
 
         // Make sure there tagAlign Column is a multiple a 4
-        if (config.keysAlignColumn % 4 != 0) {
-            error("keysAlignColumn must be a multiple of 4")
+        if (config.valuesAlignColumn % 4 != 0) {
+            error("valuesAlignColumn must be a multiple of 4")
         }
     }
 
@@ -663,13 +663,13 @@ open class Weave {
         val (keyColumn, platformColumn) = parseHeaders(headers) { index, header ->
             when {
                 header.equals(config.typeColumnName, ignoreCase = true) -> typeColumn = index
-                header.equals(config.keyColumnName, ignoreCase = true) -> tagColumn = index
+                header.equals(config.valueColumnName, ignoreCase = true) -> tagColumn = index
             }
         }
 
         // Make sure we have the tag column
         if (tagColumn == -1) {
-            error("Tag column with name ${config.keyColumnName} not found")
+            error("Tag column with name ${config.valueColumnName} not found")
         }
 
         return parseCsv(source, reader, headers, keyColumn, platformColumn) { lineNumber, key, line ->
@@ -759,9 +759,7 @@ open class Weave {
                     writer,
                     constantsStrand,
                     false,
-                    config.keysAlignColumn,
-                    config.capitalizeVariables,
-                    config.isTopLevelClassCreated,
+                    config,
                     index == noTypeStrands.lastIndex
                 )
             }
@@ -794,9 +792,7 @@ open class Weave {
                         writer,
                         strand,
                         true,
-                        config.keysAlignColumn,
-                        config.capitalizeVariables,
-                        config.isTopLevelClassCreated,
+                        config,
                         strand == lastStrand
                     )
                 }
@@ -892,28 +888,35 @@ open class Weave {
     }
 
     /**
-     * Writes one [constantString] to the Constants file using the [writer]. This will nest the String if it [hasType]
-     *  and depending on [isTopLevelClassCreated], determine what column to align this String to depending on
-     *  [tagsAlignColumn], capitalize the key or not depending on [isCapitalized], and add the comma on Web depending
+     * Writes one [constantString] to the Constants file using the [writer]. This will nest the String if it [hasType],
+     *  format the String depending on the [config] properties, and add the comma on Web depending
      *  on [isLast]
      */
     open fun writeConstantsString(
         writer: PrintWriter,
         constantString: ConstantStrand,
         hasType: Boolean,
-        tagsAlignColumn: Int,
-        isCapitalized: Boolean,
-        isTopLevelClassCreated: Boolean,
+        config: ConstantsConfig,
         isLast: Boolean
     ) {
         try {
-            val isWeb = platform == Platform.WEB
-            // Capitalize the key for the mobile platforms unless isCapitalized is false
-            val key = if (isWeb || !isCapitalized) {
-                constantString.key
-            } else {
-                constantString.key.toUpperCase()
+            // Format the String depending on the mode
+            val key = when (config.mode) {
+                ConstantsConfig.Mode.NONE -> constantString.key
+                ConstantsConfig.Mode.CAMEL_CASE -> constantString.key.split(" ")
+                    .mapIndexed { index, s ->
+                        if (index == 0) {
+                            s.toLowerCase()
+                        } else {
+                            s.capitalize()
+                        }
+                    }
+                    .joinToString("")
+                ConstantsConfig.Mode.PASCAL_CASE -> constantString.key.split(" ").joinToString("") { it.toUpperCase() }
+                ConstantsConfig.Mode.SNAKE_CASE -> constantString.key.split(" ").joinToString("_")
+
             }
+
             val tag = constantString.tag
             writer.apply {
                 var stringLength = 0
@@ -923,7 +926,7 @@ open class Weave {
                     stringLength += 4
                 }
 
-                if (platform == Platform.WEB || isTopLevelClassCreated) {
+                if (platform == Platform.WEB || config.isTopLevelClassCreated) {
                     // If there's a top level class for mobile Constants, add more spacing
                     print("    ")
                     stringLength += 4
@@ -937,11 +940,11 @@ open class Weave {
                 }
 
                 stringLength += string.length
-                val space = if (tagsAlignColumn - stringLength < 0) {
+                val space = if (config.valuesAlignColumn - stringLength < 0) {
                     // 1 for the normal space between the variable name and the equals sign
                     1
                 } else {
-                    tagsAlignColumn - stringLength
+                    config.valuesAlignColumn - stringLength
                 }
 
                 val alignmentSpace = " ".repeat(space)
