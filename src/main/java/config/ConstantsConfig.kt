@@ -61,6 +61,7 @@ class ConstantsConfig(
     /**
      * Mode to use for naming the tags
      */
+    @Serializable(with = Mode.Companion::class)
     enum class Mode {
         NONE,
         CAMEL_CASE,
