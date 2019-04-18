@@ -780,7 +780,7 @@ open class Weave {
                 sortedStrands.removeAll(typeStrands)
 
                 // Write the header
-                writeConstantsTypeHeader(writer, type, config.isTopLevelClassCreated)
+                writeConstantsTypeHeader(writer, type, config)
 
                 // Get the last strand
                 val lastStrand = typeStrands.last()
@@ -805,19 +805,21 @@ open class Weave {
     }
 
     /**
-     * Writes the header of an Constants type using the [writer] and the [typeName]. Uses [isTopLevelClassCreated] to
-     *  format this correctly (indentation and commas on web)
+     * Writes the header of an Constants type using the [writer] and the [typeName]. Uses the [config] to
+     *  format this correctly (indentation and commas on web, along with the String mode)
      */
-    open fun writeConstantsTypeHeader(writer: PrintWriter, typeName: String, isTopLevelClassCreated: Boolean) {
+    open fun writeConstantsTypeHeader(writer: PrintWriter, typeName: String, config: ConstantsConfig) {
         writer.apply {
-            if (platform == Platform.WEB || isTopLevelClassCreated) {
+            if (platform == Platform.WEB || config.isTopLevelClassCreated) {
                 // Add spacing for web Constants or mobile Constants if the top level class is created
                 print("    ")
             }
+            val type = formatString(typeName, config.typeMode)
+
             when (platform) {
-                Platform.ANDROID -> println("object $typeName {")
-                Platform.IOS -> println("enum $typeName {")
-                Platform.WEB -> println("\"${typeName.toLowerCase()}\" : { ")
+                Platform.ANDROID -> println("object $type {")
+                Platform.IOS -> println("enum $type {")
+                Platform.WEB -> println("\"$type\" : { ")
             }
         }
     }
@@ -900,7 +902,7 @@ open class Weave {
     ) {
         try {
             // Format the String depending on the mode
-            val key = formatString(constantString.key, config.mode)
+            val key = formatString(constantString.key, config.keyMode)
             val value = constantString.value
             writer.apply {
                 var stringLength = 0

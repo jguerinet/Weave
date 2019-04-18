@@ -40,7 +40,8 @@ import kotlinx.serialization.withName
  * @param typeColumnName Name of the column that holds the type
  * @param valueColumnName Name of the column that holds the key
  * @param valuesAlignColumn Number of tabs to do in order to align the keys. Defaults to 0 (unaligned)
- * @param mode [Mode] to name the keys
+ * @param typeMode [Mode] to name the types, defaults to Pascal
+ * @param keyMode [Mode] to name the keys, defaults to camel
  * @param isTopLevelClassCreated True if there should be a top level class created from the file name, false otherwise
  *                                  Defaults to true
  */
@@ -53,7 +54,8 @@ class ConstantsConfig(
     @Optional val typeColumnName: String = "",
     @Optional val valueColumnName: String = "value",
     @Optional val valuesAlignColumn: Int = 0,
-    @Optional val mode: Mode = Mode.CAMEL_CASE,
+    @Optional val typeMode: Mode = Mode.PASCAL_CASE,
+    @Optional val keyMode: Mode = Mode.CAMEL_CASE,
     @Optional val isTopLevelClassCreated: Boolean = true
 ) {
     /**
