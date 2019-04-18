@@ -17,6 +17,7 @@
 
 package com.guerinet.weave.config
 
+import com.guerinet.weave.config.ConstantsConfig.Mode
 import kotlinx.serialization.Optional
 import kotlinx.serialization.Serializable
 
@@ -30,10 +31,9 @@ import kotlinx.serialization.Serializable
  * @param path Path to the file to write to
  * @param packageName Optional package name used on Android
  * @param typeColumnName Name of the column that holds the type
- * @param tagColumnName Name of the column that holds the tag
+ * @param keyColumnName Name of the column that holds the tag
  * @param tagsAlignColumn Number of tabs to do in order to align the tags. Defaults to 0 (unaligned)
- * @param capitalizeVariables True if the variables should be capitalized, false if they should stay the way they are.
- *                              Defaults to true
+ * @param mode [Mode] to name the keys
  * @param isTopLevelClassCreated True if there should be a top level class created from the file name, false otherwise
  *                              Defaults to true
  */
@@ -44,8 +44,17 @@ class ConstantsConfig(
     val path: String = "",
     @Optional val packageName: String? = null,
     @Optional val typeColumnName: String = "",
-    val tagColumnName: String = "",
+    @Optional val keyColumnName: String = "key",
     @Optional val tagsAlignColumn: Int = 0,
-    @Optional val capitalizeVariables: Boolean = true,
+    @Optional val mode: Mode = Mode.CAMEL_CASE,
     @Optional val isTopLevelClassCreated: Boolean = true
-)
+) {
+    /**
+     * Mode to use for naming the tags
+     */
+    enum class Mode {
+        CAMEL_CASE,
+        PASCAL_CASE,
+        SNAKE_CASE
+    }
+}

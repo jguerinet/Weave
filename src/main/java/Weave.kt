@@ -663,13 +663,13 @@ open class Weave {
         val (keyColumn, platformColumn) = parseHeaders(headers) { index, header ->
             when {
                 header.equals(config.typeColumnName, ignoreCase = true) -> typeColumn = index
-                header.equals(config.tagColumnName, ignoreCase = true) -> tagColumn = index
+                header.equals(config.keyColumnName, ignoreCase = true) -> tagColumn = index
             }
         }
 
         // Make sure we have the tag column
         if (tagColumn == -1) {
-            error("Tag column with name ${config.tagColumnName} not found")
+            error("Tag column with name ${config.keyColumnName} not found")
         }
 
         return parseCsv(source, reader, headers, keyColumn, platformColumn) { lineNumber, key, line ->
