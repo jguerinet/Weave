@@ -17,7 +17,7 @@
 
 package com.guerinet.weave.config
 
-import com.guerinet.weave.config.ConstantsConfig.Mode
+import com.guerinet.weave.config.ConstantsConfig.Casing
 import kotlinx.serialization.Decoder
 import kotlinx.serialization.Encoder
 import kotlinx.serialization.KSerializer
@@ -40,8 +40,8 @@ import kotlinx.serialization.withName
  * @param typeColumnName Name of the column that holds the type
  * @param valueColumnName Name of the column that holds the key
  * @param valuesAlignColumn Number of tabs to do in order to align the keys. Defaults to 0 (unaligned)
- * @param typeMode [Mode] to name the types, defaults to Pascal
- * @param keyMode [Mode] to name the keys, defaults to camel
+ * @param typeCasing [Casing] to name the types, defaults to Pascal
+ * @param keyCasing [Casing] to name the keys, defaults to camel
  * @param isTopLevelClassCreated True if there should be a top level class created from the file name, false otherwise
  *                                  Defaults to true
  */
@@ -54,33 +54,35 @@ class ConstantsConfig(
     @Optional val typeColumnName: String = "",
     @Optional val valueColumnName: String = "value",
     @Optional val valuesAlignColumn: Int = 0,
-    @Optional val typeMode: Mode = Mode.PASCAL_CASE,
-    @Optional val keyMode: Mode = Mode.CAMEL_CASE,
+    @Optional val typeCasing: Casing = Casing.PASCAL_CASE,
+    @Optional val keyCasing: Casing = Casing.CAMEL_CASE,
     @Optional val isTopLevelClassCreated: Boolean = true
 ) {
     /**
-     * Mode to use for naming the tags
+     * Casing to use for naming the tags
      */
-    @Serializable(with = Mode.Companion::class)
-    enum class Mode {
+    @Serializable(with = Casing.Companion::class)
+    enum class Casing {
         NONE,
         CAMEL_CASE,
         PASCAL_CASE,
-        SNAKE_CASE;
+        SNAKE_CASE,
+        CAPS;
 
-        @Serializer(forClass = Mode::class)
-        companion object : KSerializer<Mode> {
+        @Serializer(forClass = Casing::class)
+        companion object : KSerializer<Casing> {
 
-            override val descriptor: SerialDescriptor = StringDescriptor.withName("Mode")
+            override val descriptor: SerialDescriptor = StringDescriptor.withName("Casing")
 
-            override fun deserialize(decoder: Decoder): Mode = when (decoder.decodeString().toLowerCase()) {
+            override fun deserialize(decoder: Decoder): Casing = when (decoder.decodeString().toLowerCase()) {
                 "camel", "camelcase" -> CAMEL_CASE
                 "pascal", "pascalcase" -> PASCAL_CASE
                 "snake", "snakecase" -> SNAKE_CASE
+                "caps" -> CAPS
                 else -> NONE
             }
 
-            override fun serialize(encoder: Encoder, obj: Mode) = error("This object should not be serialized")
+            override fun serialize(encoder: Encoder, obj: Casing) = error("This object should not be serialized")
         }
     }
 }

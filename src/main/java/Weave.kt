@@ -91,7 +91,7 @@ open class Weave {
                 constantsConfigs.forEach { constantsConfig ->
                     verifyConstantsConfigInfo(constantsConfig)
                     val downloadedStrands = downloadAllConstantsStrands(constantsConfig)
-                    val verifiedIds = verifyKeys(downloadedStrands)
+                    val verifiedIds = verifyKeys(downloadedStrands, constantsConfig.keyCasing)
                     val verifiedStrands = verifyConstantsStrands(verifiedIds)
                     writeConstantsStrands(constantsConfig, verifiedStrands)
                     println("${constantsConfig.title} parsing complete")
@@ -380,7 +380,7 @@ open class Weave {
     /**
      * Verifies that the keys are valid
      */
-    open fun verifyKeys(strands: List<BaseStrand>): List<BaseStrand> {
+    open fun verifyKeys(strands: List<BaseStrand>, keyCasing: ConstantsConfig.Casing? = null): List<BaseStrand> {
         // Define the key checker pattern to make sure no illegal characters exist within the keys
         val keyChecker = Pattern.compile("[^A-Za-z0-9_]")
 
@@ -392,11 +392,16 @@ open class Weave {
         // Check if there are any errors with the keys
         filteredStrands.forEach {
             // Check if there are any spaces in the keys
-            if (it.key.contains(" ")) {
-                error("${getLog(it)} contains a space in its key.")
+            if (it.key.contains(" ") && (keyCasing == null || keyCasing == ConstantsConfig.Casing.NONE)) {
+                if (keyCasing == null) {
+                    error("${getLog(it)} contains a space in its key. and the key mode is none.")
+                } else {
+                    // Constants only
+                    error("${getLog(it)} contains a space in its key and the key mode is none.")
+                }
             }
 
-            if (keyChecker.matcher(it.key).find()) {
+            if (keyChecker.matcher(it.key.replace(" ", "")).find()) {
                 error("${getLog(it)} contains some illegal characters.")
             }
         }
@@ -814,7 +819,7 @@ open class Weave {
                 // Add spacing for web Constants or mobile Constants if the top level class is created
                 print("    ")
             }
-            val type = formatString(typeName, config.typeMode)
+            val type = formatString(typeName, config.typeCasing)
 
             when (platform) {
                 Platform.ANDROID -> println("object $type {")
@@ -902,7 +907,7 @@ open class Weave {
     ) {
         try {
             // Format the String depending on the mode
-            val key = formatString(constantString.key, config.keyMode)
+            val key = formatString(constantString.key, config.keyCasing)
             val value = constantString.value
             writer.apply {
                 var stringLength = 0
@@ -954,11 +959,11 @@ open class Weave {
     }
 
     /**
-     * Formats the [string] based on the [mode]
+     * Formats the [string] based on the [casing]
      */
-    open fun formatString(string: String, mode: ConstantsConfig.Mode) = when (mode) {
-        ConstantsConfig.Mode.NONE -> string
-        ConstantsConfig.Mode.CAMEL_CASE -> string.split(" ")
+    open fun formatString(string: String, casing: ConstantsConfig.Casing) = when (casing) {
+        ConstantsConfig.Casing.NONE -> string
+        ConstantsConfig.Casing.CAMEL_CASE -> string.split(" ")
             .mapIndexed { index, s ->
                 if (index == 0) {
                     s.toLowerCase()
@@ -967,8 +972,9 @@ open class Weave {
                 }
             }
             .joinToString("")
-        ConstantsConfig.Mode.PASCAL_CASE -> string.split(" ").joinToString("") { it.toUpperCase() }
-        ConstantsConfig.Mode.SNAKE_CASE -> string.split(" ").joinToString("_")
+        ConstantsConfig.Casing.PASCAL_CASE -> string.split(" ").joinToString("") { it.capitalize() }
+        ConstantsConfig.Casing.SNAKE_CASE -> string.split(" ").joinToString("_") { it.toLowerCase() }
+        ConstantsConfig.Casing.CAPS -> string.split(" ").joinToString("_") { it.toUpperCase() }
     }
 
     /**
