@@ -31,7 +31,7 @@ For the constants:
 -   Fill out the same sample config. You can add as many configs as you want to the `constants` array.
 -   This will generate an `object` on Android / `class` on iOS / Json object on Web.
     Within this object, you can have enums for the different subclasses using the `type` functionality (if not they will be top level constants). The key will be used as variable names (optionally capitalized on mobile), and the tag will be the value.
--   You can change the casing of both the types and values to be none (leave as is), camel (capitalize each word except first), pascal (capitalize each word), snake (lowercase everything, underscores for spaces), and caps (capitalize everything, underscores for spaces). Note, for this to work you need to separate each word by a space in your CSV. 
+-   You can change the casing of both the types and values to be none (leave as is), camel (capitalize each word except first), pascal (capitalize each word), snake (lowercase everything, underscores for spaces), and caps (capitalize everything, underscores for spaces). Note, for this to work you need to separate each word by a space in your CSV.
 
 ## Gradle Dependencies
 
