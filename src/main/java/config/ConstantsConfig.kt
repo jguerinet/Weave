@@ -50,7 +50,6 @@ class ConstantsConfig(
     val sources: List<Source> = listOf(),
     val path: String = "",
     @Optional val packageName: String? = null,
-    @Optional val keyColumnName: String = "key",
     @Optional val typeColumnName: String = "",
     @Optional val valueColumnName: String = "value",
     @Optional val valuesAlignColumn: Int = 0,

@@ -154,7 +154,7 @@ open class Weave {
             error("Please provide a package name for Android")
         }
 
-        // Make sure there tagAlign Column is a multiple a 4
+        // Make sure there valuesAlignColumn is a multiple a 4
         if (config.valuesAlignColumn % 4 != 0) {
             error("valuesAlignColumn must be a multiple of 4")
         }
@@ -587,7 +587,7 @@ open class Weave {
                         .replace("<", "&lt;")
                 }
 
-                // Add the XML tag
+                // Add the XML value
                 writer.println("    <string name=\"$key\">$string</string>")
             }
             Platform.IOS -> {
@@ -657,19 +657,19 @@ open class Weave {
 
         val headers = reader.getHeader(true)
         var typeColumn = -1
-        var tagColumn = -1
+        var valuesColumn = -1
 
         // Keep track of which columns hold the keys and the platform
         val (keyColumn, platformColumn) = parseHeaders(headers) { index, header ->
             when {
                 header.equals(config.typeColumnName, ignoreCase = true) -> typeColumn = index
-                header.equals(config.valueColumnName, ignoreCase = true) -> tagColumn = index
+                header.equals(config.valueColumnName, ignoreCase = true) -> valuesColumn = index
             }
         }
 
-        // Make sure we have the tag column
-        if (tagColumn == -1) {
-            error("Tag column with name ${config.valueColumnName} not found")
+        // Make sure we have the value column
+        if (valuesColumn == -1) {
+            error("Values column with name ${config.valueColumnName} not found")
         }
 
         return parseCsv(source, reader, headers, keyColumn, platformColumn) { lineNumber, key, line ->
@@ -678,14 +678,13 @@ open class Weave {
             } else {
                 null
             }
-            val tag = line[tagColumn] as? String
 
-            when (tag) {
+            when (val value = line[valuesColumn] as? String) {
                 null -> {
-                    warning("Line $lineNumber has no tag and will not be parsed")
+                    warning("Line $lineNumber has no value and will not be parsed")
                     null
                 }
-                else -> ConstantStrand(key, source.title, lineNumber, type.orEmpty().trim(), tag.trim())
+                else -> ConstantStrand(key, source.title, lineNumber, type.orEmpty().trim(), value.trim())
             }
         }
     }
@@ -902,7 +901,7 @@ open class Weave {
         try {
             // Format the String depending on the mode
             val key = formatString(constantString.key, config.mode)
-            val tag = constantString.tag
+            val value = constantString.value
             writer.apply {
                 var stringLength = 0
                 if (hasType) {
@@ -935,10 +934,10 @@ open class Weave {
                 val alignmentSpace = " ".repeat(space)
 
                 when (platform) {
-                    Platform.ANDROID -> println("$string$alignmentSpace= \"$tag\"")
-                    Platform.IOS -> println("static let $key$alignmentSpace= \"$tag\"")
+                    Platform.ANDROID -> println("$string$alignmentSpace= \"$value\"")
+                    Platform.IOS -> println("static let $key$alignmentSpace= \"$value\"")
                     Platform.WEB -> {
-                        print("\"$key\": \"$tag\"")
+                        print("\"$key\": \"$value\"")
                         if (!isLast) {
                             print(",")
                         }

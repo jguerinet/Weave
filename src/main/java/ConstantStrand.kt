@@ -27,5 +27,5 @@ class ConstantStrand(
     url: String,
     lineNumber: Int,
     val type: String,
-    val tag: String
+    val value: String
 ) : BaseStrand(key, url, lineNumber)
