@@ -38,7 +38,7 @@ import kotlinx.serialization.withName
  * @param path Path to the file to write to
  * @param packageName Optional package name used on Android
  * @param typeColumnName Name of the column that holds the type
- * @param keyColumnName Name of the column that holds the key
+ * @param valueColumnName Name of the column that holds the key
  * @param keysAlignColumn Number of tabs to do in order to align the keys. Defaults to 0 (unaligned)
  * @param mode [Mode] to name the keys
  * @param isTopLevelClassCreated True if there should be a top level class created from the file name, false otherwise
@@ -50,8 +50,9 @@ class ConstantsConfig(
     val sources: List<Source> = listOf(),
     val path: String = "",
     @Optional val packageName: String? = null,
-    @Optional val typeColumnName: String = "",
     @Optional val keyColumnName: String = "key",
+    @Optional val typeColumnName: String = "",
+    @Optional val valueColumnName: String = "value",
     @Optional val keysAlignColumn: Int = 0,
     @Optional val mode: Mode = Mode.CAMEL_CASE,
     @Optional val isTopLevelClassCreated: Boolean = true
