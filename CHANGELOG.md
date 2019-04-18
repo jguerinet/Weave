@@ -1,5 +1,10 @@
 # Change Log
 
+## Version 8.0.0 (2019-04-18)
+
+-   Added option to specify the casing for the key and type values in a constants config (none, camel, pascal, snake, caps)
+-   Renamed the `tag` stuff to `value`
+
 ## Version 7.0.0 (2019-04-10)
 
 -   Renamed the entire Analytics section to be Constants
