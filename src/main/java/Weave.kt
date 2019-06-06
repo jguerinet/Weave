@@ -603,8 +603,6 @@ open class Weave {
                     // Remove <html> </html>tags
                     .replace(HTML_START_TAG, "", ignoreCase = true)
                     .replace(HTML_END_TAG, "", ignoreCase = true)
-                    // Percentages
-                    .replace("%", "%%")
 
                 writer.println("\"$key\" = \"$string\";")
             }

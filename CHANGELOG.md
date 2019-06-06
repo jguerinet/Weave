@@ -1,5 +1,8 @@
 # Change Log
 
+## Version 8.0.1 (2019-06-06)
+-   Remove percentage formatting on iOS
+
 ## Version 8.0.0 (2019-04-18)
 
 -   Added option to specify the casing for the key and type values in a constants config (none, camel, pascal, snake, caps)
