@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019 Julien Guerinet
+ * Copyright 2013-2020 Julien Guerinet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,14 @@
 package com.guerinet.weave.config
 
 import com.guerinet.weave.config.ConstantsConfig.Casing
-import kotlinx.serialization.Decoder
-import kotlinx.serialization.Encoder
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.Optional
-import kotlinx.serialization.SerialDescriptor
+import kotlinx.serialization.Required
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Serializer
-import kotlinx.serialization.internal.StringDescriptor
-import kotlinx.serialization.withName
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
 /**
  * Config for a list of constants (ex: Analytics)
@@ -47,16 +46,16 @@ import kotlinx.serialization.withName
  */
 @Serializable
 class ConstantsConfig(
-    val title: String,
-    val sources: List<Source> = listOf(),
-    val path: String = "",
-    @Optional val packageName: String? = null,
-    @Optional val typeColumnName: String = "",
-    @Optional val valueColumnName: String = "value",
-    @Optional val valuesAlignColumn: Int = 0,
-    @Optional val typeCasing: Casing = Casing.PASCAL_CASE,
-    @Optional val keyCasing: Casing = Casing.CAMEL_CASE,
-    @Optional val isTopLevelClassCreated: Boolean = true
+    @Required val title: String,
+    @Required val sources: List<Source> = listOf(),
+    @Required val path: String = "",
+    val packageName: String? = null,
+    val typeColumnName: String = "",
+    val valueColumnName: String = "value",
+    val valuesAlignColumn: Int = 0,
+    val typeCasing: Casing = Casing.PASCAL_CASE,
+    val keyCasing: Casing = Casing.CAMEL_CASE,
+    val isTopLevelClassCreated: Boolean = true
 ) {
     /**
      * Casing to use for naming the tags
@@ -69,10 +68,10 @@ class ConstantsConfig(
         SNAKE_CASE,
         CAPS;
 
-        @Serializer(forClass = Casing::class)
         companion object : KSerializer<Casing> {
 
-            override val descriptor: SerialDescriptor = StringDescriptor.withName("Casing")
+            override val descriptor: SerialDescriptor =
+                PrimitiveSerialDescriptor("Casing", PrimitiveKind.STRING)
 
             override fun deserialize(decoder: Decoder): Casing = when (decoder.decodeString().toLowerCase()) {
                 "camel", "camelcase" -> CAMEL_CASE
@@ -82,7 +81,7 @@ class ConstantsConfig(
                 else -> NONE
             }
 
-            override fun serialize(encoder: Encoder, obj: Casing) = error("This object should not be serialized")
+            override fun serialize(encoder: Encoder, value: Casing) = error("This object should not be serialized")
         }
     }
 }

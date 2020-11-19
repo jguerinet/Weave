@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019 Julien Guerinet
+ * Copyright 2013-2020 Julien Guerinet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import com.guerinet.weave.config.StringsConfig
 import com.squareup.okhttp.OkHttpClient
 import com.squareup.okhttp.Request
 import com.squareup.okhttp.Response
-import kotlinx.serialization.Optional
+import kotlinx.serialization.Required
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import okio.buffer
@@ -130,7 +130,7 @@ open class Weave {
      */
     open fun parseConfigJson(): Configs {
         val json = readFromConfigFile()
-        return Json.nonstrict.parse(Configs.serializer(), json)
+        return Json.decodeFromString(Configs.serializer(), json)
     }
 
     /* VERIFICATION */
@@ -925,7 +925,6 @@ open class Weave {
                     Platform.ANDROID -> "const val $key"
                     Platform.IOS -> "static let $key"
                     Platform.WEB -> ""
-                    else -> throw IllegalArgumentException("Unknown platform: $platform")
                 }
 
                 stringLength += string.length
@@ -1042,12 +1041,12 @@ open class Weave {
  */
 @Serializable
 class Configs(
-    val platform: String,
-    @Optional val headerColumnName: String = "###",
-    @Optional val keyColumnName: String = "key",
-    @Optional val platformsColumnName: String = "platforms",
-    @Optional val strings: StringsConfig? = null,
-    @Optional val constants: List<ConstantsConfig>? = null
+    @Required val platform: String,
+    val headerColumnName: String = "###",
+    val keyColumnName: String = "key",
+    val platformsColumnName: String = "platforms",
+    val strings: StringsConfig? = null,
+    val constants: List<ConstantsConfig>? = null
 )
 
 /**
