@@ -45,6 +45,8 @@ import java.util.regex.Pattern
 @Suppress("MemberVisibilityCanBePrivate")
 open class Weave {
 
+    open val jsonParser = Json { ignoreUnknownKeys = true }
+
     open val config: Configs by lazy { parseConfigJson() }
 
     open val platform by lazy {
@@ -130,7 +132,7 @@ open class Weave {
      */
     open fun parseConfigJson(): Configs {
         val json = readFromConfigFile()
-        return Json.decodeFromString(Configs.serializer(), json)
+        return jsonParser.decodeFromString(Configs.serializer(), json)
     }
 
     /* VERIFICATION */
