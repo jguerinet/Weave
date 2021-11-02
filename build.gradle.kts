@@ -54,6 +54,7 @@ buildscript {
 }
 
 version = Versions.WEAVE
+group = "com.guerinet"
 
 repositories {
     mavenCentral()
