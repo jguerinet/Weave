@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2019 Julien Guerinet
+ * Copyright 2013-2021 Julien Guerinet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,4 +15,4 @@
  *
  */
 
-rootProject.name = 'weave'
+rootProject.name = "weave"
