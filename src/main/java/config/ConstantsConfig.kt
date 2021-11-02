@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 Julien Guerinet
+ * Copyright 2013-2021 Julien Guerinet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ class ConstantsConfig(
             override val descriptor: SerialDescriptor =
                 PrimitiveSerialDescriptor("Casing", PrimitiveKind.STRING)
 
-            override fun deserialize(decoder: Decoder): Casing = when (decoder.decodeString().toLowerCase()) {
+            override fun deserialize(decoder: Decoder): Casing = when (decoder.decodeString().lowercase()) {
                 "camel", "camelcase" -> CAMEL_CASE
                 "pascal", "pascalcase" -> PASCAL_CASE
                 "snake", "snakecase" -> SNAKE_CASE
