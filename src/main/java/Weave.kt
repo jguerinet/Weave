@@ -217,7 +217,7 @@ open class Weave {
             }
 
             when {
-                // Note the key column if it matches the key key
+                // Note the key column if it matches the key
                 s.equals(idKey, ignoreCase = true) -> keyColumn = index
                 // Note the platform column if it matches the platform key
                 s.equals(platformsKey, ignoreCase = true) -> platformColumn = index
@@ -313,7 +313,7 @@ open class Weave {
     }
 
     /**
-     * Writes all of the Strings. Throws an [IOException] if there's an error
+     * Writes all the Strings. Throws an [IOException] if there's an error
      */
     @Throws(IOException::class)
     open fun preparePrintWriter(path: String, title: String, write: (PrintWriter) -> Unit) {
@@ -334,7 +334,7 @@ open class Weave {
     /* STRING PARSING */
 
     /**
-     * Downloads all of the Strings from all of the Urls. Throws an [IOException] if there are
+     * Downloads all the Strings from all the Urls. Throws an [IOException] if there are
      *  any errors downloading the Strings
      */
     @Throws(IOException::class)
@@ -343,7 +343,7 @@ open class Weave {
         .flatten()
 
     /**
-     * Uses the given [source] to connect to a Url and download all of the Strings in the right
+     * Uses the given [source] to connect to a Url and download all the Strings in the right
      *  format. This will return a list of [BaseStrand]s, null if there were any errors
      */
     open fun downloadStrands(config: StringsConfig, source: Source): List<BaseStrand>? {
@@ -387,7 +387,7 @@ open class Weave {
         // Define the key checker pattern to make sure no illegal characters exist within the keys
         val keyChecker = Pattern.compile("[^A-Za-z0-9_]")
 
-        // Get rid of all of the headers
+        // Get rid of all the headers
         val filteredStrands = strands.filter { it is LanguageStrand || it is ConstantStrand }
 
         val toRemove = mutableListOf<BaseStrand>()
@@ -430,7 +430,7 @@ open class Weave {
             for (j in i + 1 until stringStrands.size) {
                 val strand2 = stringStrands[j]
 
-                // If the keys are the same and it's not a header, show a warning and remove the older one
+                // If the keys are the same, and it's not a header, show a warning and remove the older one
                 if (strand1.key == strand2.key) {
                     warning("${getLog(strand1)} and ${getLog(strand2)} have the same key. The second one will be used")
                     toRemove.add(strand1)
@@ -460,7 +460,7 @@ open class Weave {
     }
 
     /**
-     * Writes all of the Strings for the different languages. Throws an [IOException] if there's
+     * Writes all the Strings for the different languages. Throws an [IOException] if there's
      *  an error
      */
     @Throws(IOException::class)
@@ -587,7 +587,7 @@ open class Weave {
                         .replace(HTML_START_TAG, "<![CDATA[", ignoreCase = true)
                         .replace(HTML_END_TAG, "]]>", ignoreCase = true)
                 } else {
-                    // Format the greater then and less than symbol otherwise
+                    // Format the greater than and less than symbol otherwise
                     string
                         // Greater than
                         .replace(">", "&gt;")
@@ -647,7 +647,7 @@ open class Weave {
     /* CONSTANTS PARSING */
 
     /**
-     * Downloads all of the [ConstantStrand]s from all of the Urls. Throws an [IOException] if there are
+     * Downloads all of the [ConstantStrand]s from all the Urls. Throws an [IOException] if there are
      *  any errors downloading them
      */
     @Throws(IOException::class)
@@ -811,7 +811,7 @@ open class Weave {
     }
 
     /**
-     * Writes the header of an Constants type using the [writer] and the [typeName]. Uses the [config] to
+     * Writes the header of a Constants type using the [writer] and the [typeName]. Uses the [config] to
      *  format this correctly (indentation and commas on web, along with the String mode)
      */
     open fun writeConstantsTypeHeader(writer: PrintWriter, typeName: String, config: ConstantsConfig) {
@@ -831,7 +831,7 @@ open class Weave {
     }
 
     /**
-     * Writes the footer of an Constants type using the [writer]. Uses [isTopLevelClassCreated] and [isLastType] to
+     * Writes the footer of a Constants type using the [writer]. Uses [isTopLevelClassCreated] and [isLastType] to
      *  format this correctly (indentation and commas on web)
      */
     open fun writeConstantsTypeFooter(writer: PrintWriter, isTopLevelClassCreated: Boolean, isLastType: Boolean) {
