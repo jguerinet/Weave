@@ -562,6 +562,14 @@ open class Weave {
             .replace("(c)", "\u00A9")
             // New Lines
             .replace("\n", "")
+            // Weird opening single quotes
+            .replace("‘", "'")
+            // Weird closing single quotes
+            .replace("’", "'")
+            // Weird opening double quotes
+            .replace("“", "\\\"")
+            // Weird closing double quotes
+            .replace("”", "\\\"")
 
         // Find the max index used for any arguments
         val arguments = Regex("\\\$\\d+").findAll(string).toMutableList()
