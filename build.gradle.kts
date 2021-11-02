@@ -59,6 +59,11 @@ repositories {
     mavenCentral()
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
@@ -71,11 +76,18 @@ dependencies {
 }
 
 val fatJar = task("fatJar", type = Jar::class) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
     manifest {
+        attributes["Implementation-Title"] = "Weave"
+        attributes["Implementation-Version"] = archiveVersion
         attributes["Main-Class"] = "com.guerinet.weave.Weave"
     }
     from(sourceSets.main.get().output)
-    // from(configurations.runtime.get().map { if (it.isDirectory) it else zipTree(it) })
+    configurations["compileClasspath"].forEach { file: File ->
+        from(zipTree(file.absoluteFile))
+    }
+    // from(configurations["compileClasspath"].map { if (it.isDirectory) it else zipTree(it) })
     with(tasks["jar"] as CopySpec)
 }
 
