@@ -75,8 +75,29 @@ val fatJar = task("fatJar", type = Jar::class) {
         attributes["Main-Class"] = "com.guerinet.weave.Weave"
     }
     from(sourceSets.main.get().output)
-    from(configurations.runtime.get().map { if (it.isDirectory) it else zipTree(it) })
+    // from(configurations.runtime.get().map { if (it.isDirectory) it else zipTree(it) })
     with(tasks["jar"] as CopySpec)
+}
+
+/* Versions Configuration */
+
+tasks.named(
+    "dependencyUpdates",
+    com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask::class.java
+).configure {
+    // Don't allow unstable versions if the current version is stable
+    rejectVersionIf {
+        isUnstable(candidate.version) && !isUnstable(currentVersion)
+    }
+}
+
+/**
+ * Returns true if the [version] is unstable, false otherwise
+ */
+fun isUnstable(version: String): Boolean {
+    val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.toUpperCase().contains(it) }
+    val regex = "^[0-9,.v-]+(-r)?$".toRegex()
+    return !stableKeyword && !regex.matches(version)
 }
 
 /* Spotless Configuration */

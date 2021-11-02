@@ -23,13 +23,13 @@ object Versions {
     /* Plugins */
     object Plugins {
         const val KTLINT = "0.41.0"
-        const val SPOTLESS = "5.14.2"
+        const val SPOTLESS = "5.17.1"
         const val VERSIONS = "0.39.0"
     }
 
     object Square {
-        const val OKHTTP = "2.7.5"
-        const val OKIO = "2.9.0"
+        const val OKHTTP = "4.9.2"
+        const val OKIO = "3.0.0"
     }
 
     const val KOTLINX_SERIALIZATION = "1.3.0"
@@ -47,7 +47,7 @@ object Deps {
 
     object Square {
         private const val BASE = "com.squareup"
-        const val OKHTTP = "$BASE.okhttp:okhttp:${Versions.Square.OKHTTP}"
+        const val OKHTTP = "$BASE.okhttp3:okhttp:${Versions.Square.OKHTTP}"
         const val OKIO = "$BASE.okio:okio:${Versions.Square.OKIO}"
     }
 
