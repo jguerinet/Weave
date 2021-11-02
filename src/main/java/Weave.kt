@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 Julien Guerinet
+ * Copyright 2013-2021 Julien Guerinet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.io.PrintWriter
 import java.util.regex.Pattern
+import kotlin.system.exitProcess
 
 /**
  * Main class, executes the main code for parsing the Google Docs file
@@ -148,7 +149,7 @@ open class Weave {
     }
 
     /**
-     * Verifies that all of the config info is present
+     * Verifies that all the config info is present
      */
     open fun verifyConstantsConfigInfo(config: ConstantsConfig) {
         // Make sure there's a package for Android
@@ -1000,7 +1001,7 @@ open class Weave {
     open fun error(message: String, isTerminated: Boolean = true) {
         println("Error: $message")
         if (isTerminated) {
-            System.exit(-1)
+            exitProcess(-1)
         }
     }
 
