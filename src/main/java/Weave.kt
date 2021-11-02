@@ -20,12 +20,12 @@ package com.guerinet.weave
 import com.guerinet.weave.config.ConstantsConfig
 import com.guerinet.weave.config.Source
 import com.guerinet.weave.config.StringsConfig
-import com.squareup.okhttp.OkHttpClient
-import com.squareup.okhttp.Request
-import com.squareup.okhttp.Response
 import kotlinx.serialization.Required
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 import okio.buffer
 import okio.source
 import org.supercsv.cellprocessor.ift.CellProcessor
@@ -179,7 +179,8 @@ open class Weave {
 
         val response: Response
         try {
-            response = OkHttpClient().setCache(null).newCall(request).execute()
+            val client = OkHttpClient.Builder().cache(null).build()
+            response = client.newCall(request).execute()
         } catch (e: IOException) {
             // Catch the exception here to be able to continue a build even if we are not connected
             println("IOException while connecting to the URL")
@@ -187,16 +188,22 @@ open class Weave {
             return null
         }
 
-        val responseCode = response.code()
+        val responseCode = response.code
         println("Response Code: $responseCode")
 
         if (responseCode != 200) {
-            error("Response Message: ${response.message()}", false)
+            error("Response Message: ${response.message}", false)
+            return null
+        }
+
+        val body = response.body
+        if (body == null) {
+            error("Response body was null")
             return null
         }
 
         // Set up the CSV reader and return it
-        return CsvListReader(InputStreamReader(response.body().byteStream(), "UTF-8"), CsvPreference.EXCEL_PREFERENCE)
+        return CsvListReader(InputStreamReader(body.byteStream(), "UTF-8"), CsvPreference.EXCEL_PREFERENCE)
     }
 
     /**
