@@ -35,6 +35,7 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
 import java.io.PrintWriter
+import java.util.Locale
 import java.util.regex.Pattern
 import kotlin.system.exitProcess
 
@@ -992,15 +993,16 @@ open class Weave {
         ConstantsConfig.Casing.CAMEL_CASE -> string.split(" ")
             .mapIndexed { index, s ->
                 if (index == 0) {
-                    s.toLowerCase()
+                    s.lowercase()
                 } else {
-                    s.capitalize()
+                    s.capitalized()
                 }
             }
             .joinToString("")
-        ConstantsConfig.Casing.PASCAL_CASE -> string.split(" ").joinToString("") { it.capitalize() }
-        ConstantsConfig.Casing.SNAKE_CASE -> string.split(" ").joinToString("_") { it.toLowerCase() }
-        ConstantsConfig.Casing.CAPS -> string.split(" ").joinToString("_") { it.toUpperCase() }
+        ConstantsConfig.Casing.PASCAL_CASE ->
+            string.split(" ").joinToString("") { it.capitalized() }
+        ConstantsConfig.Casing.SNAKE_CASE -> string.split(" ").joinToString("_") { it.lowercase() }
+        ConstantsConfig.Casing.CAPS -> string.split(" ").joinToString("_") { it.uppercase() }
     }
 
     /**
@@ -1042,7 +1044,7 @@ open class Weave {
     open fun isForPlatform(platformCsv: String?): Boolean {
         val platforms = platformCsv
             ?.split(",")
-            ?.mapNotNull { Platform.parse(it.trim().toLowerCase()) } ?: listOf()
+            ?.mapNotNull { Platform.parse(it.trim().lowercase()) } ?: listOf()
         return platforms.isEmpty() || platforms.contains(platform)
     }
 
@@ -1050,6 +1052,14 @@ open class Weave {
      * Prints a warning [message]
      */
     open fun warning(message: String) = println("Warning: $message")
+
+    fun String.capitalized() = replaceFirstChar {
+        if (it.isLowerCase()) {
+            it.titlecase(Locale.getDefault())
+        } else {
+            it.toString()
+        }
+    }
 
     companion object {
 
