@@ -15,25 +15,10 @@
  *
  */
 
-package com.guerinet.weave
+plugins {
+    `kotlin-dsl`
+}
 
-import kotlinx.serialization.Serializable
-
-/**
- * One language that the Strings are in
- * @author Julien Guerinet
- * @since 2.0.0
- *
- * @param id Language Id
- * @param path Path to the file for the Strings in this language
- * @param columnIndex Index of the column of this language in the CSV file (starts as -1)
- */
-@Serializable
-class Language(val id: String, val path: String, var columnIndex: Int = -1) {
-
-    companion object {
-
-        /** Dummy [Language]  object to use when we do not care about the language */
-        val EMPTY = Language("en", "", 0)
-    }
+repositories {
+    mavenCentral()
 }
