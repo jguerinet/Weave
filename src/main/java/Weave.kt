@@ -435,11 +435,11 @@ open class Weave {
 
                 // If the keys are the same, and it's not a header, show a warning and remove the older one
                 if (strand1.key == strand2.key) {
-                    warning("${getLog(strand1)} and ${getLog(strand2)} have the same key. The second one will be used")
+                    warning("Same Key: ${getLog(strand1)}, ${getLog(strand2)}. The second one will be used")
                     toRemove.add(strand1)
                 } else if (strand1Value != null && strand1Value == strand2Value) {
                     // If one of them is not null, but they have the same value, show a warning
-                    warning("Same Value: ${getLog(strand1)}, ${getLog(strand2)}.")
+                    warning("Same Value: ${getLog(strand1)}, ${getLog(strand2)}")
                 }
             }
         }
@@ -452,10 +452,10 @@ open class Weave {
             .forEach {
                 if (it.translations.isEmpty()) {
                     // Show a warning message if there are no translations and remove it
-                    warning("No Translation: ${getLog(it)} has no translations so it will not be parsed.")
+                    warning("No Translation: ${getLog(it)}")
                     toRemove.add(it)
                 } else if (it.translations.size != config.languages.size) {
-                    warning("Warning: ${getLog(it)} is missing at least one translation")
+                    warning("Missing at least one Translation: ${getLog(it)}")
                 }
             }
 
@@ -716,7 +716,7 @@ open class Weave {
 
             when (val value = line[valuesColumn] as? String) {
                 null -> {
-                    warning("Line $lineNumber has no value and will not be parsed")
+                    warning("No Value: ${getLog(lineNumber, source.title)}")
                     null
                 }
                 else -> ConstantStrand(key, source.title, lineNumber, type.orEmpty().trim(), value.trim())
@@ -740,10 +740,7 @@ open class Weave {
 
                 // If the keys are the same and the type is the same, show a warning and remove the older one
                 if (strand1.key == strand2.key && strand1.type == strand2.type) {
-                    warning(
-                        "${getLog(strand1)} and ${getLog(strand2)} have the same key and type. " +
-                                "The second one will be used"
-                    )
+                    warning("Same Key & Type: ${getLog(strand1)}, ${getLog(strand2)}. The second one will be used")
                     toRemove.add(strand1)
                 }
             }
@@ -1022,7 +1019,12 @@ open class Weave {
     /**
      * Returns the header for a log message for a given [strand]
      */
-    open fun getLog(strand: BaseStrand): String = "Line ${strand.lineNumber} from ${strand.sourceName}"
+    open fun getLog(strand: BaseStrand): String = getLog(strand.lineNumber, strand.sourceName)
+
+    /**
+     * Returns the log to use for an error in [sourceName] at [lineNumber]
+     */
+    open fun getLog(lineNumber: Int, sourceName: String) = "Line $lineNumber in $sourceName"
 
     /**
      * Prints an error [message], and terminates the program is [isTerminated] is true (defaults to true)
