@@ -444,14 +444,12 @@ open class Weave {
 
         stringStrands
             .forEach {
-                val lineNumber = it.lineNumber
-                val sourceName = it.sourceName
                 if (it.translations.isEmpty()) {
                     // Show a warning message if there are no translations and remove it
-                    warning("Line $lineNumber from $sourceName has no translations so it will not be parsed.")
+                    warning("${getLog(it)} has no translations so it will not be parsed.")
                     toRemove.add(it)
                 } else if (it.translations.size != config.languages.size) {
-                    warning("Warning: Line $lineNumber from $sourceName is missing at least one translation")
+                    warning("Warning: ${getLog(it)} is missing at least one translation")
                 }
             }
 
