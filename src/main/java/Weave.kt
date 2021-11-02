@@ -420,20 +420,26 @@ open class Weave {
      *  that don't have all translations
      */
     open fun verifyStringStrands(config: StringsConfig, strands: List<BaseStrand>): List<BaseStrand> {
+        val primaryLanguage = config.languages.first().id
         val stringStrands = strands.mapNotNull { it as? LanguageStrand }
         val toRemove = mutableListOf<BaseStrand>()
 
         // Check if there are any duplicates
         for (i in stringStrands.indices) {
             val strand1 = stringStrands[i]
+            val strand1Value = strand1.translations[primaryLanguage]
 
             for (j in i + 1 until stringStrands.size) {
                 val strand2 = stringStrands[j]
+                val strand2Value = strand2.translations[primaryLanguage]
 
                 // If the keys are the same, and it's not a header, show a warning and remove the older one
                 if (strand1.key == strand2.key) {
                     warning("${getLog(strand1)} and ${getLog(strand2)} have the same key. The second one will be used")
                     toRemove.add(strand1)
+                } else if (strand1Value != null && strand1Value == strand2Value) {
+                    // If one of them is not null, but they have the same value, show a warning
+                    warning("Same Value: ${getLog(strand1)}, ${getLog(strand2)}.")
                 }
             }
         }
@@ -446,7 +452,7 @@ open class Weave {
             .forEach {
                 if (it.translations.isEmpty()) {
                     // Show a warning message if there are no translations and remove it
-                    warning("${getLog(it)} has no translations so it will not be parsed.")
+                    warning("No Translation: ${getLog(it)} has no translations so it will not be parsed.")
                     toRemove.add(it)
                 } else if (it.translations.size != config.languages.size) {
                     warning("Warning: ${getLog(it)} is missing at least one translation")
