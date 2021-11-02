@@ -563,6 +563,11 @@ open class Weave {
             // New Lines
             .replace("\n", "")
 
+        // Find the max index used for any arguments
+        val arguments = Regex("\\\$\\d+").findAll(string).toMutableList()
+        val indexes = arguments.mapNotNull { it.value.replace("\$", "").toIntOrNull() }
+        val maxIndex = indexes.maxByOrNull { it } ?: 0
+
         val key = strand.key
         when (platform) {
             Platform.ANDROID -> {
@@ -595,6 +600,16 @@ open class Weave {
                         .replace("<", "&lt;")
                 }
 
+                // Format the arguments
+                if (maxIndex == 1) {
+                    // Just one index, use the %s
+                    string = string.replace("$1", "%s")
+                } else if (maxIndex > 0) {
+                    for (i in 1..maxIndex) {
+                        string = string.replace("$$i", "%$i\$s")
+                    }
+                }
+
                 // Add the XML value
                 writer.println("    <string name=\"$key\">$string</string>")
             }
@@ -607,6 +622,16 @@ open class Weave {
                     .replace(HTML_START_TAG, "", ignoreCase = true)
                     .replace(HTML_END_TAG, "", ignoreCase = true)
 
+                // Format the arguments
+                if (maxIndex == 1) {
+                    // Just one index, use the %@
+                    string = string.replace("$1", "%@")
+                } else if (maxIndex > 0) {
+                    for (i in 1..maxIndex) {
+                        string = string.replace("$$i", "%$i$@")
+                    }
+                }
+
                 writer.println("\"$key\" = \"$string\";")
             }
             Platform.WEB -> {
@@ -614,14 +639,6 @@ open class Weave {
                 string = string
                     .replace(HTML_START_TAG, "", ignoreCase = true)
                     .replace(HTML_END_TAG, "", ignoreCase = true)
-                    // If there's just one placeholder, replace it with $1
-                    .replace("%s", "$1")
-
-                // If there are multiple placeholders, keep the formatting
-                //  TODO Find a better way of doing this
-                for (i in 1..10) {
-                    string = string.replace("%$i\$s", "$$i")
-                }
 
                 writer.println("        \"$key\": \"$string\"${if (isLastStrand) "" else ","}")
             }
