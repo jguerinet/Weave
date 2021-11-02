@@ -1,12 +1,23 @@
 # Change Log
 
+## Version 9.0.0 (2021-11-02)
+
+- Switched to Kotlin DSL for the Gradle files
+- Updated Weave to check for duplicate values
+- Updated params to be formatted in the more universal $1, $2...
+- Added cleanup of smart quotes
+- Clean up log messages
+- Updated dependencies
+
 ## Version 8.0.1 (2019-06-06)
--   Remove percentage formatting on iOS
+
+- Remove percentage formatting on iOS
 
 ## Version 8.0.0 (2019-04-18)
 
--   Added option to specify the casing for the key and type values in a constants config (none, camel, pascal, snake, caps)
--   Renamed the `tag` stuff to `value`
+- Added option to specify the casing for the key and type values in a constants config (none, camel, pascal, snake,
+  caps)
+- Renamed the `tag` stuff to `value`
 
 ## Version 7.0.0 (2019-04-10)
 
