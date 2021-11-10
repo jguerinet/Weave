@@ -443,11 +443,14 @@ open class Weave {
 
                 // If the keys are the same, and it's not a header, show a warning and remove the older one
                 if (strand1.key == strand2.key) {
-                    warning("Same Key: ${getLog(strand1)}, ${getLog(strand2)}. The second one will be used")
+                    warning(
+                        "Same Key: ${getLog(strand1)}, ${getLog(strand2)} (${strand1.key}). " +
+                            "The second one will be used"
+                    )
                     toRemove.add(strand1)
                 } else if (strand1Value != null && strand1Value == strand2Value) {
                     // If one of them is not null, but they have the same value, show a warning
-                    warning("Same Value: ${getLog(strand1)}, ${getLog(strand2)}")
+                    warning("Same Value: ${getLog(strand1)}, ${getLog(strand2)} ($strand1Value)")
                 }
             }
         }
@@ -745,7 +748,10 @@ open class Weave {
 
                 // If the keys are the same and the type is the same, show a warning and remove the older one
                 if (strand1.key == strand2.key && strand1.type == strand2.type) {
-                    warning("Same Key & Type: ${getLog(strand1)}, ${getLog(strand2)}. The second one will be used")
+                    warning(
+                        "Same Key & Type: ${getLog(strand1)}, ${getLog(strand2)} (${strand1.key})." +
+                            " The second one will be used"
+                    )
                     toRemove.add(strand1)
                 }
             }
