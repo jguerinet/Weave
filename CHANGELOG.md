@@ -1,6 +1,10 @@
 # Change Log
 
-## Version 9.0.1 (2021-11-02)
+## Version 9.1.0 (2021-11-10)
+
+- Improved the warning messages by including the duplicated key or value when applicable
+
+## Version 9.0.1 (2021-11-09)
 
 - Changed the formatting for 1 placeholder in Android
 
