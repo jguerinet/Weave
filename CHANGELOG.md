@@ -1,5 +1,9 @@
 # Change Log
 
+## Version 9.0.1 (2021-11-02)
+
+- Changed the formatting for 1 placeholder in Android
+
 ## Version 9.0.0 (2021-11-02)
 
 - Switched to Kotlin DSL for the Gradle files

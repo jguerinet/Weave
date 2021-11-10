@@ -17,7 +17,7 @@
 
 object Versions {
 
-    const val WEAVE = "9.0.0"
+    const val WEAVE = "9.0.1"
     const val KOTLIN = "1.5.31"
 
     /* Plugins */
