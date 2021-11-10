@@ -621,10 +621,7 @@ open class Weave {
                 }
 
                 // Format the arguments
-                if (maxIndex == 1) {
-                    // Just one index, use the %s
-                    string = string.replace("$1", "%s")
-                } else if (maxIndex > 0) {
+                if (maxIndex > 0) {
                     for (i in 1..maxIndex) {
                         string = string.replace("$$i", "%$i\$s")
                     }
