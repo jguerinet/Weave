@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2021 Julien Guerinet
+ * Copyright 2013-2022 Julien Guerinet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,21 +18,20 @@
 object Versions {
 
     const val WEAVE = "9.1.0"
-    const val KOTLIN = "1.5.31"
+    const val KOTLIN = "1.6.10"
 
-    /* Plugins */
     object Plugins {
         const val KTLINT = "0.41.0"
-        const val SPOTLESS = "5.17.1"
-        const val VERSIONS = "0.39.0"
+        const val SPOTLESS = "6.2.2"
+        const val VERSIONS = "0.42.0"
     }
 
     object Square {
-        const val OKHTTP = "4.9.2"
+        const val OKHTTP = "4.9.3"
         const val OKIO = "3.0.0"
     }
 
-    const val KOTLINX_SERIALIZATION = "1.3.0"
+    const val KOTLINX_SERIALIZATION = "1.3.2"
     const val SUPER_CSV = "2.4.0"
 }
 
