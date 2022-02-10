@@ -662,7 +662,7 @@ open class Weave {
 
                 writer.println("\"$key\" = \"$string\";")
             }
-            Platform.WEB -> {
+            Platform.WEB, Platform.REACT_NATIVE -> {
                 // Remove <html> </html>tags
                 string = string
                     .replace(HTML_START_TAG, "", ignoreCase = true)
@@ -870,7 +870,7 @@ open class Weave {
             when (platform) {
                 Platform.ANDROID -> println("object $type {")
                 Platform.IOS -> println("enum $type {")
-                Platform.WEB -> println("\"$type\" : { ")
+                Platform.WEB, Platform.REACT_NATIVE -> println("\"$type\" : { ")
             }
         }
     }
@@ -890,7 +890,7 @@ open class Weave {
             if (!isLastType) {
                 when (platform) {
                     // If we're on web and this isn't the last type, add a comma
-                    Platform.WEB -> print(",")
+                    Platform.WEB, Platform.REACT_NATIVE -> print(",")
                     // If we're on mobile and this isn't the last type, add an extra space
                     Platform.ANDROID, Platform.IOS -> println()
                 }
@@ -932,7 +932,7 @@ open class Weave {
                         println("class $objectName {")
                     }
                 }
-                Platform.WEB -> {
+                Platform.WEB, Platform.REACT_NATIVE -> {
                     println("{")
                 }
             }
@@ -972,7 +972,7 @@ open class Weave {
                 val string = when (platform) {
                     Platform.ANDROID -> "const val $key"
                     Platform.IOS -> "static let $key"
-                    Platform.WEB -> ""
+                    Platform.WEB, Platform.REACT_NATIVE -> ""
                 }
 
                 stringLength += string.length
@@ -988,7 +988,7 @@ open class Weave {
                 when (platform) {
                     Platform.ANDROID -> println("$string$alignmentSpace= \"$value\"")
                     Platform.IOS -> println("static let $key$alignmentSpace= \"$value\"")
-                    Platform.WEB -> {
+                    Platform.WEB, Platform.REACT_NATIVE -> {
                         print("\"$key\": \"$value\"")
                         if (!isLast) {
                             print(",")
@@ -1107,7 +1107,8 @@ class Configs(
 enum class Platform {
     ANDROID,
     IOS,
-    WEB;
+    WEB,
+    REACT_NATIVE;
 
     companion object {
         /**
@@ -1117,6 +1118,7 @@ enum class Platform {
             string.equals("Android", ignoreCase = true) -> ANDROID
             string.equals("iOS", ignoreCase = true) -> IOS
             string.equals("Web", ignoreCase = true) -> WEB
+            string.equals("React Native", ignoreCase = true) -> REACT_NATIVE
             else -> null
         }
     }
