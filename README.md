@@ -3,8 +3,8 @@
 ## Summary
 
 Weave takes an online CSV file and parses the content to produce the Strings files for an Android or iOS app. It also
-parses the Strings for Web in the form of a Json: a Json object with key-value pairs, the key being the String key and
-the value being the translated String for that language.
+parses the Strings for Web/React Native in the form of a Json: a Json object with key-value pairs, the key being the
+String key and the value being the translated String for that language.
 
 It can also parse Constants into files that you are using the same properties cross-platform (ex: Analytics tags, Regex
 expressions).
@@ -16,15 +16,15 @@ in UTF-8 and also produces UTF-8 files.
 
 To use this:
 
--   Download the latest jar from the releases tab and the [sample config](weave-config-sample.json)
--   Set up your config file (fill out the fields in the config). The following fields are optional:
-    -   `headerColumnName`, which represents the symbol to show that a line is a header, defaults to `###`.
-    -   `keyColumnName`, which represents the name of the column where the key is stored, defaults to `key`
-    -   `platformsColumnName`, which represents the name of the column where the supported platforms for a specific row is, defaults to `platforms`
--   Any columns containing translations in your CSV file must have a header with the 2 character language Id (ex: en, fr)
-- You may also add a 'platforms' column and put in a CSV list of the platforms that a particular String should be parsed
-  for. If the column doesn't exist or the platform value is empty for a specific String it will be parsed for all
-  platforms
+- Download the latest jar from the releases tab and the [sample config](weave-config-sample.json)
+- Set up your config file (fill out the fields in the config). The following fields are optional:
+    - `headerColumnName`, which represents the symbol to show that a line is a header, defaults to `###`.
+    - `keyColumnName`, which represents the name of the column where the key is stored, defaults to `key`
+- Any columns containing translations in your CSV file must have a header with the 2 character language Id (ex: en, fr)
+- You may also add a column with the name of your platform and mark which Strings should be parsed for a platform by
+  putting
+  'true' or 'X' in that column for the Strings to parse. If the column for the current platform doesn't exist, all
+  Strings will be parsed.
 - Keys must be unique, not have spaces, and not be null (the parser will inform of any errors when you run it)
 - You can add headers (which will be parsed as comments) in your Strings file by adding or surrounding your header
   with '###' (or whatever you specify).For example, if you put ### General ### (or ### General), it will be parsed
@@ -44,7 +44,7 @@ For the constants:
 - [OkHttp](http://square.github.io/okhttp/)
 - [Okio](http://square.github.io/okio/)
 - [kotlinx-serialization](https://github.com/Kotlin/kotlinx.serialization)
--   [super-csv](http://super-csv.github.io/super-csv/)
+- [super-csv](http://super-csv.github.io/super-csv/)
 
 ## Contributors
 
@@ -57,7 +57,7 @@ See the [Change Log](CHANGELOG.md).
 
 ## Copyright
 
-    Copyright 2013-2021 Julien Guerinet
+    Copyright 2013-2022 Julien Guerinet
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.

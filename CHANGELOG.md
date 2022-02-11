@@ -1,5 +1,11 @@
 # Change Log
 
+## Version 10.0.0 (2022-02-10)
+
+- Added React Native as a platform
+- Changed the platform
+- Updated dependencies
+
 ## Version 9.1.0 (2021-11-10)
 
 - Improved the warning messages by including the duplicated key or value when applicable

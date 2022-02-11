@@ -2,7 +2,6 @@
     "platform": "",
     "headerColumnName": "Optional, remove if unused / default is suitable",
     "keyColumnName": "Optional, remove if unused / default is suitable",
-    "platformsColumnName": "Optional, remove if unused / default is suitable",
     "strings": {
         "sources": [
             {
